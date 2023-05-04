@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Notes</string>
+    <string name="page_title">All notes</string>
+    <string name="item_title">Item Title</string>
+    <string name="navigation_open">nav_open</string>
+    <string name="navigation_close">nav_close</string>
+    <!-- TODO: Remove or change this placeholder text -->
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/authentication_nav"
+    app:startDestination="@id/loginPhoneNumberFragment">
+
+    <fragment
+        android:id="@+id/loginPhoneNumberFragment"
+        android:name="com.uzhnu.notesapp.fragments.LoginPhoneNumberFragment"
+        android:label="fragment_login_phone_number"
+        tools:layout="@layout/fragment_login_phone_number">
+        <action
+            android:id="@+id/action_loginPhoneNumberFragment_to_loginOtpFragment"
+            app:destination="@id/loginOtpFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginOtpFragment"
+        android:name="com.uzhnu.notesapp.fragments.LoginOtpFragment"
+        android:label="fragment_login_otp"
+        tools:layout="@layout/fragment_login_otp" >
+        <action
+            android:id="@+id/action_loginOtpFragment_to_loginUsernameFragment"
+            app:destination="@id/loginUsernameFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginUsernameFragment"
+        android:name="com.uzhnu.notesapp.fragments.LoginUsernameFragment"
+        android:label="fragment_login_username"
+        tools:layout="@layout/fragment_login_username" />
+</navigation>

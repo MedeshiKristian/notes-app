@@ -1,46 +1,64 @@
 package com.uzhnu.notesapp.activities;
 
-import androidx.appcompat.app.*;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
 
 import com.uzhnu.notesapp.R;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.navigation.NavigationView;
+import com.uzhnu.notesapp.databinding.ActivityMainBinding;
+import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.ImageUtil;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    private MaterialToolbar toolBar;
-    private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
-    private ListView listView;
-    private ListView listView2;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        toolBar = findViewById(R.id.topAppBar);
-        navigationView = findViewById(R.id.nav_view);
-        toolBar.setTitle("Dynamic title");
-//        setSupportActionBar(toolBar);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        setSupportActionBar(binding.topAppBar);
+
+        binding.topAppBar.setTitle("All notes");
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                drawerLayout, toolBar, R.string.navigation_open, R.string.navigation_close);
+                binding.drawerLayout, binding.topAppBar,
+                R.string.navigation_open, R.string.navigation_close);
 
-        drawerLayout.addDrawerListener(toggle);
+        binding.drawerLayout.addDrawerListener(toggle);
 
         toggle.syncState();
 
-        toolBar.setNavigationOnClickListener(view -> {
-            drawerLayout.openDrawer(GravityCompat.START);
+        binding.topAppBar.setNavigationOnClickListener(view -> {
+            binding.drawerLayout.openDrawer(GravityCompat.START);
         });
+
+        FirebaseUtil.getCurrentUserDetails().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        UserModel userModel = task.getResult().toObject(UserModel.class);
+                        binding.imageViewUser
+                                .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
+                        binding.textViewUsername.setText(userModel.getUsername());
+                        binding.textViewPhoneNumber.setText(userModel.getPhoneNumber());
+                    } else {
+                        Log.w(Constants.TAG, "Task for getting user image failed");
+                    }
+                });
 
         ArrayList<String> categories = new ArrayList<>();
         categories.add("Personal");
@@ -49,10 +67,26 @@ public class MainActivity extends AppCompatActivity {
         categories.add("Travel");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, categories);
-        listView = findViewById(R.id.list_slidermenu);
-        listView.setAdapter(adapter);
-        listView2 = findViewById(R.id.list_slidermenu2);
-        listView2.setAdapter(adapter);
+        binding.listSlidermenu.setAdapter(adapter);
+        binding.listSlidermenu2.setAdapter(adapter);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.top_app_bar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.optionSignOut) {
+            FirebaseUtil.signOut();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

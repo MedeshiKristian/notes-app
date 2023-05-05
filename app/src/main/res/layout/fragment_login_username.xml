@@ -64,14 +64,26 @@
 
     </LinearLayout>
 
-    <ImageView
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/image_view_user"
         android:layout_width="@dimen/_150sdp"
+        android:layout_margin="@dimen/_20sdp"
         android:layout_height="@dimen/_150sdp"
-        android:layout_weight="20"
-        android:src="@drawable/ic_baseline_username_24"
-        android:contentDescription="Enter otp code"
-        app:tint="@color/secondary"
-        />
+        android:background="@drawable/text_view_circular_background"
+        android:backgroundTint="@color/secondary_light"
+        android:contentDescription="User image"
+        android:src="@drawable/ic_baseline_username_48"
+        android:scaleType="centerCrop"
+        app:riv_oval="true" />
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/image_view_user"-->
+    <!--        android:layout_width="150dp"-->
+    <!--        android:layout_height="150dp"-->
+    <!--        android:background="@drawable/text_view_circular_background"-->
+    <!--        android:backgroundTint="@color/secondary_light"-->
+    <!--        android:contentDescription="Enter otp code"-->
+    <!--        android:src="@drawable/ic_baseline_username_24" />-->
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
@@ -89,7 +101,7 @@
         android:padding="@dimen/_5sdp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/login_username"
+            android:id="@+id/text_input_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
@@ -103,14 +115,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="10"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingLeft="@dimen/_20sdp"
-        android:paddingRight="@dimen/_20sdp"
-        android:layout_weight="10">
+        android:paddingRight="@dimen/_20sdp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/let_me_in_button"
+            android:id="@+id/button_let_me_in"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@color/secondary"
@@ -120,15 +132,15 @@
             android:id="@+id/circular_progress_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:indicatorSize="@dimen/_25sdp"
-            app:trackThickness="@dimen/_3sdp"
-            app:trackColor="@color/primary"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
             app:indicatorColor="@color/secondary_light"
-            android:layout_gravity="center_horizontal"
+            app:indicatorSize="@dimen/_25sdp"
+            app:trackColor="@color/primary"
             app:trackCornerRadius="8dp"
-            android:layout_marginTop="@dimen/_20sdp"/>
+            app:trackThickness="@dimen/_3sdp" />
     </LinearLayout>
 
 </LinearLayout>

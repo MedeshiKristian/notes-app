@@ -13,6 +13,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.FragmentLoginPhoneNumberBinding;
+import com.uzhnu.notesapp.utils.Constants;
 
 public class LoginPhoneNumberFragment extends Fragment {
     private FragmentLoginPhoneNumberBinding binding;
@@ -41,7 +42,7 @@ public class LoginPhoneNumberFragment extends Fragment {
                 binding.editTextPhoneNumber.setError("Phone number is not valid");
             } else {
                 setIsProgress(true);
-                new Handler().postDelayed(this::navigateToNextFragment, 5000);
+                new Handler().postDelayed(this::navigateToNextFragment, 3000);
             }
         });
     }
@@ -62,7 +63,7 @@ public class LoginPhoneNumberFragment extends Fragment {
         setIsProgress(false);
 
         Bundle bundle = new Bundle();
-        bundle.putString(LoginOtpFragment.ARG_PHONE_NUMBER,
+        bundle.putString(Constants.KEY_PHONE_NUMBER,
                 binding.countryCodePicker.getFullNumberWithPlus());
         NavHostFragment.findNavController(LoginPhoneNumberFragment.this)
                 .navigate(R.id.action_loginPhoneNumberFragment_to_loginOtpFragment, bundle);

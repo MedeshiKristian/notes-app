@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:openDrawer="start"
-    tools:context=".activities.MainActivity">
+    tools:context=".activities.MainActivity"
+    tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -23,7 +23,8 @@
                 android:layout_height="?attr/actionBarSize"
                 app:menu="@menu/top_app_bar"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
-                app:title="@string/page_title"/>
+                app:title="@string/page_title"
+                app:titleTextColor="@color/primary_text" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -45,41 +46,78 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            app:backgroundTint="@color/white"
-            app:srcCompat="@drawable/ic_baseline_add_24"/>
+            android:tint="@color/white"
+            app:backgroundTint="@color/primary"
+            app:tint="@color/primary_text"
+            app:srcCompat="@drawable/ic_baseline_add_24" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:id="@+id/nav_view"
         android:layout_gravity="start">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/secondary_light"
             android:orientation="vertical">
 
-<!--            <include layout="@layout/nav_header_main" />-->
+            <!--            <include layout="@layout/nav_header_main" />-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/secondary"
+                android:orientation="vertical">
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:id="@+id/image_view_user"
+                    android:layout_width="@dimen/_60sdp"
+                    android:layout_height="@dimen/_60sdp"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:layout_marginTop="@dimen/_30sdp"
+                    android:contentDescription="User image"
+                    android:scaleType="centerCrop"
+                    app:riv_oval="true" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/text_view_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:textColor="@color/primary_text" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/text_view_phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:layout_marginBottom="@dimen/_10sdp"
+                    android:textColor="@color/primary_text" />
+
+            </LinearLayout>
 
             <ListView
                 android:id="@+id/list_slidermenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:choiceMode="singleChoice"
-                android:dividerHeight="0dp"
                 android:divider="@color/white"
-                android:textColor="#424242"/>
+                android:dividerHeight="0dp"
+                android:textColor="#424242" />
 
             <ListView
                 android:id="@+id/list_slidermenu2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:choiceMode="singleChoice"
-                android:dividerHeight="0dp"
                 android:divider="@color/white"
-                android:textColor="#424242"/>
+                android:dividerHeight="0dp"
+                android:textColor="#424242" />
 
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>

@@ -16,13 +16,13 @@ import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.FragmentLoginOtpBinding;
-import com.uzhnu.notesapp.utils.AndroidUtils;
+import com.uzhnu.notesapp.utils.AndroidUtil;
+import com.uzhnu.notesapp.utils.Constants;
 
 import java.util.Objects;
 import java.util.Timer;
@@ -30,9 +30,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class LoginOtpFragment extends Fragment {
-    public static final String ARG_PHONE_NUMBER = "phone_number";
-
-    private static final String TAG = "myLogs";
     private static final Long timeoutSeconds = 30L;
 
     private Long timeoutLeftSeconds;
@@ -51,7 +48,7 @@ public class LoginOtpFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         assert getArguments() != null;
-        getArgPhoneNumber = getArguments().getString(ARG_PHONE_NUMBER);
+        getArgPhoneNumber = getArguments().getString(Constants.KEY_PHONE_NUMBER);
     }
 
     @Nullable
@@ -65,11 +62,13 @@ public class LoginOtpFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Log.d(TAG, getArgPhoneNumber);
+        Log.d(Constants.TAG, getArgPhoneNumber);
 
         setIsProgress(false);
 
         setVariables();
+
+        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
 
         if (mResendToken == null) {
             sendOtp();
@@ -90,31 +89,29 @@ public class LoginOtpFragment extends Fragment {
                 // 2 - Auto-retrieval. On some devices Google Play services can automatically
                 //     detect the incoming verification SMS and perform verification without
                 //     user action.
-                Log.d(TAG, "onVerificationCompleted:" + credential);
+                Log.d(Constants.TAG, "onVerificationCompleted:" + credential);
 
-                AndroidUtils.showToast(getContext(),
+                AndroidUtil.showToast(getContext(),
                         "OTP verification has been completed successfully");
 
                 signInWithPhoneAuthCredential(credential);
-
-                navigateToNextFragment();
             }
 
             @Override
             public void onVerificationFailed(@NonNull FirebaseException e) {
                 // This callback is invoked in an invalid request for verification is made,
                 // for instance if the the phone number format is not valid.
-                Log.w(TAG, "onVerificationFailed", e);
+                Log.w(Constants.TAG, "onVerificationFailed", e);
 
                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
                     // Invalid request
-                    Log.w(TAG, "Invalid request", e);
+                    Log.w(Constants.TAG, "Invalid request", e);
                 } else if (e instanceof FirebaseTooManyRequestsException) {
                     // The SMS quota for the project has been exceeded
-                    Log.w(TAG, "The SMS quota for the project has been exceeded", e);
+                    Log.w(Constants.TAG, "The SMS quota for the project has been exceeded", e);
                 } else if (e instanceof FirebaseAuthMissingActivityForRecaptchaException) {
                     // reCAPTCHA verification attempted with null Activity
-                    Log.w(TAG, "reCAPTCHA verification attempted with null Activity", e);
+                    Log.w(Constants.TAG, "reCAPTCHA verification attempted with null Activity", e);
                 }
 
                 // Show a message and update the UI
@@ -127,7 +124,7 @@ public class LoginOtpFragment extends Fragment {
                 // The SMS verification code has been sent to the provided phone number, we
                 // now need to ask the user to enter the code and then construct a credential
                 // by combining the code with a verification ID.
-                Log.d(TAG, "onCodeSent:" + verificationId);
+                Log.d(Constants.TAG, "onCodeSent:" + verificationId);
 
                 super.onCodeSent(verificationId, token);
 
@@ -135,7 +132,7 @@ public class LoginOtpFragment extends Fragment {
                 mVerificationId = verificationId;
                 mResendToken = token;
 
-                AndroidUtils.showToast(getContext(),
+                AndroidUtil.showToast(getContext(),
                         "OTP has been sent successfully");
 
                 startResendTimer();
@@ -231,21 +228,21 @@ public class LoginOtpFragment extends Fragment {
                         setIsProgress(false);
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+                            Log.d(Constants.TAG, "signInWithCredential:success");
 
-                            AndroidUtils.showToast(getContext(),
+                            AndroidUtil.showToast(getContext(),
                                     "OTP verification has been completed successfully");
 
-                            FirebaseUser user = task.getResult().getUser();
+                            // FirebaseUser user = task.getResult().getUser();
                             // Update UI
                             navigateToNextFragment();
                         } else {
                             // Sign in failed, display a message and update the UI
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Log.w(Constants.TAG, "signInWithCredential:failure", task.getException());
                             if (task.getException() instanceof
                                     FirebaseAuthInvalidCredentialsException) {
                                 // The verification code entered was invalid
-                                AndroidUtils.showToast(getContext(),
+                                AndroidUtil.showToast(getContext(),
                                         "The verification code entered was invalid");
                             }
                         }
@@ -255,8 +252,10 @@ public class LoginOtpFragment extends Fragment {
 
     private void navigateToNextFragment() {
         setIsProgress(false);
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.KEY_PHONE_NUMBER, getArgPhoneNumber);
         NavHostFragment.findNavController(LoginOtpFragment.this)
-                .navigate(R.id.action_loginOtpFragment_to_loginUsernameFragment);
+                .navigate(R.id.action_loginOtpFragment_to_loginUsernameFragment, bundle);
     }
 
     @Override

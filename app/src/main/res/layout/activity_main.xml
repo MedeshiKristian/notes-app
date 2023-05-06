@@ -27,7 +27,7 @@
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
                 app:subtitleTextColor="@color/primary"
                 app:title="@string/page_title"
-                app:titleTextColor="@color/primary_text"/>
+                app:titleTextColor="@color/primary_text" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -55,6 +55,22 @@
             app:srcCompat="@drawable/ic_baseline_add_24"
             app:tint="@color/primary_text" />
 
+        <FrameLayout
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_50sdp"
+            android:background="@color/primary"
+            app:behavior_hideable="true"
+            app:behavior_peekHeight="@dimen/_50sdp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Bottom sheet"
+                android:textColor="@color/secondary_text" />
+        </FrameLayout>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -66,7 +82,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/secondary_light"
+            android:background="@color/secondary"
             android:orientation="vertical">
 
             <!--            <include layout="@layout/nav_header_main" />-->
@@ -74,7 +90,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/secondary"
+                android:background="@color/primary"
                 android:orientation="vertical">
 
                 <com.makeramen.roundedimageview.RoundedImageView
@@ -93,6 +109,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginTop="@dimen/_5sdp"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/_12sdp"
                     android:textColor="@color/primary_text" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -101,7 +119,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
-                    android:textColor="#6E6E6E" />
+                    android:textColor="@color/md_blue_grey_100" />
 
             </LinearLayout>
 

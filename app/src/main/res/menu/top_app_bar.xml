@@ -3,6 +3,5 @@
     <item
         android:id="@+id/optionLogOut"
         android:title="Log out"
-        android:iconTint="@color/primary_text"
         android:visible="true" />
 </menu>

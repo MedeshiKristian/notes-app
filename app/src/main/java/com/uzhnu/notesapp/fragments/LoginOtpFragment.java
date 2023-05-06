@@ -68,7 +68,7 @@ public class LoginOtpFragment extends Fragment {
 
         setVariables();
 
-        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
+//        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
 
         if (mResendToken == null) {
             sendOtp();

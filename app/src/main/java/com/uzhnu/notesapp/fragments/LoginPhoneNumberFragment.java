@@ -48,6 +48,7 @@ public class LoginPhoneNumberFragment extends Fragment {
     }
 
     private void setIsProgress(boolean show) {
+        if (binding == null) return;
         if (show) {
             binding.sentOtpButton.setEnabled(false);
             binding.circularProgressIndicator.show();

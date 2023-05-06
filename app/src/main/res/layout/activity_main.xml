@@ -15,16 +15,19 @@
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:foregroundTint="@color/primary_text">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:fitsSystemWindows="true"
                 app:menu="@menu/top_app_bar"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
+                app:subtitleTextColor="@color/primary"
                 app:title="@string/page_title"
-                app:titleTextColor="@color/primary_text" />
+                app:titleTextColor="@color/primary_text"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -46,10 +49,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
+            android:contentDescription="Add note button"
             android:tint="@color/white"
             app:backgroundTint="@color/primary"
-            app:tint="@color/primary_text"
-            app:srcCompat="@drawable/ic_baseline_add_24" />
+            app:srcCompat="@drawable/ic_baseline_add_24"
+            app:tint="@color/primary_text" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -97,7 +101,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
-                    android:textColor="@color/primary_text" />
+                    android:textColor="#6E6E6E" />
 
             </LinearLayout>
 

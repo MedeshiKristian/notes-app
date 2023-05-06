@@ -20,14 +20,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/secondary_light">
+            android:backgroundTint="@color/primary_light">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="1"
-                android:textColor="@color/secondary_text"
+                android:textColor="@color/primary_text"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -36,14 +36,14 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_margin="@dimen/_10sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/secondary">
+            android:backgroundTint="@color/primary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="2"
-                android:textColor="@color/secondary_text"
+                android:textColor="@color/primary_text"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -51,14 +51,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/secondary_light">
+            android:backgroundTint="@color/primary_light">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="3"
-                android:textColor="@color/secondary_text"
+                android:textColor="@color/primary_text"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -70,7 +70,7 @@
         android:layout_weight="20"
         android:contentDescription="Enter otp code"
         android:src="@drawable/ic_baseline_otp_code_24"
-        app:tint="@color/secondary" />
+        app:tint="@color/primary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
@@ -112,8 +112,9 @@
             android:id="@+id/verify_otp_code_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_45sdp"
-            android:backgroundTint="@color/secondary"
-            android:text="Verify" />
+            android:backgroundTint="@drawable/buttons_state_colors"
+            android:text="Verify"
+            android:textColor="@color/primary_text" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator"
@@ -123,7 +124,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="@color/secondary_light"
+            app:indicatorColor="@color/primary_light"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="@color/primary"
             app:trackCornerRadius="8dp"

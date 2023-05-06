@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="primary">@color/md_cyan_500</color>
+    <color name="primary_light">@color/md_cyan_300</color>
+    <color name="primary_dark">@color/md_cyan_A400</color>
+
     <color name="secondary">@color/md_cyan_500</color>
-    <color name="secondary_light">@color/white</color>
-<!--    <color name="primary_dark">#142232</color>-->
+    <color name="secondary_light">@color/md_cyan_300</color>
+
     <color name="primary_text">@color/white</color>
     <color name="secondary_text">@color/black</color>
-<!--    <color name="secondary_text">#757575</color>-->
+    <!--    <color name="secondary_text">#757575</color>-->
 
     <!--    <color name="purple_200">#FFBB86FC</color>-->
     <!--    <color name="purple_500">#FF6200EE</color>-->

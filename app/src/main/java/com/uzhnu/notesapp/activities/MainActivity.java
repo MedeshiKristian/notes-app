@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
+                        assert userModel != null;
                         binding.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
                         binding.textViewUsername.setText(userModel.getUsername());
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.optionSignOut) {
+        if (item.getItemId() == R.id.optionLogOut) {
             FirebaseUtil.signOut();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

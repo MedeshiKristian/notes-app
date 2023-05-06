@@ -1,12 +1,14 @@
 package com.uzhnu.notesapp.models;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class UserModel {
     private String username;
     private String phoneNumber;
     private String image;
+
+    public UserModel() {
+    }
 
     public UserModel(@NonNull String username, @NonNull String phoneNumber, @NonNull String image) {
         this.username = username;
@@ -15,7 +17,10 @@ public class UserModel {
     }
 
     @NonNull
-    public String getUsername() {
+    public String getUsername() throws NullPointerException {
+        if (username == null) {
+            throw new NullPointerException("Username is null");
+        }
         return username;
     }
 
@@ -24,7 +29,10 @@ public class UserModel {
     }
 
     @NonNull
-    public String getPhoneNumber() {
+    public String getPhoneNumber() throws NullPointerException {
+        if (phoneNumber == null) {
+            throw new NullPointerException("User phone number is null");
+        }
         return phoneNumber;
     }
 
@@ -33,7 +41,10 @@ public class UserModel {
     }
 
     @NonNull
-    public String getImage() {
+    public String getImage() throws NullPointerException {
+        if (image == null) {
+            throw new NullPointerException("User image is null");
+        }
         return image;
     }
 

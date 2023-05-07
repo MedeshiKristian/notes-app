@@ -2,7 +2,9 @@ package com.uzhnu.notesapp.fragments;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -12,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -20,6 +23,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
@@ -68,12 +73,94 @@ public class LoginUsernameFragment extends Fragment {
         binding.buttonLetMeIn.setOnClickListener(view1 -> setUser());
 
         binding.imageViewUser.setOnClickListener(view1 -> {
-            Intent intent =
-                    new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            pickImage.launch(intent);
+            showBottomSheetPickImage();
         });
     }
+
+    private void showBottomSheetPickImage() {
+        if (getContext() != null) {
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_pick_image);
+
+            LinearLayout cameraLayout = bottomSheetDialog.findViewById(R.id.camera_linear_layout);
+            LinearLayout galleryLayout = bottomSheetDialog.findViewById(R.id.gallery_linear_layout);
+
+            bottomSheetDialog.show();
+
+            assert cameraLayout != null;
+            cameraLayout.setOnClickListener(view -> {
+                if (getContext().checkSelfPermission(Manifest.permission.CAMERA) ==
+                        PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    pickImageFromCamera.launch(intent);
+                } else {
+                    requestCameraPermission.launch(Manifest.permission.CAMERA);
+                }
+                bottomSheetDialog.hide();
+            });
+
+
+            assert galleryLayout != null;
+            galleryLayout.setOnClickListener(view -> {
+                Intent intent =
+                        new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                pickImageFromGallery.launch(intent);
+                bottomSheetDialog.hide();
+            });
+        }
+    }
+
+    private final ActivityResultLauncher<Intent> pickImageFromCamera = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null) {
+                        Bundle bundle = result.getData().getExtras();
+                        Bitmap bitmap = (Bitmap) bundle.get("data");
+                        binding.imageViewUser.setImageBitmap(bitmap);
+                    }
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<String> requestCameraPermission = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            result -> {
+                if (result) {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    pickImageFromCamera.launch(intent);
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> pickImageFromGallery = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    if (result.getData() != null) {
+                        Uri imageUri = result.getData().getData();
+                        // TODO NullPointerException
+                        try {
+                            InputStream inputStream =
+                                    getContext().getContentResolver().openInputStream(imageUri);
+                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                            if (bitmap != null) {
+                                binding.imageViewUser.setImageBitmap(bitmap);
+                            } else {
+                                Toast.makeText(getContext(),
+                                        "Please choose a valid image",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (FileNotFoundException exception) {
+                            exception.printStackTrace();
+                            Toast.makeText(getContext(),
+                                    "Please choose a valid file", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+    );
 
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),

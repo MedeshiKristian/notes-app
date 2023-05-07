@@ -19,7 +19,7 @@
         <item name="colorOnSecondaryContainer">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <item name="android:windowLightStatusBar">true</item>
+<!--        <item name="android:windowLightStatusBar">true</item>-->
         <!-- Customize your theme here. -->
         <item name="background">@color/white</item>
         <item name="android:itemBackground">@color/primary_text</item>

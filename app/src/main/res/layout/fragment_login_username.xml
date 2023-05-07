@@ -126,7 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
-            android:text="Let me in"
+            android:text="Sign in"
             android:textColor="@color/primary_text" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator

@@ -27,7 +27,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
-import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.models.User;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
@@ -39,7 +39,7 @@ import java.io.InputStream;
 public class LoginUsernameFragment extends Fragment {
     private FragmentLoginUsernameBinding binding;
 
-    private UserModel userModel;
+    private User user;
     private String getArgPhoneNumber;
     private String encodedImage;
 
@@ -77,6 +77,17 @@ public class LoginUsernameFragment extends Fragment {
         });
     }
 
+    private void setIsProgress(boolean show) {
+        if (show) {
+            binding.buttonLetMeIn.setEnabled(false);
+            binding.circularProgressIndicator.show();
+            binding.circularProgressIndicator.setProgress(100, true);
+        } else {
+            binding.circularProgressIndicator.hide();
+            binding.buttonLetMeIn.setEnabled(true);
+        }
+    }
+
     private void showBottomSheetPickImage() {
         if (getContext() != null) {
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
@@ -89,6 +100,7 @@ public class LoginUsernameFragment extends Fragment {
 
             assert cameraLayout != null;
             cameraLayout.setOnClickListener(view -> {
+                // TODO NullPointerException
                 if (getContext().checkSelfPermission(Manifest.permission.CAMERA) ==
                         PackageManager.PERMISSION_GRANTED) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -119,6 +131,7 @@ public class LoginUsernameFragment extends Fragment {
                         Bundle bundle = result.getData().getExtras();
                         Bitmap bitmap = (Bitmap) bundle.get("data");
                         binding.imageViewUser.setImageBitmap(bitmap);
+                        encodedImage = ImageUtil.encodeImage(bitmap);
                     }
                 }
             }
@@ -135,34 +148,6 @@ public class LoginUsernameFragment extends Fragment {
     );
 
     private final ActivityResultLauncher<Intent> pickImageFromGallery = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        // TODO NullPointerException
-                        try {
-                            InputStream inputStream =
-                                    getContext().getContentResolver().openInputStream(imageUri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                            if (bitmap != null) {
-                                binding.imageViewUser.setImageBitmap(bitmap);
-                            } else {
-                                Toast.makeText(getContext(),
-                                        "Please choose a valid image",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (FileNotFoundException exception) {
-                            exception.printStackTrace();
-                            Toast.makeText(getContext(),
-                                    "Please choose a valid file", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
@@ -197,14 +182,14 @@ public class LoginUsernameFragment extends Fragment {
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
-                        userModel = task.getResult().toObject(UserModel.class);
-                        if (userModel != null) {
+                        user = task.getResult().toObject(User.class);
+                        if (user != null) {
                             Log.i(Constants.TAG,
                                     "Account with this number has already been created");
-                            encodedImage = userModel.getImage();
+                            encodedImage = user.getImage();
                             binding.imageViewUser.setImageBitmap(
-                                    ImageUtil.decodeImage(userModel.getImage()));
-                            binding.textInputUsername.setText(userModel.getUsername());
+                                    ImageUtil.decodeImage(user.getImage()));
+                            binding.textInputUsername.setText(user.getUsername());
                         } else {
                             Log.i(Constants.TAG,
                                     "Account with this number has not been created yet");
@@ -228,18 +213,18 @@ public class LoginUsernameFragment extends Fragment {
 
         setIsProgress(true);
 
-        if (userModel != null) {
-            userModel.setImage(encodedImage);
-            userModel.setUsername(username);
+        if (user != null) {
+            user.setImage(encodedImage);
+            user.setUsername(username);
         } else {
-            userModel = new UserModel(username, getArgPhoneNumber, encodedImage);
+            user = new User(username, getArgPhoneNumber, encodedImage);
         }
 
-        Log.d(Constants.TAG, "Username: " + userModel.getUsername());
-        Log.d(Constants.TAG, "Phone number: " + userModel.getPhoneNumber());
-        Log.d(Constants.TAG, "Image: " + userModel.getImage());
+        Log.d(Constants.TAG, "Username: " + user.getUsername());
+        Log.d(Constants.TAG, "Phone number: " + user.getPhoneNumber());
+        Log.d(Constants.TAG, "Image: " + user.getImage());
 
-        FirebaseUtil.getCurrentUserDetails().set(userModel)
+        FirebaseUtil.getCurrentUserDetails().set(user)
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
@@ -254,17 +239,6 @@ public class LoginUsernameFragment extends Fragment {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-    }
-
-    private void setIsProgress(boolean show) {
-        if (show) {
-            binding.buttonLetMeIn.setEnabled(false);
-            binding.circularProgressIndicator.show();
-            binding.circularProgressIndicator.setProgress(100, true);
-        } else {
-            binding.circularProgressIndicator.hide();
-            binding.buttonLetMeIn.setEnabled(true);
-        }
     }
 
     @Override

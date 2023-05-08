@@ -7,11 +7,10 @@ import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.auth.User;
-import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.models.User;
 
 public class FirebaseUtil {
-    private static UserModel userModel;
+    private static User user;
 
     public static String getCurrentUserId() {
         return FirebaseAuth.getInstance().getUid();

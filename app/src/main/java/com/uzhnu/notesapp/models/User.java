@@ -2,18 +2,22 @@ package com.uzhnu.notesapp.models;
 
 import androidx.annotation.NonNull;
 
-public class UserModel {
+import java.util.Date;
+
+public class User {
     private String username;
     private String phoneNumber;
     private String image;
+    private Date createdAt;
 
-    public UserModel() {
+    public User() {
     }
 
-    public UserModel(@NonNull String username, @NonNull String phoneNumber, @NonNull String image) {
+    public User(@NonNull String username, @NonNull String phoneNumber, @NonNull String image) {
         this.username = username;
         this.phoneNumber = phoneNumber;
         this.image = image;
+        this.createdAt = new Date();
     }
 
     @NonNull
@@ -50,6 +54,17 @@ public class UserModel {
 
     public void setImage(@NonNull String image) {
         this.image = image;
+    }
+
+    public Date getCreatedAt() throws NullPointerException {
+        if (this.createdAt == null) {
+            throw new NullPointerException("User timestamp is null");
+        }
+        return createdAt;
+    }
+
+    public void setCreatedAt(@NonNull Date createdAt) {
+        this.createdAt = createdAt;
     }
 }
 

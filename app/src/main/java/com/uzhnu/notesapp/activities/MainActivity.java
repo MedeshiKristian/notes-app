@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -24,9 +25,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
-import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.models.Note;
+import com.uzhnu.notesapp.models.User;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
@@ -34,35 +38,32 @@ import com.uzhnu.notesapp.utils.ImageUtil;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
+    private List<Note> notes;
+    private NotesAdapter notesAdapter;
+    private FirebaseFirestore database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.topAppBar);
 
-        binding.topAppBar.setTitle("All notes");
+        init();
+        loadUserDetails();
+
+        FirebaseFirestore.getInstance()
+                .collection(Constants.KEY_COLLECTION_ALL_NOTES)
+                .document(FirebaseUtil.getCurrentUserId())
+                .collection(Constants.KEY_COLLECTION_NOTES);
+
+        binding.topAppBar.setTitle("My notes");
 
         setListeners();
-
-        FirebaseUtil.getCurrentUserDetails().get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        UserModel userModel = task.getResult().toObject(UserModel.class);
-                        assert userModel != null;
-                        binding.imageViewUser
-                                .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
-                        binding.textViewUsername.setText(userModel.getUsername());
-                        binding.textViewPhoneNumber.setText(userModel.getPhoneNumber());
-                    } else {
-                        Log.w(Constants.TAG, "Task for getting user image failed");
-                    }
-                });
 
         ArrayList<String> categories = new ArrayList<>();
         categories.add("Personal");
@@ -72,14 +73,29 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, categories);
         binding.listSlidermenu.setAdapter(adapter);
-        binding.listSlidermenu2.setAdapter(adapter);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.top_app_bar, menu);
-        return super.onCreateOptionsMenu(menu);
+    private void init() {
+        notes = new ArrayList<>();
+        notesAdapter = new NotesAdapter(notes);
+        binding.recyclerViewNotes.setAdapter(notesAdapter);
+        database = FirebaseFirestore.getInstance();
+    }
+
+    private void loadUserDetails() {
+        FirebaseUtil.getCurrentUserDetails().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        User user = task.getResult().toObject(User.class);
+                        assert user != null;
+                        binding.imageViewUser
+                                .setImageBitmap(ImageUtil.decodeImage(user.getImage()));
+                        binding.textViewUsername.setText(user.getUsername());
+                        binding.textViewPhoneNumber.setText(user.getPhoneNumber());
+                    } else {
+                        Log.e(Constants.TAG, "Task for getting user image failed");
+                    }
+                });
     }
 
     private void setListeners() {
@@ -98,6 +114,18 @@ public class MainActivity extends AppCompatActivity {
         binding.imageViewUser.setOnClickListener(view -> {
             showBottomSheetPickImage();
         });
+    }
+
+    private void setIsProgress(boolean show) {
+        if (binding == null) return;
+        if (show) {
+            binding.recyclerViewNotes.setVisibility(View.GONE);
+            binding.circularProgressIndicator.show();
+            binding.circularProgressIndicator.setProgress(100, true);
+        } else {
+            binding.circularProgressIndicator.hide();
+            binding.recyclerViewNotes.setVisibility(View.VISIBLE);
+        }
     }
 
     private void showBottomSheetPickImage() {
@@ -181,6 +209,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
     );
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.top_app_bar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

@@ -32,16 +32,42 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <!-- Note: A RecyclerView can also be used -->
-        <androidx.core.widget.NestedScrollView
+        <!--<androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="742dp"
             android:layout_gravity="start"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <!-- Scrollable content -->
+            &lt;!&ndash; Scrollable content &ndash;&gt;
 
-        </androidx.core.widget.NestedScrollView>
+        </androidx.core.widget.NestedScrollView>-->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_notes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:overScrollMode="never"
+            android:padding="@dimen/_20sdp"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/circular_progress_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:indeterminate="true"
+            android:progress="0"
+            app:indicatorColor="@color/primary_light"
+            app:indicatorSize="@dimen/_30sdp"
+            app:trackColor="@color/primary"
+            app:trackCornerRadius="8dp"
+            app:trackThickness="@dimen/_4sdp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_note_fa_button"
@@ -109,15 +135,6 @@
 
             <ListView
                 android:id="@+id/list_slidermenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:choiceMode="singleChoice"
-                android:divider="@color/white"
-                android:dividerHeight="0dp"
-                android:textColor="#424242" />
-
-            <ListView
-                android:id="@+id/list_slidermenu2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:choiceMode="singleChoice"

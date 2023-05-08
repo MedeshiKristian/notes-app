@@ -63,17 +63,12 @@ public class LoginOtpFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Log.d(Constants.TAG, getArgPhoneNumber);
-
         setIsProgress(false);
-
         setVariables();
-
 //        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
-
         if (mResendToken == null) {
             sendOtp();
         }
-
         setListeners();
     }
 
@@ -142,14 +137,17 @@ public class LoginOtpFragment extends Fragment {
     }
 
     private void setListeners() {
-        binding.verifyOtpCodeButton.setOnClickListener(view1 -> {
-            String code =
-                    Objects.requireNonNull(binding.editTextOtpCode.getText()).toString();
+        binding.buttonVerifyOtpCode.setOnClickListener(view1 -> {
+            String code = Objects.requireNonNull(binding.editTextOtpCode.getText()).toString();
 
-            PhoneAuthCredential credential =
-                    PhoneAuthProvider.getCredential(mVerificationId, code);
+            if (code.length() != 6) {
+                binding.editTextOtpCode.setError("Enter the 6-digit verification code");
+            } else {
+                PhoneAuthCredential credential =
+                        PhoneAuthProvider.getCredential(mVerificationId, code);
 
-            signInWithPhoneAuthCredential(credential);
+                signInWithPhoneAuthCredential(credential);
+            }
         });
 
         binding.textViewResendOtp.setOnClickListener(view1 -> sendOtp());
@@ -157,12 +155,12 @@ public class LoginOtpFragment extends Fragment {
 
     private void setIsProgress(boolean show) {
         if (show) {
-            binding.verifyOtpCodeButton.setEnabled(false);
+            binding.buttonVerifyOtpCode.setEnabled(false);
             binding.circularProgressIndicator.show();
             binding.circularProgressIndicator.setProgress(100, true);
         } else {
             binding.circularProgressIndicator.hide();
-            binding.verifyOtpCodeButton.setEnabled(true);
+            binding.buttonVerifyOtpCode.setEnabled(true);
         }
     }
 

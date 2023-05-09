@@ -23,25 +23,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:fitsSystemWindows="true"
-                app:menu="@menu/top_app_bar"
+                app:menu="@menu/menu_main"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
-                app:subtitleTextColor="@color/primary"
+                app:titleMargin="0dp"
                 app:title="@string/page_title"
                 app:titleTextColor="@color/primary_text" />
 
         </com.google.android.material.appbar.AppBarLayout>
-
-        <!-- Note: A RecyclerView can also be used -->
-        <!--<androidx.core.widget.NestedScrollView
-            android:id="@+id/nestedScrollView"
-            android:layout_width="match_parent"
-            android:layout_height="742dp"
-            android:layout_gravity="start"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            &lt;!&ndash; Scrollable content &ndash;&gt;
-
-        </androidx.core.widget.NestedScrollView>-->
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_notes"
@@ -50,7 +38,7 @@
             android:clipToPadding="false"
             android:orientation="vertical"
             android:overScrollMode="never"
-            android:padding="@dimen/_20sdp"
+            android:paddingTop="@dimen/_10sdp"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
@@ -60,7 +48,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
             app:indicatorColor="@color/primary_light"
@@ -70,7 +57,7 @@
             app:trackThickness="@dimen/_4sdp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_note_fa_button"
+            android:id="@+id/floating_action_button_add_note"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"

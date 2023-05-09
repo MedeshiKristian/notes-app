@@ -8,6 +8,6 @@ public class Constants {
     public static final String KEY_USERNAME = "username";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_TIMESTAMP = "timestamp";
-    public static final String KEY_COLLECTION_ALL_NOTES = "allNotes";
     public static final String KEY_COLLECTION_NOTES = "notes";
+    public static final String KEY_COLLECTION_USER_NOTES = "userNotes";
 }

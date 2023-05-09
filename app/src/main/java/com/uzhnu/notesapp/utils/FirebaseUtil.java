@@ -1,12 +1,12 @@
 package com.uzhnu.notesapp.utils;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.uzhnu.notesapp.models.Note;
 import com.uzhnu.notesapp.models.User;
 
 public class FirebaseUtil {
@@ -21,15 +21,19 @@ public class FirebaseUtil {
     }
 
     public static void signOut() {
-        Log.i(Constants.TAG, "Signing out");
         FirebaseAuth.getInstance().signOut();
     }
 
     @NonNull
     public static DocumentReference getCurrentUserDetails() {
-        Log.i(Constants.TAG, "getCurrentUserDetails called");
         return FirebaseFirestore.getInstance()
                 .collection(Constants.KEY_COLLECTION_USERS)
                 .document(getCurrentUserId());
+    }
+
+    @NonNull
+    public static CollectionReference getCurrentUserNotes() {
+        return getCurrentUserDetails()
+                .collection(Constants.KEY_COLLECTION_USER_NOTES);
     }
 }

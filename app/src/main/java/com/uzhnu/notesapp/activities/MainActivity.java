@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,6 +27,7 @@ import androidx.core.view.GravityCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
@@ -39,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -53,15 +56,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.topAppBar);
 
+        binding.topAppBar.setTitle("My notes");
+
         init();
         loadUserDetails();
-
-        FirebaseFirestore.getInstance()
-                .collection(Constants.KEY_COLLECTION_ALL_NOTES)
-                .document(FirebaseUtil.getCurrentUserId())
-                .collection(Constants.KEY_COLLECTION_NOTES);
-
-        binding.topAppBar.setTitle("My notes");
+        loadUserNotes();
 
         setListeners();
 
@@ -76,26 +75,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
-        notes = new ArrayList<>();
+        /*notes = new ArrayList<>();
         notesAdapter = new NotesAdapter(notes);
         binding.recyclerViewNotes.setAdapter(notesAdapter);
-        database = FirebaseFirestore.getInstance();
+        database = FirebaseFirestore.getInstance();*/
     }
 
     private void loadUserDetails() {
+        setIsProgress(true);
         FirebaseUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
+                    setIsProgress(false);
                     if (task.isSuccessful()) {
                         User user = task.getResult().toObject(User.class);
                         assert user != null;
                         binding.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(user.getImage()));
                         binding.textViewUsername.setText(user.getUsername());
-                        binding.textViewPhoneNumber.setText(user.getPhoneNumber());
+                        binding.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
+                                user.getPhoneNumber(),
+                                Locale.getDefault().getCountry()
+                        ));
+
                     } else {
                         Log.e(Constants.TAG, "Task for getting user image failed");
                     }
                 });
+    }
+
+    private void loadUserNotes() {
+        setIsProgress(true);
+        FirebaseUtil.getCurrentUserNotes().get()
+                .addOnCompleteListener(task -> {
+                    setIsProgress(false);
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<Note> userNotes = new ArrayList<>();
+                        for (QueryDocumentSnapshot  queryDocumentSnapshot: task.getResult()) {
+                            Note note = queryDocumentSnapshot.toObject(Note.class);
+                            userNotes.add(note);
+                        }
+                        if (userNotes.size() > 0) {
+                            notesAdapter = new NotesAdapter(userNotes);
+                            binding.recyclerViewNotes.setAdapter(notesAdapter);
+                            binding.recyclerViewNotes.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+
     }
 
     private void setListeners() {
@@ -109,6 +135,12 @@ public class MainActivity extends AppCompatActivity {
 
         binding.topAppBar.setNavigationOnClickListener(view -> {
             binding.drawerLayout.openDrawer(GravityCompat.START);
+        });
+
+        binding.floatingActionButtonAddNote.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+            startActivity(intent);
+            finish();
         });
 
         binding.imageViewUser.setOnClickListener(view -> {
@@ -213,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.top_app_bar, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

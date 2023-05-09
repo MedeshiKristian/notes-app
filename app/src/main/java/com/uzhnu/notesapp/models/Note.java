@@ -7,6 +7,9 @@ public class Note {
     private Date lastEdited;
     private Date createdAt;
 
+    public Note() {
+    }
+
     public Note(String text) {
         this.text = text;
         this.createdAt = new Date();

@@ -21,8 +21,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (!FirebaseUtil.isLoggedIn()) {
-            Intent intent =
-                    new Intent(SplashActivity.this, LoginActivity.class);
+            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

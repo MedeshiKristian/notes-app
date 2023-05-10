@@ -32,11 +32,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     private Function<Boolean, Void> setDeleteActionVisible;
     private Boolean isDeleteActionVisible;
     private SparseBooleanArray mSelectedItems;
+    private Function<Void, Void> updateToolBarTitle;
 
     private RecyclerView recyclerView;
 
-    public NotesAdapter(List<Note> notes) {
+    public NotesAdapter(List<Note> notes, Function<Void, Void> updateToolBarTitle) {
         this.notes = notes;
+        this.updateToolBarTitle = updateToolBarTitle;
         isDeleteActionVisible = false;
     }
 
@@ -137,6 +139,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             mSelectedItems.delete(position);
             holder.removeSelection();
         }
+        updateToolBarTitle.apply(null);
+    }
+
+    public int getCountSelectedItems() {
+        return mSelectedItems.size();
     }
 
     @Override

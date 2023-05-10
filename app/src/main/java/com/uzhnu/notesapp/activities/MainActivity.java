@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.topAppBar);
 
-        binding.topAppBar.setTitle("My notes");
+        updateToolBarTitle();
 
         init();
         loadUserDetails();
@@ -82,6 +82,21 @@ public class MainActivity extends AppCompatActivity {
         binding.listSlidermenu.setAdapter(adapter);
 
         registerReceiver(broadcastReceiver, new IntentFilter(FINISH_ACTIVITY));
+    }
+
+    private void updateToolBarTitle() {
+        if (binding != null) {
+            if (notesAdapter == null || !notesAdapter.getDeleteActionVisible()) {
+                binding.topAppBar.setTitle("My notes");
+            } else {
+                int countSelectedItems = notesAdapter.getCountSelectedItems();
+                if (countSelectedItems == 1) {
+                    binding.topAppBar.setTitle("1 item selected");
+                } else {
+                    binding.topAppBar.setTitle(countSelectedItems + " items selected");
+                }
+            }
+        }
     }
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -261,7 +276,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
         notes = new ArrayList<>();
-        notesAdapter = new NotesAdapter(notes);
+        notesAdapter = new NotesAdapter(notes, (foo) -> {
+            this.updateToolBarTitle();
+            return null;
+        });
         binding.recyclerViewNotes.setAdapter(notesAdapter);
     }
 
@@ -307,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (notesAdapter.getDeleteActionVisible()) {
             setDeleteActionVisible.apply(false);
             notesAdapter.removeAllSelections(true);
+            updateToolBarTitle();
         } else {
             super.onBackPressed();
         }

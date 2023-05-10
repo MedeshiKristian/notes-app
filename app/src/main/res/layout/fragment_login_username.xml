@@ -68,7 +68,7 @@
         android:id="@+id/image_view_user"
         android:layout_width="@dimen/_150sdp"
         android:layout_height="@dimen/_150sdp"
-        android:layout_margin="@dimen/_20sdp"
+        android:layout_marginTop="@dimen/_10sdp"
         android:background="@drawable/text_view_circular_background"
         android:backgroundTint="@color/primary_light"
         android:contentDescription="User image"
@@ -76,20 +76,12 @@
         android:src="@drawable/ic_baseline_username_48"
         app:riv_oval="true" />
 
-    <!--    <ImageView-->
-    <!--        android:id="@+id/image_view_user"-->
-    <!--        android:layout_width="150dp"-->
-    <!--        android:layout_height="150dp"-->
-    <!--        android:background="@drawable/text_view_circular_background"-->
-    <!--        android:backgroundTint="@color/primary_light"-->
-    <!--        android:contentDescription="Enter otp code"-->
-    <!--        android:src="@drawable/ic_baseline_username_24" />-->
-
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter your username"
-        android:textColor="@color/primary_text"
+        android:textColor="@color/secondary_text"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -105,7 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
-            android:background="@drawable/edit_text_rounder_corner"
+            android:background="@drawable/white_rounded_corners_background"
             android:elevation="@dimen/_3sdp"
             android:hint="Username"
             android:inputType="text"

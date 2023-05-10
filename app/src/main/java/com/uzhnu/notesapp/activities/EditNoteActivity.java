@@ -15,6 +15,10 @@ import com.uzhnu.notesapp.models.Note;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 
+import java.io.Console;
+import java.util.HashMap;
+import java.util.Map;
+
 public class EditNoteActivity extends AppCompatActivity {
     private ActivityEditNoteBinding binding;
 
@@ -30,7 +34,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private void setListeners() {
         binding.topAppBar.setNavigationOnClickListener(view -> {
-            startMainActivity();
+            onBackPressed();
         });
     }
 
@@ -46,10 +50,10 @@ public class EditNoteActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case (R.id.save_note):
                 Note note = new Note(binding.editTextNote.getText().toString());
-                FirebaseUtil.getCurrentUserNotes()
-                        .add(note)
+                FirebaseUtil.addNote(note)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
+                                sendBroadcast(new Intent(MainActivity.FINISH_ACTIVITY));
                                 startMainActivity();
                             } else {
                                 AndroidUtil.showToast(getApplicationContext(), "Note saving failed");
@@ -59,11 +63,6 @@ public class EditNoteActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        startMainActivity();
     }
 
     private void startMainActivity() {

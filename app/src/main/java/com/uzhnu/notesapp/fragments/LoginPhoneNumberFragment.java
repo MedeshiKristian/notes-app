@@ -42,7 +42,7 @@ public class LoginPhoneNumberFragment extends Fragment {
                 binding.editTextPhoneNumber.setError("Phone number is not valid");
             } else {
                 setIsProgress(true);
-                new Handler().postDelayed(this::navigateToNextFragment, 3000);
+                navigateToNextFragment();
             }
         });
     }

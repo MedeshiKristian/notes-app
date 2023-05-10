@@ -1,7 +1,11 @@
 package com.uzhnu.notesapp.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,7 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
@@ -40,14 +43,19 @@ import com.uzhnu.notesapp.utils.ImageUtil;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String FINISH_ACTIVITY = "finish_main_activity";
+
     private ActivityMainBinding binding;
     private List<Note> notes;
     private NotesAdapter notesAdapter;
-    private FirebaseFirestore database;
+
+    private Function<Boolean, Void> setDeleteActionVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +80,19 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, categories);
         binding.listSlidermenu.setAdapter(adapter);
+
+        registerReceiver(broadcastReceiver, new IntentFilter(FINISH_ACTIVITY));
     }
 
-    private void init() {
-        /*notes = new ArrayList<>();
-        notesAdapter = new NotesAdapter(notes);
-        binding.recyclerViewNotes.setAdapter(notesAdapter);
-        database = FirebaseFirestore.getInstance();*/
-    }
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(FINISH_ACTIVITY)) {
+                finish();
+            }
+        }
+    };
 
     private void loadUserDetails() {
         setIsProgress(true);
@@ -103,23 +116,24 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadUserNotes() {
         setIsProgress(true);
         FirebaseUtil.getCurrentUserNotes().get()
                 .addOnCompleteListener(task -> {
-                    setIsProgress(false);
                     if (task.isSuccessful() && task.getResult() != null) {
-                        List<Note> userNotes = new ArrayList<>();
-                        for (QueryDocumentSnapshot  queryDocumentSnapshot: task.getResult()) {
-                            Note note = queryDocumentSnapshot.toObject(Note.class);
-                            userNotes.add(note);
+                        notes.clear();
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            notes.add(FirebaseUtil.getNote(queryDocumentSnapshot));
                         }
-                        if (userNotes.size() > 0) {
-                            notesAdapter = new NotesAdapter(userNotes);
-                            binding.recyclerViewNotes.setAdapter(notesAdapter);
+                        if (notes.size() > 0) {
+                            Collections.sort(notes);
+                            notesAdapter.notifyDataSetChanged();
+                            binding.recyclerViewNotes.smoothScrollToPosition(0);
                             binding.recyclerViewNotes.setVisibility(View.VISIBLE);
                         }
                     }
+                    setIsProgress(false);
                 });
 
     }
@@ -140,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
         binding.floatingActionButtonAddNote.setOnClickListener(view -> {
             Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
             startActivity(intent);
-            finish();
         });
 
         binding.imageViewUser.setOnClickListener(view -> {
@@ -200,6 +213,8 @@ public class MainActivity extends AppCompatActivity {
                         Bundle bundle = result.getData().getExtras();
                         Bitmap bitmap = (Bitmap) bundle.get("data");
                         binding.imageViewUser.setImageBitmap(bitmap);
+                        FirebaseUtil.getCurrentUserDetails()
+                                .update(Constants.KEY_IMAGE, ImageUtil.encodeImage(bitmap));
                     }
                 }
             }
@@ -227,6 +242,8 @@ public class MainActivity extends AppCompatActivity {
                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                             if (bitmap != null) {
                                 binding.imageViewUser.setImageBitmap(bitmap);
+                                FirebaseUtil.getCurrentUserDetails()
+                                        .update(Constants.KEY_IMAGE, ImageUtil.encodeImage(bitmap));
                             } else {
                                 Toast.makeText(MainActivity.this,
                                         "Please choose a valid image",
@@ -242,16 +259,36 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+    private void init() {
+        notes = new ArrayList<>();
+        notesAdapter = new NotesAdapter(notes);
+        binding.recyclerViewNotes.setAdapter(notesAdapter);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+        setDeleteActionVisible = (show) -> {
+            if (menu != null) {
+                menu.findItem(R.id.optionDelete).setVisible(show);
+                assert binding != null;
+                notesAdapter.setDeleteActionVisible(show);
+            }
+            return null;
+        };
+        notesAdapter.setSetDeleteActionVisible(setDeleteActionVisible);
         return super.onCreateOptionsMenu(menu);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case (R.id.optionDelete):
+                notesAdapter.deleteAllSelectedItems();
+                //loadUserNotes();
+                return true;
             case (R.id.optionLogOut):
                 FirebaseUtil.signOut();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -267,6 +304,9 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (notesAdapter.getDeleteActionVisible()) {
+            setDeleteActionVisible.apply(false);
+            notesAdapter.removeAllSelections(true);
         } else {
             super.onBackPressed();
         }

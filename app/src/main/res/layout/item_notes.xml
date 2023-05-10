@@ -1,28 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutNote"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/_5sdp"
+    android:background="@drawable/white_rounded_corners_background"
     android:elevation="@dimen/_3sdp"
-    android:orientation="vertical"
-    android:background="@drawable/edit_text_rounder_corner"
+    android:orientation="horizontal"
     android:padding="@dimen/_10sdp">
 
-    <TextView
-        android:id="@+id/text_view_note_title"
+    <LinearLayout
+        android:id="@+id/linearLayoutNoteText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_2sdp"
-        android:maxLines="1"
-        android:text="Note Title"
-        android:textColor="@color/secondary_text" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="@+id/layoutNote">
 
-    <TextView
-        android:id="@+id/text_view_last_edited"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_view_note_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_2sdp"
+            android:maxLines="1"
+            android:text="Note Title"
+            android:textColor="@color/secondary_text" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_view_last_edited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_2sdp"
+            android:text="LastEdited"
+            android:textColor="@color/md_blue_grey_500"
+            android:textSize="@dimen/_10sdp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageViewSelected"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_2sdp"
-        android:text="LastEdited"
-        android:textColor="@color/md_blue_grey_500"
-        android:textSize="@dimen/_10sdp" />
-</LinearLayout>
+        android:layout_gravity="end"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:src="@drawable/ic_baseline_done_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/layoutNote"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

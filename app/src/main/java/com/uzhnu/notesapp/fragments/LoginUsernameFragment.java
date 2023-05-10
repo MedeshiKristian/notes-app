@@ -72,9 +72,7 @@ public class LoginUsernameFragment extends Fragment {
     private void setListeners() {
         binding.buttonLetMeIn.setOnClickListener(view1 -> setUser());
 
-        binding.imageViewUser.setOnClickListener(view1 -> {
-            showBottomSheetPickImage();
-        });
+        binding.imageViewUser.setOnClickListener(view1 -> showBottomSheetPickImage());
     }
 
     private void setIsProgress(boolean show) {

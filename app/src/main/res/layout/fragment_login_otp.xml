@@ -67,7 +67,7 @@
     <ImageView
         android:layout_width="@dimen/_150sdp"
         android:layout_height="@dimen/_150sdp"
-        android:layout_weight="20"
+        android:layout_margin="@dimen/_10sdp"
         android:contentDescription="Enter otp code"
         android:src="@drawable/ic_baseline_otp_code_24"
         app:tint="@color/primary" />
@@ -75,8 +75,9 @@
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter OTP sent to your phone"
-        android:textColor="@color/primary_text"
+        android:textColor="@color/secondary_text"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -92,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
-            android:background="@drawable/edit_text_rounder_corner"
+            android:background="@drawable/white_rounded_corners_background"
             android:elevation="@dimen/_3sdp"
             android:hint="OTP"
             android:inputType="number"

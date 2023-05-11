@@ -39,6 +39,7 @@ import com.uzhnu.notesapp.models.User;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
+import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -56,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private List<Note> notes;
     private NotesAdapter notesAdapter;
+
+    private String encodedUserImage;
 
     private Function<Boolean, Void> setDeleteActionVisible;
 
@@ -144,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         User user = task.getResult().toObject(User.class);
                         assert user != null;
+                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, user.getImage());
                         binding.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(user.getImage()));
                         binding.textViewUsername.setText(user.getUsername());
@@ -196,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_pick_image);
 
+        LinearLayout viewPictureLayout = bottomSheetDialog.findViewById(R.id.view_picture_linear_layout);
         LinearLayout cameraLayout = bottomSheetDialog.findViewById(R.id.camera_linear_layout);
         LinearLayout galleryLayout = bottomSheetDialog.findViewById(R.id.gallery_linear_layout);
 
@@ -222,6 +227,12 @@ public class MainActivity extends AppCompatActivity {
             pickImageFromGallery.launch(intent);
             bottomSheetDialog.hide();
         });
+
+        assert viewPictureLayout != null;
+        viewPictureLayout.setOnClickListener(view -> {
+            Intent intent = new Intent(getApplicationContext(), FullscreenPhotoActivity.class);
+            startActivity(intent);
+        });
     }
 
     private final ActivityResultLauncher<Intent> pickImageFromCamera = registerForActivityResult(
@@ -232,8 +243,10 @@ public class MainActivity extends AppCompatActivity {
                         Bundle bundle = result.getData().getExtras();
                         Bitmap bitmap = (Bitmap) bundle.get("data");
                         binding.imageViewUser.setImageBitmap(bitmap);
+                        String encodedImage = ImageUtil.encodeImage(bitmap);
                         FirebaseUtil.getCurrentUserDetails()
-                                .update(Constants.KEY_IMAGE, ImageUtil.encodeImage(bitmap));
+                                .update(Constants.KEY_IMAGE, encodedImage);
+                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
                     }
                 }
             }
@@ -261,8 +274,10 @@ public class MainActivity extends AppCompatActivity {
                             Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                             if (bitmap != null) {
                                 binding.imageViewUser.setImageBitmap(bitmap);
+                                String encodedImage = ImageUtil.encodeImage(bitmap);
                                 FirebaseUtil.getCurrentUserDetails()
-                                        .update(Constants.KEY_IMAGE, ImageUtil.encodeImage(bitmap));
+                                        .update(Constants.KEY_IMAGE, encodedImage);
+                                PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
                             } else {
                                 Toast.makeText(MainActivity.this,
                                         "Please choose a valid image",

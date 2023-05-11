@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.activities.FullscreenPhotoActivity;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.User;
@@ -32,6 +33,7 @@ import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
+import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -91,6 +93,7 @@ public class LoginUsernameFragment extends Fragment {
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
             bottomSheetDialog.setContentView(R.layout.bottom_sheet_pick_image);
 
+            LinearLayout viewPictureLayout = bottomSheetDialog.findViewById(R.id.view_picture_linear_layout);
             LinearLayout cameraLayout = bottomSheetDialog.findViewById(R.id.camera_linear_layout);
             LinearLayout galleryLayout = bottomSheetDialog.findViewById(R.id.gallery_linear_layout);
 
@@ -117,6 +120,17 @@ public class LoginUsernameFragment extends Fragment {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 pickImageFromGallery.launch(intent);
                 bottomSheetDialog.hide();
+            });
+
+            assert viewPictureLayout != null;
+            viewPictureLayout.setOnClickListener(view -> {
+                if (encodedImage != null) {
+                    Intent intent = new Intent(getContext(), FullscreenPhotoActivity.class);
+                    PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
+                    startActivity(intent);
+                } else {
+                    AndroidUtil.showToast(getContext(), "Please choose an image");
+                }
             });
         }
     }

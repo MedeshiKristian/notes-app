@@ -9,6 +9,7 @@ public class Constants {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_CREATED_AT = "createdAt";
     public static final String KEY_COLLECTION_USER_NOTES = "userNotes";
+    public static final String KEY_NOTE = "note";
     public static final String KEY_TEXT = "text";
     public static final String KEY_LAST_EDITED = "lastEdited";
 }

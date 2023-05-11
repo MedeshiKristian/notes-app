@@ -10,6 +10,7 @@
     tools:openDrawer="start">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinatorContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -25,8 +26,8 @@
                 android:fitsSystemWindows="true"
                 app:menu="@menu/menu_main"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
-                app:titleMargin="0dp"
                 app:title="@string/page_title"
+                app:titleMargin="0dp"
                 app:titleTextColor="@color/primary_text" />
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -71,12 +72,12 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
         <LinearLayout
+            android:id="@+id/layoutSidebar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/secondary"
@@ -88,14 +89,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/primary"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/_5sdp">
 
                 <com.makeramen.roundedimageview.RoundedImageView
                     android:id="@+id/image_view_user"
-                    android:layout_width="@dimen/_60sdp"
-                    android:layout_height="@dimen/_60sdp"
+                    android:layout_width="@dimen/_65sdp"
+                    android:layout_height="@dimen/_65sdp"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginTop="@dimen/_30sdp"
+                    android:layout_marginBottom="@dimen/_5sdp"
                     android:contentDescription="User image"
                     android:scaleType="centerCrop"
                     app:riv_oval="true" />
@@ -119,17 +122,6 @@
                     android:textColor="@color/md_blue_grey_100" />
 
             </LinearLayout>
-
-            <ListView
-                android:id="@+id/list_slidermenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:choiceMode="singleChoice"
-                android:divider="@color/white"
-                android:dividerHeight="0dp"
-                android:textColor="#424242" />
-
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
-
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -9,14 +9,11 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.models.Note;
-import com.uzhnu.notesapp.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseUtil {
-    private static User user;
-
     public static String getCurrentUserId() {
         return FirebaseAuth.getInstance().getUid();
     }
@@ -36,7 +33,8 @@ public class FirebaseUtil {
                 .document(getCurrentUserId());
     }
 
-    public static Note getNote(QueryDocumentSnapshot queryDocumentSnapshot) {
+    @NonNull
+    public static Note getNote(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
         Note note = new Note();
         note.setText(queryDocumentSnapshot.getString(Constants.KEY_TEXT));
         note.setLastEdited(queryDocumentSnapshot.getDate(Constants.KEY_LAST_EDITED));
@@ -45,7 +43,8 @@ public class FirebaseUtil {
         return note;
     }
 
-    public static Task<DocumentReference> addNote(Note note) {
+    @NonNull
+    public static Task<DocumentReference> addUserNote(@NonNull Note note) {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put(Constants.KEY_TEXT, note.getText());
         objectMap.put(Constants.KEY_LAST_EDITED, note.getLastEdited());
@@ -54,8 +53,14 @@ public class FirebaseUtil {
                 .add(objectMap);
     }
 
-    public static Task<Void> deleteNote(Note note) {
+    @NonNull
+    public static Task<Void> deleteUserNote(@NonNull Note note) {
         return getCurrentUserNotes().document(note.getDocumentId()).delete();
+    }
+
+    @NonNull
+    public static DocumentReference getUserNote(String noteId) {
+        return getCurrentUserNotes().document(noteId);
     }
 
     @NonNull

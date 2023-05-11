@@ -18,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -27,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -49,7 +49,9 @@ import java.util.Locale;
 import java.util.function.Function;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String FINISH_ACTIVITY = "finish_main_activity";
+    public static final String FINISH_ACTIVITY = "finishMainActivity";
+
+    private static final String defaultTitle = "My notes";
 
     private ActivityMainBinding binding;
     private List<Note> notes;
@@ -57,14 +59,25 @@ public class MainActivity extends AppCompatActivity {
 
     private Function<Boolean, Void> setDeleteActionVisible;
 
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, @NonNull Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(FINISH_ACTIVITY)) {
+                finish();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         setSupportActionBar(binding.topAppBar);
 
-        updateToolBarTitle();
+        updateToolBar();
 
         init();
         loadUserDetails();
@@ -72,25 +85,38 @@ public class MainActivity extends AppCompatActivity {
 
         setListeners();
 
-        ArrayList<String> categories = new ArrayList<>();
-        categories.add("Personal");
-        categories.add("Work");
-        categories.add("Life");
-        categories.add("Travel");
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, categories);
-        binding.listSlidermenu.setAdapter(adapter);
-
         registerReceiver(broadcastReceiver, new IntentFilter(FINISH_ACTIVITY));
     }
 
-    private void updateToolBarTitle() {
+    private void updateToolBar() {
         if (binding != null) {
             if (notesAdapter == null || !notesAdapter.getDeleteActionVisible()) {
-                binding.topAppBar.setTitle("My notes");
+                binding.topAppBar.setTitle(defaultTitle);
+                
+                ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
+                        binding.drawerLayout, binding.topAppBar,
+                        R.string.navigation_open, R.string.navigation_close);
+
+                binding.drawerLayout.addDrawerListener(toggle);
+
+                toggle.syncState();
+
+                binding.topAppBar.setNavigationOnClickListener(view -> {
+                    toggleSidebar();
+//                    binding.drawerLayout.openDrawer(GravityCompat.START);
+                });
             } else {
                 int countSelectedItems = notesAdapter.getCountSelectedItems();
                 if (countSelectedItems == 1) {
+                    binding.topAppBar.setNavigationIcon(
+                            ContextCompat.getDrawable(
+                                    getApplicationContext(),
+                                    R.drawable.ic_baseline_arrow_back_24
+                            )
+                    );
+                    binding.topAppBar.setNavigationOnClickListener(view -> {
+                        onBackPressed();
+                    });
                     binding.topAppBar.setTitle("1 item selected");
                 } else {
                     binding.topAppBar.setTitle(countSelectedItems + " items selected");
@@ -99,15 +125,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(FINISH_ACTIVITY)) {
-                finish();
-            }
-        }
-    };
+    private void setListeners() {
+        binding.floatingActionButtonAddNote.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
+            startActivity(intent);
+        });
+
+        binding.imageViewUser.setOnClickListener(view -> {
+            showBottomSheetPickImage();
+        });
+    }
 
     private void loadUserDetails() {
         setIsProgress(true);
@@ -151,29 +178,6 @@ public class MainActivity extends AppCompatActivity {
                     setIsProgress(false);
                 });
 
-    }
-
-    private void setListeners() {
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                binding.drawerLayout, binding.topAppBar,
-                R.string.navigation_open, R.string.navigation_close);
-
-        binding.drawerLayout.addDrawerListener(toggle);
-
-        toggle.syncState();
-
-        binding.topAppBar.setNavigationOnClickListener(view -> {
-            binding.drawerLayout.openDrawer(GravityCompat.START);
-        });
-
-        binding.floatingActionButtonAddNote.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
-            startActivity(intent);
-        });
-
-        binding.imageViewUser.setOnClickListener(view -> {
-            showBottomSheetPickImage();
-        });
     }
 
     private void setIsProgress(boolean show) {
@@ -277,9 +281,9 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         notes = new ArrayList<>();
         notesAdapter = new NotesAdapter(notes, (foo) -> {
-            this.updateToolBarTitle();
+            this.updateToolBar();
             return null;
-        });
+        }, getApplicationContext());
         binding.recyclerViewNotes.setAdapter(notesAdapter);
     }
 
@@ -290,12 +294,13 @@ public class MainActivity extends AppCompatActivity {
         setDeleteActionVisible = (show) -> {
             if (menu != null) {
                 menu.findItem(R.id.optionDelete).setVisible(show);
+                menu.findItem(R.id.optionLogOut).setVisible(!show);
                 assert binding != null;
-                notesAdapter.setDeleteActionVisible(show);
+                notesAdapter.setIsDeleteActionVisible(show);
             }
             return null;
         };
-        notesAdapter.setSetDeleteActionVisible(setDeleteActionVisible);
+        notesAdapter.setSetDeleteActionVisibleInMainCallback(setDeleteActionVisible);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -305,7 +310,6 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case (R.id.optionDelete):
                 notesAdapter.deleteAllSelectedItems();
-                //loadUserNotes();
                 return true;
             case (R.id.optionLogOut):
                 FirebaseUtil.signOut();
@@ -318,14 +322,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void toggleSidebar() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            binding.drawerLayout.openDrawer(GravityCompat.START);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            toggleSidebar();
+//            binding.drawerLayout.closeDrawer(GravityCompat.START);
         } else if (notesAdapter.getDeleteActionVisible()) {
             setDeleteActionVisible.apply(false);
             notesAdapter.removeAllSelections(true);
-            updateToolBarTitle();
+            updateToolBar();
         } else {
             super.onBackPressed();
         }

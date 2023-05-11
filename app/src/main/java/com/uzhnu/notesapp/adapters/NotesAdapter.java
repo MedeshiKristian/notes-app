@@ -1,6 +1,8 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.activities.EditNoteActivity;
 import com.uzhnu.notesapp.databinding.ItemNotesBinding;
 import com.uzhnu.notesapp.models.Note;
 import com.uzhnu.notesapp.utils.Constants;
@@ -27,19 +30,21 @@ import java.util.function.Function;
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private static final int TEXT_LIMIT = 45;
 
+    private Context context;
+
     private final List<Note> notes;
 
-    private Function<Boolean, Void> setDeleteActionVisible;
+    private Function<Boolean, Void> setDeleteActionVisibleInMainCallback;
     private Boolean isDeleteActionVisible;
     private SparseBooleanArray mSelectedItems;
-    private Function<Void, Void> updateToolBarTitle;
-
+    private final Function<Void, Void> updateToolBar;
     private RecyclerView recyclerView;
 
-    public NotesAdapter(List<Note> notes, Function<Void, Void> updateToolBarTitle) {
+    public NotesAdapter(List<Note> notes, Function<Void, Void> updateToolBar, Context context) {
         this.notes = notes;
-        this.updateToolBarTitle = updateToolBarTitle;
+        this.updateToolBar = updateToolBar;
         isDeleteActionVisible = false;
+        this.context = context;
     }
 
     @NonNull
@@ -67,11 +72,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 toggleSelection(holder, position);
             } else {
                 // Edit note
+                Intent intent = new Intent(context, EditNoteActivity.class);
+                intent.putExtra(Constants.KEY_NOTE, notes.get(position));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
             }
         });
 
         holder.itemView.setOnLongClickListener(view -> {
-            setDeleteActionVisible.apply(true);
+            setDeleteActionVisibleInMainCallback.apply(true);
             toggleSelection(holder, position);
             return true;
         });
@@ -84,14 +93,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
     }
 
-    public void removeAllSelections(boolean clearSelectedItems) {
+    public void removeAllSelections(boolean clearSelections) {
         if (recyclerView != null) {
             for (int i = 0; i < notes.size(); i++) {
                 if (mSelectedItems.get(i)) {
                     removeSelectionAt(i);
                 }
             }
-            if (clearSelectedItems) {
+            if (clearSelections) {
                 mSelectedItems.clear();
             }
         }
@@ -100,13 +109,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     @SuppressLint("NotifyDataSetChanged")
     public void deleteAllSelectedItems() {
         if (recyclerView != null) {
-            setDeleteActionVisible.apply(false);
+            setDeleteActionVisibleInMainCallback.apply(false);
             removeAllSelections(false);
             Log.i(Constants.TAG, Integer.toString(notes.size()));
             for (int i = notes.size() - 1; i >= 0; i--) {
                 if (mSelectedItems.get(i)) {
                     int finalI = i;
-                    FirebaseUtil.deleteNote(notes.get(i))
+                    FirebaseUtil.deleteUserNote(notes.get(i))
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     mSelectedItems.delete(finalI);
@@ -135,11 +144,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             mSelectedItems.put(position, true);
             holder.selectItem();
         } else {
-            Log.i(Constants.TAG, "remove item called");
             mSelectedItems.delete(position);
+            if (mSelectedItems.size() == 0) {
+                setDeleteActionVisibleInMainCallback.apply(false);
+            }
             holder.removeSelection();
         }
-        updateToolBarTitle.apply(null);
+        updateToolBar.apply(null);
     }
 
     public int getCountSelectedItems() {
@@ -155,12 +166,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return isDeleteActionVisible;
     }
 
-    public void setDeleteActionVisible(Boolean deleteActionVisible) {
+    public void setIsDeleteActionVisible(Boolean deleteActionVisible) {
         isDeleteActionVisible = deleteActionVisible;
     }
 
-    public void setSetDeleteActionVisible(Function<Boolean, Void> setDeleteActionVisible) {
-        this.setDeleteActionVisible = setDeleteActionVisible;
+    public void setSetDeleteActionVisibleInMainCallback(Function<Boolean, Void> setDeleteActionVisibleInMainCallback) {
+        this.setDeleteActionVisibleInMainCallback = setDeleteActionVisibleInMainCallback;
     }
 
     static class NotesViewHolder extends RecyclerView.ViewHolder {

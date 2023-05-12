@@ -45,7 +45,7 @@
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/circular_progress_indicator"
+            android:id="@+id/circular_progress_indicator_notes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:contentDescription="Add note button"
+            android:contentDescription="Add noteModel button"
             android:tint="@color/white"
             app:backgroundTint="@color/primary"
             app:srcCompat="@drawable/ic_baseline_add_24"
@@ -77,7 +77,6 @@
         android:layout_gravity="start">
 
         <LinearLayout
-            android:id="@+id/layoutSidebar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/secondary"
@@ -88,6 +87,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/_5sdp"
                 android:background="@color/primary"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/_5sdp">
@@ -110,7 +110,7 @@
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginTop="@dimen/_5sdp"
                     android:textColor="@color/primary_text"
-                    android:textSize="@dimen/_12sdp"
+                    android:textSize="@dimen/_12ssp"
                     android:textStyle="bold" />
 
                 <com.google.android.material.textview.MaterialTextView
@@ -119,9 +119,61 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/_20sdp"
                     android:layout_marginBottom="@dimen/_10sdp"
-                    android:textColor="@color/md_blue_grey_100" />
+                    android:textColor="@color/greyColor" />
 
             </LinearLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:text="Categories"
+                android:textColor="@color/secondary_text"
+                android:textSize="@dimen/_18ssp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCategories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+            <!--<com.google.android.material.textview.MaterialTextView
+                android:id="@+id/textViewAddCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_5sdp"
+                android:padding="@dimen/_5sdp"
+                android:visibility="visible"
+                android:text="Add category" />-->
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/text_view_add_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_5sdp"
+                android:layout_marginLeft="@dimen/_20sdp"
+                android:text="Add category"
+                android:textColor="@color/secondary_text"
+                android:textSize="@dimen/_14ssp" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/circular_progress_indicator_categories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:indeterminate="true"
+                android:progress="0"
+                app:indicatorColor="@color/primary_light"
+                app:indicatorSize="@dimen/_25sdp"
+                app:trackColor="@color/primary"
+                app:trackCornerRadius="10dp"
+                app:trackThickness="@dimen/_4sdp" />
         </LinearLayout>
+
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

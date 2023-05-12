@@ -20,6 +20,8 @@
     <color name="error">@color/md_red_A700</color>
     <color name="recieved_note_background">#090D16</color>
 
+    <color name="greyColor">@color/md_blue_grey_100</color>
+
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>

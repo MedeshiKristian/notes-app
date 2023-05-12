@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
-import com.uzhnu.notesapp.models.Note;
+import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
@@ -22,7 +22,7 @@ import java.util.Date;
 public class EditNoteActivity extends AppCompatActivity {
     private ActivityEditNoteBinding binding;
 
-    private Note note;
+    private NoteModel noteModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,14 +30,14 @@ public class EditNoteActivity extends AppCompatActivity {
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        this.note = getIntent().getParcelableExtra(Constants.KEY_NOTE);
+        this.noteModel = getIntent().getParcelableExtra(Constants.KEY_NOTE);
 
-        if (note != null) {
-            Log.i(Constants.TAG, note.getText());
-            Log.i(Constants.TAG, note.getDocumentId());
-            Log.i(Constants.TAG, "Creater at: " + note.getCreatedAt().toString());
-            Log.i(Constants.TAG, "Last edited: " + note.getLastEdited().toString());
-            binding.editTextNote.setText(note.getText());
+        if (noteModel != null) {
+            Log.i(Constants.TAG, noteModel.getText());
+            Log.i(Constants.TAG, noteModel.getDocumentId());
+            Log.i(Constants.TAG, "Creater at: " + noteModel.getCreatedAt().toString());
+            Log.i(Constants.TAG, "Last edited: " + noteModel.getLastEdited().toString());
+            binding.editTextNote.setText(noteModel.getText());
         }
         setSupportActionBar(binding.topAppBar);
         setListeners();
@@ -60,26 +60,26 @@ public class EditNoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case (R.id.save_note):
-                if (note == null) {
-                    Note note = new Note(binding.editTextNote.getText().toString());
-                    if (note.getText().isEmpty()) {
+                if (noteModel == null) {
+                    NoteModel noteModel = new NoteModel(binding.editTextNote.getText().toString());
+                    if (noteModel.getText().isEmpty()) {
                         onBackPressed();
                         return true;
                     }
-                    Log.i(Constants.TAG, "Save new note");
-                    FirebaseUtil.addUserNote(note)
+                    Log.i(Constants.TAG, "Save new noteModel");
+                    FirebaseUtil.addUserNote(noteModel)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     sendBroadcast(new Intent(MainActivity.FINISH_ACTIVITY));
                                     startMainActivity();
                                 } else {
-                                    AndroidUtil.showToast(getApplicationContext(), "Note saving failed");
+                                    AndroidUtil.showToast(getApplicationContext(), "NoteModel saving failed");
                                 }
                             });
                 } else {
                     Log.i(Constants.TAG, "Edit note");
                     String newText = binding.editTextNote.getText().toString();
-                    FirebaseUtil.getUserNote(note.getDocumentId())
+                    FirebaseUtil.getUserNote(noteModel.getDocumentId())
                             .update(Constants.KEY_TEXT, newText,
                                     Constants.KEY_LAST_EDITED, new Date())
                             .addOnCompleteListener(task -> {
@@ -87,7 +87,7 @@ public class EditNoteActivity extends AppCompatActivity {
                                     sendBroadcast(new Intent(MainActivity.FINISH_ACTIVITY));
                                     startMainActivity();
                                 } else {
-                                    AndroidUtil.showToast(getApplicationContext(), "Note saving failed");
+                                    AndroidUtil.showToast(getApplicationContext(), "NoteModel saving failed");
                                 }
                             });
                 }

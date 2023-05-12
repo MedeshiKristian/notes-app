@@ -32,10 +32,12 @@ import androidx.core.view.GravityCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.CategoriesAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
-import com.uzhnu.notesapp.models.Note;
-import com.uzhnu.notesapp.models.User;
+import com.uzhnu.notesapp.models.CategoryModel;
+import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
@@ -55,10 +57,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String defaultTitle = "My notes";
 
     private ActivityMainBinding binding;
-    private List<Note> notes;
+    private List<NoteModel> noteModels;
     private NotesAdapter notesAdapter;
 
-    private String encodedUserImage;
+    private List<CategoryModel> categoryModels;
+    private CategoriesAdapter categoriesAdapter;
 
     private Function<Boolean, Void> setDeleteActionVisible;
 
@@ -85,17 +88,34 @@ public class MainActivity extends AppCompatActivity {
         init();
         loadUserDetails();
         loadUserNotes();
+        loadUserCategories();
 
         setListeners();
 
         registerReceiver(broadcastReceiver, new IntentFilter(FINISH_ACTIVITY));
     }
 
+    private void init() {
+        noteModels = new ArrayList<>();
+        notesAdapter = new NotesAdapter(noteModels, (foo) -> {
+            this.updateToolBar();
+            return null;
+        }, getApplicationContext());
+        binding.recyclerViewNotes.setAdapter(notesAdapter);
+
+        categoryModels = new ArrayList<>();
+        categoriesAdapter = new CategoriesAdapter(categoryModels, categoryName -> {
+            // TODO Load notes from categoryName collection
+            return null;
+        });
+        binding.recyclerViewCategories.setAdapter(categoriesAdapter);
+    }
+
     private void updateToolBar() {
         if (binding != null) {
             if (notesAdapter == null || !notesAdapter.getDeleteActionVisible()) {
                 binding.topAppBar.setTitle(defaultTitle);
-                
+
                 ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
                         binding.drawerLayout, binding.topAppBar,
                         R.string.navigation_open, R.string.navigation_close);
@@ -137,22 +157,24 @@ public class MainActivity extends AppCompatActivity {
         binding.imageViewUser.setOnClickListener(view -> {
             showBottomSheetPickImage();
         });
+
+        binding.textViewAddCategory.setOnClickListener(view -> {
+            // TODO Open dialog with input category name
+        });
     }
 
     private void loadUserDetails() {
-        setIsProgress(true);
         FirebaseUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
-                    setIsProgress(false);
                     if (task.isSuccessful()) {
-                        User user = task.getResult().toObject(User.class);
-                        assert user != null;
-                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, user.getImage());
+                        UserModel userModel = task.getResult().toObject(UserModel.class);
+                        assert userModel != null;
+                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
                         binding.imageViewUser
-                                .setImageBitmap(ImageUtil.decodeImage(user.getImage()));
-                        binding.textViewUsername.setText(user.getUsername());
+                                .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
+                        binding.textViewUsername.setText(userModel.getUsername());
                         binding.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
-                                user.getPhoneNumber(),
+                                userModel.getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         ));
 
@@ -164,35 +186,65 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadUserNotes() {
-        setIsProgress(true);
+        setIsProgressNotes(true);
         FirebaseUtil.getCurrentUserNotes().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
-                        notes.clear();
+                        noteModels.clear();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            notes.add(FirebaseUtil.getNote(queryDocumentSnapshot));
+                            noteModels.add(FirebaseUtil.getNote(queryDocumentSnapshot));
                         }
-                        if (notes.size() > 0) {
-                            Collections.sort(notes);
+                        if (noteModels.size() > 0) {
+                            Collections.sort(noteModels);
                             notesAdapter.notifyDataSetChanged();
                             binding.recyclerViewNotes.smoothScrollToPosition(0);
-                            binding.recyclerViewNotes.setVisibility(View.VISIBLE);
                         }
                     }
-                    setIsProgress(false);
+                    setIsProgressNotes(false);
                 });
 
     }
 
-    private void setIsProgress(boolean show) {
+    @SuppressLint("NotifyDataSetChanged")
+    private void loadUserCategories() {
+        setIsProgressCategories(true);
+        FirebaseUtil.getCurrentUserCategories().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        categoryModels.clear();
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            categoryModels.add(FirebaseUtil.getCategory(queryDocumentSnapshot));
+                        }
+                        if (categoryModels.size() > 0) {
+                            categoriesAdapter.notifyDataSetChanged();
+                            binding.recyclerViewCategories.smoothScrollToPosition(0);
+                        }
+                    }
+                    setIsProgressCategories(false);
+                });
+    }
+
+    private void setIsProgressNotes(boolean show) {
         if (binding == null) return;
         if (show) {
             binding.recyclerViewNotes.setVisibility(View.GONE);
-            binding.circularProgressIndicator.show();
-            binding.circularProgressIndicator.setProgress(100, true);
+            binding.circularProgressIndicatorNotes.show();
+            binding.circularProgressIndicatorNotes.setProgress(100, true);
         } else {
-            binding.circularProgressIndicator.hide();
+            binding.circularProgressIndicatorNotes.hide();
             binding.recyclerViewNotes.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setIsProgressCategories(boolean show) {
+        if (binding == null) return;
+        if (show) {
+            binding.recyclerViewCategories.setVisibility(View.GONE);
+            binding.circularProgressIndicatorCategories.show();
+            binding.circularProgressIndicatorCategories.setProgress(100, true);
+        } else {
+            binding.circularProgressIndicatorCategories.hide();
+            binding.recyclerViewCategories.setVisibility(View.VISIBLE);
         }
     }
 
@@ -292,15 +344,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
     );
-
-    private void init() {
-        notes = new ArrayList<>();
-        notesAdapter = new NotesAdapter(notes, (foo) -> {
-            this.updateToolBar();
-            return null;
-        }, getApplicationContext());
-        binding.recyclerViewNotes.setAdapter(notesAdapter);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

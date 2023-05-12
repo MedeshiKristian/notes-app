@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Note implements Comparable<Note>, Parcelable {
+public class NoteModel implements Comparable<NoteModel>, Parcelable {
     public static final String format = "dd MMMM yyyy HH:mm:ss";
 
     private String documentId;
@@ -18,16 +18,16 @@ public class Note implements Comparable<Note>, Parcelable {
     private Date lastEdited;
     private Date createdAt;
 
-    public Note() {
+    public NoteModel() {
     }
 
-    public Note(String text) {
+    public NoteModel(String text) {
         this.text = text;
         this.createdAt = new Date();
         this.lastEdited = this.createdAt;
     }
 
-    public Note(@NonNull Parcel in) throws ParseException {
+    public NoteModel(@NonNull Parcel in) throws ParseException {
         this.text = in.readString();
         this.documentId = in.readString();
         this.createdAt = new SimpleDateFormat(format, Locale.getDefault()).parse(in.readString());
@@ -47,11 +47,11 @@ public class Note implements Comparable<Note>, Parcelable {
         parcel.writeString(new SimpleDateFormat(format, Locale.getDefault()).format(getLastEdited()));
     }
 
-    public static final Creator<Note> CREATOR = new Creator<Note>() {
+    public static final Creator<NoteModel> CREATOR = new Creator<NoteModel>() {
         @Override
-        public Note createFromParcel(Parcel in) {
+        public NoteModel createFromParcel(Parcel in) {
             try {
-                return new Note(in);
+                return new NoteModel(in);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -59,8 +59,8 @@ public class Note implements Comparable<Note>, Parcelable {
         }
 
         @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
+        public NoteModel[] newArray(int size) {
+            return new NoteModel[size];
         }
     };
 
@@ -89,8 +89,8 @@ public class Note implements Comparable<Note>, Parcelable {
     }
 
     @Override
-    public int compareTo(Note note) {
-        return note.getLastEdited().compareTo(this.getLastEdited());
+    public int compareTo(NoteModel noteModel) {
+        return noteModel.getLastEdited().compareTo(this.getLastEdited());
     }
 
     public String getDocumentId() {

@@ -28,7 +28,7 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.FullscreenPhotoActivity;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
-import com.uzhnu.notesapp.models.User;
+import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
@@ -41,7 +41,7 @@ import java.io.InputStream;
 public class LoginUsernameFragment extends Fragment {
     private FragmentLoginUsernameBinding binding;
 
-    private User user;
+    private UserModel userModel;
     private String getArgPhoneNumber;
     private String encodedImage;
 
@@ -194,14 +194,14 @@ public class LoginUsernameFragment extends Fragment {
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
-                        user = task.getResult().toObject(User.class);
-                        if (user != null) {
+                        userModel = task.getResult().toObject(UserModel.class);
+                        if (userModel != null) {
                             Log.i(Constants.TAG,
                                     "Account with this number has already been created");
-                            encodedImage = user.getImage();
+                            encodedImage = userModel.getImage();
                             binding.imageViewUser.setImageBitmap(
-                                    ImageUtil.decodeImage(user.getImage()));
-                            binding.textInputUsername.setText(user.getUsername());
+                                    ImageUtil.decodeImage(userModel.getImage()));
+                            binding.textInputUsername.setText(userModel.getUsername());
                         } else {
                             Log.i(Constants.TAG,
                                     "Account with this number has not been created yet");
@@ -225,18 +225,18 @@ public class LoginUsernameFragment extends Fragment {
 
         setIsProgress(true);
 
-        if (user != null) {
-            user.setImage(encodedImage);
-            user.setUsername(username);
+        if (userModel != null) {
+            userModel.setImage(encodedImage);
+            userModel.setUsername(username);
         } else {
-            user = new User(username, getArgPhoneNumber, encodedImage);
+            userModel = new UserModel(username, getArgPhoneNumber, encodedImage);
         }
 
-        Log.d(Constants.TAG, "Username: " + user.getUsername());
-        Log.d(Constants.TAG, "Phone number: " + user.getPhoneNumber());
-        Log.d(Constants.TAG, "Image: " + user.getImage());
+        Log.d(Constants.TAG, "Username: " + userModel.getUsername());
+        Log.d(Constants.TAG, "Phone number: " + userModel.getPhoneNumber());
+        Log.d(Constants.TAG, "Image: " + userModel.getImage());
 
-        FirebaseUtil.getCurrentUserDetails().set(user)
+        FirebaseUtil.getCurrentUserDetails().set(userModel)
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {

@@ -4,16 +4,16 @@ import androidx.annotation.NonNull;
 
 import java.util.Date;
 
-public class User {
+public class UserModel {
     private String username;
     private String phoneNumber;
     private String image;
     private Date createdAt;
 
-    public User() {
+    public UserModel() {
     }
 
-    public User(@NonNull String username, @NonNull String phoneNumber, @NonNull String image) {
+    public UserModel(@NonNull String username, @NonNull String phoneNumber, @NonNull String image) {
         this.username = username;
         this.phoneNumber = phoneNumber;
         this.image = image;
@@ -35,7 +35,7 @@ public class User {
     @NonNull
     public String getPhoneNumber() throws NullPointerException {
         if (phoneNumber == null) {
-            throw new NullPointerException("User phone number is null");
+            throw new NullPointerException("UserModel phone number is null");
         }
         return phoneNumber;
     }
@@ -47,7 +47,7 @@ public class User {
     @NonNull
     public String getImage() throws NullPointerException {
         if (image == null) {
-            throw new NullPointerException("User image is null");
+            throw new NullPointerException("UserModel image is null");
         }
         return image;
     }
@@ -58,7 +58,7 @@ public class User {
 
     public Date getCreatedAt() throws NullPointerException {
         if (this.createdAt == null) {
-            throw new NullPointerException("User timestamp is null");
+            throw new NullPointerException("UserModel timestamp is null");
         }
         return createdAt;
     }

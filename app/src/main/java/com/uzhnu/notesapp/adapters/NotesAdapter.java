@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.EditNoteActivity;
-import com.uzhnu.notesapp.databinding.ItemNotesBinding;
-import com.uzhnu.notesapp.models.Note;
+import com.uzhnu.notesapp.databinding.ItemNoteBinding;
+import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 
@@ -30,9 +30,9 @@ import java.util.function.Function;
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private static final int TEXT_LIMIT = 45;
 
-    private Context context;
+    private final Context context;
 
-    private final List<Note> notes;
+    private final List<NoteModel> noteModels;
 
     private Function<Boolean, Void> setDeleteActionVisibleInMainCallback;
     private Boolean isDeleteActionVisible;
@@ -40,8 +40,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     private final Function<Void, Void> updateToolBar;
     private RecyclerView recyclerView;
 
-    public NotesAdapter(List<Note> notes, Function<Void, Void> updateToolBar, Context context) {
-        this.notes = notes;
+    public NotesAdapter(List<NoteModel> noteModels, Function<Void, Void> updateToolBar, Context context) {
+        this.noteModels = noteModels;
         this.updateToolBar = updateToolBar;
         isDeleteActionVisible = false;
         this.context = context;
@@ -51,7 +51,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new NotesViewHolder(
-                ItemNotesBinding.inflate(
+                ItemNoteBinding.inflate(
                         LayoutInflater.from(parent.getContext()),
                         parent,
                         false
@@ -61,7 +61,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
-        holder.setData(notes.get(position));
+        holder.setData(noteModels.get(position));
 
         mSelectedItems = new SparseBooleanArray();
 
@@ -73,7 +73,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             } else {
                 // Edit note
                 Intent intent = new Intent(context, EditNoteActivity.class);
-                intent.putExtra(Constants.KEY_NOTE, notes.get(position));
+                intent.putExtra(Constants.KEY_NOTE, noteModels.get(position));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
@@ -86,6 +86,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         });
     }
 
+    @Override
+    public int getItemCount() {
+        return noteModels.size();
+    }
+
     private void removeSelectionAt(int position) {
         RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
         if (holder instanceof NotesViewHolder) {
@@ -95,7 +100,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     public void removeAllSelections(boolean clearSelections) {
         if (recyclerView != null) {
-            for (int i = 0; i < notes.size(); i++) {
+            for (int i = 0; i < noteModels.size(); i++) {
                 if (mSelectedItems.get(i)) {
                     removeSelectionAt(i);
                 }
@@ -110,16 +115,17 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void deleteAllSelectedItems() {
         if (recyclerView != null) {
             setDeleteActionVisibleInMainCallback.apply(false);
+            updateToolBar.apply(null);
             removeAllSelections(false);
-            Log.i(Constants.TAG, Integer.toString(notes.size()));
-            for (int i = notes.size() - 1; i >= 0; i--) {
+            Log.i(Constants.TAG, Integer.toString(noteModels.size()));
+            for (int i = noteModels.size() - 1; i >= 0; i--) {
                 if (mSelectedItems.get(i)) {
                     int finalI = i;
-                    FirebaseUtil.deleteUserNote(notes.get(i))
+                    FirebaseUtil.deleteUserNote(noteModels.get(i))
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     mSelectedItems.delete(finalI);
-                                    notes.remove(finalI);
+                                    noteModels.remove(finalI);
                                     notifyDataSetChanged();
                                 }
                             });
@@ -157,11 +163,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return mSelectedItems.size();
     }
 
-    @Override
-    public int getItemCount() {
-        return notes.size();
-    }
-
     public Boolean getDeleteActionVisible() {
         return isDeleteActionVisible;
     }
@@ -174,19 +175,19 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.setDeleteActionVisibleInMainCallback = setDeleteActionVisibleInMainCallback;
     }
 
-    static class NotesViewHolder extends RecyclerView.ViewHolder {
-        private ItemNotesBinding binding;
+    public static class NotesViewHolder extends RecyclerView.ViewHolder {
+        private final ItemNoteBinding binding;
 
-        public NotesViewHolder(@NonNull ItemNotesBinding itemNotesBinding) {
-            super(itemNotesBinding.getRoot());
-            binding = itemNotesBinding;
+        public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding) {
+            super(itemNoteBinding.getRoot());
+            binding = itemNoteBinding;
         }
 
-        private void setData(@NonNull Note note) {
-            binding.textViewNoteTitle.setText(StringUtils.abbreviate(note.getText(), TEXT_LIMIT));
+        private void setData(@NonNull NoteModel noteModel) {
+            binding.textViewNoteTitle.setText(StringUtils.abbreviate(noteModel.getText(), TEXT_LIMIT));
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
-            binding.textViewLastEdited.setText(simpleDateFormat.format(note.getLastEdited()));
+            binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
 
             setListeners();
         }

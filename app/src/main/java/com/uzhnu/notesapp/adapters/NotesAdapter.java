@@ -126,7 +126,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                                 if (task.isSuccessful()) {
                                     mSelectedItems.delete(finalI);
                                     noteModels.remove(finalI);
-                                    notifyDataSetChanged();
+                                    notifyItemRemoved(finalI);
                                 }
                             });
                 }

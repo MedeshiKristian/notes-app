@@ -3,12 +3,12 @@ package com.uzhnu.notesapp.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,10 +31,10 @@ import androidx.core.view.GravityCompat;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
-import com.uzhnu.notesapp.adapters.CategoriesAdapter;
+import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
-import com.uzhnu.notesapp.models.CategoryModel;
+import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.Constants;
@@ -44,7 +43,6 @@ import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -54,26 +52,93 @@ import java.util.function.Function;
 public class MainActivity extends AppCompatActivity {
     public static final String FINISH_ACTIVITY = "finishMainActivity";
 
-    private static final String defaultTitle = "My notes";
-
     private ActivityMainBinding binding;
+    
     private List<NoteModel> noteModels;
     private NotesAdapter notesAdapter;
 
-    private List<CategoryModel> categoryModels;
-    private CategoriesAdapter categoriesAdapter;
+    private List<FolderModel> folderModels;
+    private FoldersAdapter foldersAdapter;
 
     private Function<Boolean, Void> setDeleteActionVisible;
 
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, @NonNull Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(FINISH_ACTIVITY)) {
-                finish();
+    private BroadcastReceiver broadcastReceiver;
+    private ActivityResultLauncher<Intent> pickImageFromGallery;
+    private ActivityResultLauncher<String> requestCameraPermission;
+    private ActivityResultLauncher<String> requestWriteStorePermission;
+
+    Uri camUri;
+    private ActivityResultLauncher<Intent> pickImageFromCamera;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, @NonNull Intent intent) {
+                String action = intent.getAction();
+                if (action.equals(FINISH_ACTIVITY)) {
+                    finish();
+                }
             }
-        }
-    };
+        };
+        pickImageFromGallery = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                ImageUtil.getActivityResultCallbackForGallery(
+                        getApplicationContext(), binding.header.imageViewUser
+                )
+        );
+        pickImageFromCamera = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        try {
+                            Bitmap bitmap = ImageUtil.getBitmapFromUri(getApplicationContext(), camUri);
+                            assert bitmap != null;
+                            binding.header.imageViewUser.setImageBitmap(bitmap);
+                            String encodedImage = ImageUtil.encodeImage(bitmap);
+                            FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_IMAGE, encodedImage);
+                            PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
+
+                        } catch (FileNotFoundException exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                }
+        );
+        requestCameraPermission = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                result -> {
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        requestCameraPermission.launch(Manifest.permission.WRITE_APN_SETTINGS);
+                    } else if (result) {
+                        launchCamera();
+                    }
+                }
+        );
+        requestWriteStorePermission = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                result -> {
+                    if (checkSelfPermission(Manifest.permission.CAMERA) !=
+                            PackageManager.PERMISSION_GRANTED) {
+                        requestCameraPermission.launch(Manifest.permission.CAMERA);
+                    } else if (result) {
+                        launchCamera();
+                    }
+                }
+        );
+    }
+
+    private void launchCamera() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
+        camUri = getApplicationContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, camUri);
+        pickImageFromCamera.launch(cameraIntent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         init();
         loadUserDetails();
         loadUserNotes();
-        loadUserCategories();
+        loadUserFolders();
 
         setListeners();
 
@@ -103,22 +168,29 @@ public class MainActivity extends AppCompatActivity {
         }, getApplicationContext());
         binding.recyclerViewNotes.setAdapter(notesAdapter);
 
-        categoryModels = new ArrayList<>();
-        categoriesAdapter = new CategoriesAdapter(categoryModels, categoryName -> {
-            // TODO Load notes from categoryName collection
+        folderModels = new ArrayList<>();
+        foldersAdapter = new FoldersAdapter(folderModels, folderName -> {
+            // TODO Load notes from folderName collection
             return null;
         });
-        binding.recyclerViewCategories.setAdapter(categoriesAdapter);
+        binding.recyclerViewFolders.setAdapter(foldersAdapter);
     }
 
     private void updateToolBar() {
         if (binding != null) {
             if (notesAdapter == null || !notesAdapter.getDeleteActionVisible()) {
-                binding.topAppBar.setTitle(defaultTitle);
+                binding.topAppBar.setTitle(Constants.KEY_COLLECTION_FOLDERS_DEFAULT);
 
                 ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
                         binding.drawerLayout, binding.topAppBar,
-                        R.string.navigation_open, R.string.navigation_close);
+                        R.string.navigation_open, R.string.navigation_close) {
+                    @Override
+                    public void onDrawerSlide(View drawerView, float slideOffset) {
+                        super.onDrawerSlide(drawerView, slideOffset);
+                        float moveFactor = binding.navigationView.getWidth() * slideOffset;
+                        binding.coordinatorContent.setTranslationX(moveFactor);
+                    }
+                };
 
                 binding.drawerLayout.addDrawerListener(toggle);
 
@@ -126,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
 
                 binding.topAppBar.setNavigationOnClickListener(view -> {
                     toggleSidebar();
-//                    binding.drawerLayout.openDrawer(GravityCompat.START);
                 });
             } else {
                 int countSelectedItems = notesAdapter.getCountSelectedItems();
@@ -137,9 +208,7 @@ public class MainActivity extends AppCompatActivity {
                                     R.drawable.ic_baseline_arrow_back_24
                             )
                     );
-                    binding.topAppBar.setNavigationOnClickListener(view -> {
-                        onBackPressed();
-                    });
+                    binding.topAppBar.setNavigationOnClickListener(view -> onBackPressed());
                     binding.topAppBar.setTitle("1 item selected");
                 } else {
                     binding.topAppBar.setTitle(countSelectedItems + " items selected");
@@ -153,14 +222,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
             startActivity(intent);
         });
-
-        binding.imageViewUser.setOnClickListener(view -> {
-            showBottomSheetPickImage();
-        });
-
-        binding.textViewAddCategory.setOnClickListener(view -> {
-            // TODO Open dialog with input category name
-        });
+        binding.header.imageViewUser.setOnClickListener(view -> showBottomSheetPickImage());
     }
 
     private void loadUserDetails() {
@@ -170,14 +232,13 @@ public class MainActivity extends AppCompatActivity {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
                         assert userModel != null;
                         PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
-                        binding.imageViewUser
+                        binding.header.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
-                        binding.textViewUsername.setText(userModel.getUsername());
-                        binding.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
+                        binding.header.textViewUsername.setText(userModel.getUsername());
+                        binding.header.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
                                 userModel.getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         ));
-
                     } else {
                         Log.e(Constants.TAG, "Task for getting user image failed");
                     }
@@ -206,21 +267,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void loadUserCategories() {
-        setIsProgressCategories(true);
-        FirebaseUtil.getCurrentUserCategories().get()
+    private void loadUserFolders() {
+        setIsProgressFolders(true);
+        FirebaseUtil.getCurrentUserFolders().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
-                        categoryModels.clear();
+                        folderModels.clear();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            categoryModels.add(FirebaseUtil.getCategory(queryDocumentSnapshot));
+                            folderModels.add(FirebaseUtil.getFolder(queryDocumentSnapshot));
                         }
-                        if (categoryModels.size() > 0) {
-                            categoriesAdapter.notifyDataSetChanged();
-                            binding.recyclerViewCategories.smoothScrollToPosition(0);
+                        if (folderModels.size() > 0) {
+                            Log.i(Constants.TAG, "folders are not empty");
+                            foldersAdapter.notifyDataSetChanged();
+                            binding.recyclerViewFolders.smoothScrollToPosition(0);
                         }
                     }
-                    setIsProgressCategories(false);
+                    setIsProgressFolders(false);
                 });
     }
 
@@ -236,40 +298,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setIsProgressCategories(boolean show) {
+    private void setIsProgressFolders(boolean show) {
         if (binding == null) return;
         if (show) {
-            binding.recyclerViewCategories.setVisibility(View.GONE);
-            binding.circularProgressIndicatorCategories.show();
-            binding.circularProgressIndicatorCategories.setProgress(100, true);
+            binding.recyclerViewFolders.setVisibility(View.GONE);
+            binding.circularProgressIndicatorFolders.show();
+            binding.circularProgressIndicatorFolders.setProgress(100, true);
         } else {
-            binding.circularProgressIndicatorCategories.hide();
-            binding.recyclerViewCategories.setVisibility(View.VISIBLE);
+            binding.circularProgressIndicatorFolders.hide();
+            binding.recyclerViewFolders.setVisibility(View.VISIBLE);
         }
     }
 
     private void showBottomSheetPickImage() {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_pick_image);
+        bottomSheetDialog.show();
 
         LinearLayout viewPictureLayout = bottomSheetDialog.findViewById(R.id.view_picture_linear_layout);
         LinearLayout cameraLayout = bottomSheetDialog.findViewById(R.id.camera_linear_layout);
         LinearLayout galleryLayout = bottomSheetDialog.findViewById(R.id.gallery_linear_layout);
 
-        bottomSheetDialog.show();
 
         assert cameraLayout != null;
         cameraLayout.setOnClickListener(view -> {
-            if (checkSelfPermission(Manifest.permission.CAMERA) ==
+            if (checkSelfPermission(Manifest.permission.CAMERA) !=
                     PackageManager.PERMISSION_GRANTED) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                pickImageFromCamera.launch(intent);
-            } else {
                 requestCameraPermission.launch(Manifest.permission.CAMERA);
+            } else if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                requestWriteStorePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            } else {
+                launchCamera();
             }
             bottomSheetDialog.hide();
         });
-
 
         assert galleryLayout != null;
         galleryLayout.setOnClickListener(view -> {
@@ -286,64 +349,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
-    private final ActivityResultLauncher<Intent> pickImageFromCamera = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        Bundle bundle = result.getData().getExtras();
-                        Bitmap bitmap = (Bitmap) bundle.get("data");
-                        binding.imageViewUser.setImageBitmap(bitmap);
-                        String encodedImage = ImageUtil.encodeImage(bitmap);
-                        FirebaseUtil.getCurrentUserDetails()
-                                .update(Constants.KEY_IMAGE, encodedImage);
-                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
-                    }
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<String> requestCameraPermission = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            result -> {
-                if (result) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    pickImageFromCamera.launch(intent);
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<Intent> pickImageFromGallery = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        // TODO NullPointerException
-                        try {
-                            InputStream inputStream = getContentResolver().openInputStream(imageUri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                            if (bitmap != null) {
-                                binding.imageViewUser.setImageBitmap(bitmap);
-                                String encodedImage = ImageUtil.encodeImage(bitmap);
-                                FirebaseUtil.getCurrentUserDetails()
-                                        .update(Constants.KEY_IMAGE, encodedImage);
-                                PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
-                            } else {
-                                Toast.makeText(MainActivity.this,
-                                        "Please choose a valid image",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (FileNotFoundException exception) {
-                            exception.printStackTrace();
-                            Toast.makeText(MainActivity.this,
-                                    "Please choose a valid file", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            }
-    );
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -392,7 +397,6 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             toggleSidebar();
-//            binding.drawerLayout.closeDrawer(GravityCompat.START);
         } else if (notesAdapter.getDeleteActionVisible()) {
             setDeleteActionVisible.apply(false);
             notesAdapter.removeAllSelections(true);

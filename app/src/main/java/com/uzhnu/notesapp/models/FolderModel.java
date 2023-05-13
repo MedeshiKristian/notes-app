@@ -1,12 +1,12 @@
 package com.uzhnu.notesapp.models;
 
-public class CategoryModel {
+public class FolderModel {
     private String name;
 
-    public CategoryModel() {
+    public FolderModel() {
     }
 
-    public CategoryModel(String name) {
+    public FolderModel(String name) {
         this.name = name;
     }
 

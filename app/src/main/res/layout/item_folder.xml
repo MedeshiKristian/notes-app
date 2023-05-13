@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/_15sdp"
+    android:layout_marginBottom="@dimen/_3sdp"
+    android:orientation="horizontal"
+    android:padding="@dimen/_3sdp">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/text_view_folder_name"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="@string/folders_title"
+        android:textColor="@color/secondary_text"
+        android:textSize="@dimen/_16ssp"
+        android:drawablePadding="@dimen/_20sdp"
+        app:drawableLeftCompat="@drawable/ic_outline_folder_24"
+        app:drawableTint="@color/primary" />
+
+</LinearLayout>

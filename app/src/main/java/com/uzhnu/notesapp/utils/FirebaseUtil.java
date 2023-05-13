@@ -8,7 +8,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.uzhnu.notesapp.models.CategoryModel;
+import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static CategoryModel getCategory(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
-        CategoryModel categoryMode = new CategoryModel();
+    public static FolderModel getFolder(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+        FolderModel categoryMode = new FolderModel();
         categoryMode.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
         return categoryMode;
     }
@@ -58,7 +58,7 @@ public class FirebaseUtil {
     @NonNull
     public static CollectionReference getCurrentUserNotes() {
         return getCurrentUserDetails()
-                .collection(Constants.KEY_COLLECTION_NOTES_DEFAULT);
+                .collection(Constants.KEY_COLLECTION_FOLDERS_DEFAULT);
     }
 
     @NonNull
@@ -82,8 +82,8 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static CollectionReference  getCurrentUserCategories() {
+    public static CollectionReference  getCurrentUserFolders() {
         return FirebaseUtil.getCurrentUserDetails()
-                .collection(Constants.KEY_COLLECTION_CATEGORIES_NAMES);
+                .collection(Constants.KEY_COLLECTION_FOLDERS_NAMES);
     }
 }

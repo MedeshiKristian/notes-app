@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:contentDescription="Add noteModel button"
+            android:contentDescription="Add note button"
             android:tint="@color/white"
             app:backgroundTint="@color/primary"
             app:srcCompat="@drawable/ic_baseline_add_24"
@@ -72,9 +72,11 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="start">
+        android:layout_gravity="start"
+        app:layout_behavior="com.google.android.material.appbar.ScrollingViewBehavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -82,86 +84,33 @@
             android:background="@color/secondary"
             android:orientation="vertical">
 
-            <!--            <include layout="@layout/nav_header_main" />-->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/_5sdp"
-                android:background="@color/primary"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/_5sdp">
-
-                <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/image_view_user"
-                    android:layout_width="@dimen/_65sdp"
-                    android:layout_height="@dimen/_65sdp"
-                    android:layout_marginStart="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_30sdp"
-                    android:layout_marginBottom="@dimen/_5sdp"
-                    android:contentDescription="User image"
-                    android:scaleType="centerCrop"
-                    app:riv_oval="true" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/text_view_username"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_20sdp"
-                    android:layout_marginTop="@dimen/_5sdp"
-                    android:textColor="@color/primary_text"
-                    android:textSize="@dimen/_12ssp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/text_view_phone_number"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_20sdp"
-                    android:layout_marginBottom="@dimen/_10sdp"
-                    android:textColor="@color/greyColor" />
-
-            </LinearLayout>
+            <include
+                android:id="@+id/header"
+                layout="@layout/navigation_header" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginBottom="@dimen/_5sdp"
-                android:text="Categories"
+                android:layout_marginBottom="@dimen/_15sdp"
+                android:text="Folders"
                 android:textColor="@color/secondary_text"
-                android:textSize="@dimen/_18ssp" />
+                android:textSize="@dimen/_14ssp" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewCategories"
+                android:id="@+id/recycler_view_folders"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                android:overScrollMode="never"
                 android:visibility="gone"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
-            <!--<com.google.android.material.textview.MaterialTextView
-                android:id="@+id/textViewAddCategory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_5sdp"
-                android:padding="@dimen/_5sdp"
-                android:visibility="visible"
-                android:text="Add category" />-->
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/text_view_add_category"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_5sdp"
-                android:layout_marginLeft="@dimen/_20sdp"
-                android:text="Add category"
-                android:textColor="@color/secondary_text"
-                android:textSize="@dimen/_14ssp" />
-
             <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/circular_progress_indicator_categories"
+                android:id="@+id/circular_progress_indicator_folders"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -174,6 +123,5 @@
                 app:trackCornerRadius="10dp"
                 app:trackThickness="@dimen/_4sdp" />
         </LinearLayout>
-
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

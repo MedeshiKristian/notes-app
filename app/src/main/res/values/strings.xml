@@ -4,5 +4,7 @@
     <string name="item_title">Item Title</string>
     <string name="navigation_open">Open navigation sidebar</string>
     <string name="navigation_close">Close navigation sidebar</string>
-    <string name="save_note">Save notes</string>
+    <string name="save_note">Save note</string>
+    <string name="folders_title">Folders</string>
+<!--    <string name="default_folder">Notes</string>-->
 </resources>

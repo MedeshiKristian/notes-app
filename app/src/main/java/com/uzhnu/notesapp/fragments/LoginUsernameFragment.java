@@ -1,12 +1,10 @@
 package com.uzhnu.notesapp.fragments;
 
-import static android.app.Activity.RESULT_OK;
-
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -27,6 +24,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.FullscreenPhotoActivity;
 import com.uzhnu.notesapp.activities.MainActivity;
+import com.uzhnu.notesapp.callbacks.CameraResultCallback;
+import com.uzhnu.notesapp.callbacks.GalleryResultCallback;
+import com.uzhnu.notesapp.callbacks.RequestCameraPermissionsCallback;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
@@ -35,8 +35,7 @@ import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.util.Arrays;
 
 public class LoginUsernameFragment extends Fragment {
     private FragmentLoginUsernameBinding binding;
@@ -44,6 +43,13 @@ public class LoginUsernameFragment extends Fragment {
     private UserModel userModel;
     private String getArgPhoneNumber;
     private String encodedImage;
+
+    private ActivityResultLauncher<Intent> pickImageFromGallery;
+    private ActivityResultLauncher<Intent> pickImageFromCamera;
+    private ActivityResultLauncher<String[]> requestCameraPermissions;
+
+    private Uri cameraUri;
+    private ImageUtil imageUtil;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +64,23 @@ public class LoginUsernameFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentLoginUsernameBinding.inflate(inflater, container, false);
+        pickImageFromGallery = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new GalleryResultCallback(getContext(), binding.imageViewUser));
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
+        cameraUri = requireActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        pickImageFromCamera = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new CameraResultCallback(getContext(), binding.imageViewUser, cameraUri)
+        );
+        requestCameraPermissions = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                new RequestCameraPermissionsCallback(imageUtil)
+        );
+        imageUtil = new ImageUtil(requireActivity(), pickImageFromGallery,
+                pickImageFromCamera, requestCameraPermissions, cameraUri);
         return binding.getRoot();
     }
 
@@ -74,7 +97,7 @@ public class LoginUsernameFragment extends Fragment {
     private void setListeners() {
         binding.buttonLetMeIn.setOnClickListener(view1 -> setUser());
 
-        binding.imageViewUser.setOnClickListener(view1 -> showBottomSheetPickImage());
+        binding.imageViewUser.setOnClickListener(view1 -> imageUtil.showBottomSheetPickImage());
     }
 
     private void setIsProgress(boolean show) {
@@ -87,106 +110,6 @@ public class LoginUsernameFragment extends Fragment {
             binding.buttonLetMeIn.setEnabled(true);
         }
     }
-
-    private void showBottomSheetPickImage() {
-        if (getContext() != null) {
-            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
-            bottomSheetDialog.setContentView(R.layout.bottom_sheet_pick_image);
-
-            LinearLayout viewPictureLayout = bottomSheetDialog.findViewById(R.id.view_picture_linear_layout);
-            LinearLayout cameraLayout = bottomSheetDialog.findViewById(R.id.camera_linear_layout);
-            LinearLayout galleryLayout = bottomSheetDialog.findViewById(R.id.gallery_linear_layout);
-
-            bottomSheetDialog.show();
-
-            assert cameraLayout != null;
-            cameraLayout.setOnClickListener(view -> {
-                // TODO NullPointerException
-                if (getContext().checkSelfPermission(Manifest.permission.CAMERA) ==
-                        PackageManager.PERMISSION_GRANTED) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    pickImageFromCamera.launch(intent);
-                } else {
-                    requestCameraPermission.launch(Manifest.permission.CAMERA);
-                }
-                bottomSheetDialog.hide();
-            });
-
-
-            assert galleryLayout != null;
-            galleryLayout.setOnClickListener(view -> {
-                Intent intent =
-                        new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                pickImageFromGallery.launch(intent);
-                bottomSheetDialog.hide();
-            });
-
-            assert viewPictureLayout != null;
-            viewPictureLayout.setOnClickListener(view -> {
-                if (encodedImage != null) {
-                    Intent intent = new Intent(getContext(), FullscreenPhotoActivity.class);
-                    PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
-                    startActivity(intent);
-                } else {
-                    AndroidUtil.showToast(getContext(), "Please choose an image");
-                }
-            });
-        }
-    }
-
-    private final ActivityResultLauncher<Intent> pickImageFromCamera = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        Bundle bundle = result.getData().getExtras();
-                        Bitmap bitmap = (Bitmap) bundle.get("data");
-                        binding.imageViewUser.setImageBitmap(bitmap);
-                        encodedImage = ImageUtil.encodeImage(bitmap);
-                    }
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<String> requestCameraPermission = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            result -> {
-                if (result) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    pickImageFromCamera.launch(intent);
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<Intent> pickImageFromGallery = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        // TODO NullPointerException
-                        try {
-                            InputStream inputStream =
-                                    getContext().getContentResolver().openInputStream(imageUri);
-                            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                            if (bitmap != null) {
-                                binding.imageViewUser.setImageBitmap(bitmap);
-                                encodedImage = ImageUtil.encodeImage(bitmap);
-                            } else {
-                                Toast.makeText(getContext(),
-                                        "Please choose a valid image",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (FileNotFoundException exception) {
-                            exception.printStackTrace();
-                            Toast.makeText(getContext(),
-                                    "Please choose a valid file", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            }
-    );
 
     private void getUser() {
         setIsProgress(true);
@@ -202,6 +125,7 @@ public class LoginUsernameFragment extends Fragment {
                             binding.imageViewUser.setImageBitmap(
                                     ImageUtil.decodeImage(userModel.getImage()));
                             binding.textInputUsername.setText(userModel.getUsername());
+                            PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
                         } else {
                             Log.i(Constants.TAG,
                                     "Account with this number has not been created yet");
@@ -231,10 +155,6 @@ public class LoginUsernameFragment extends Fragment {
         } else {
             userModel = new UserModel(username, getArgPhoneNumber, encodedImage);
         }
-
-        Log.d(Constants.TAG, "Username: " + userModel.getUsername());
-        Log.d(Constants.TAG, "Phone number: " + userModel.getPhoneNumber());
-        Log.d(Constants.TAG, "Image: " + userModel.getImage());
 
         FirebaseUtil.getCurrentUserDetails().set(userModel)
                 .addOnCompleteListener(task -> {

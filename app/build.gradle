@@ -60,6 +60,9 @@ dependencies {
     // Scalable photo view
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 
+    // Event bus
+    implementation 'org.greenrobot:eventbus:3.3.1'
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
 

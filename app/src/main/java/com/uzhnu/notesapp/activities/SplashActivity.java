@@ -21,6 +21,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         if (!FirebaseUtil.isLoggedIn()) {
+            Log.i(Constants.TAG, "User is not logged in");
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                     Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -42,7 +43,7 @@ public class SplashActivity extends AppCompatActivity {
                     if (task.getResult().toObject(UserModel.class) == null) {
                         // Lack of user details in database
                         FirebaseUtil.signOut();
-                        Log.i(Constants.TAG, "UserModel is not logged in");
+                        Log.i(Constants.TAG, "UserModel logged in but has not set picture or username yet");
                         Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_CLEAR_TASK);

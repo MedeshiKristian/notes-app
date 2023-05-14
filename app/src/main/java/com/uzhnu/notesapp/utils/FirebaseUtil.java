@@ -11,6 +11,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static NoteModel getNote(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+    public static NoteModel getNoteFromDocument(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
         NoteModel noteModel = new NoteModel();
         noteModel.setText(queryDocumentSnapshot.getString(Constants.KEY_TEXT));
         noteModel.setLastEdited(queryDocumentSnapshot.getDate(Constants.KEY_LAST_EDITED));
@@ -49,16 +50,20 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static FolderModel getFolder(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+    public static FolderModel getFolderFromDocument(
+            @NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
         FolderModel categoryMode = new FolderModel();
         categoryMode.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
         return categoryMode;
     }
 
+    private static String getCurrentFolder() {
+        return (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER);
+    }
+
     @NonNull
-    public static CollectionReference getCurrentUserNotes() {
-        return getCurrentUserDetails()
-                .collection(Constants.KEY_COLLECTION_FOLDERS_DEFAULT);
+    public static CollectionReference getNotes() {
+        return FirebaseUtil.getCurrentUserDetails().collection(getCurrentFolder());
     }
 
     @NonNull
@@ -67,22 +72,28 @@ public class FirebaseUtil {
         objectMap.put(Constants.KEY_TEXT, noteModel.getText());
         objectMap.put(Constants.KEY_LAST_EDITED, noteModel.getLastEdited());
         objectMap.put(Constants.KEY_CREATED_AT, noteModel.getCreatedAt());
-        return FirebaseUtil.getCurrentUserNotes()
-                .add(objectMap);
+        return FirebaseUtil.getNotes().add(objectMap);
     }
 
     @NonNull
     public static Task<Void> deleteUserNote(@NonNull NoteModel noteModel) {
-        return getCurrentUserNotes().document(noteModel.getDocumentId()).delete();
+        return getNotes().document(noteModel.getDocumentId()).delete();
     }
 
     @NonNull
     public static DocumentReference getUserNote(String noteId) {
-        return getCurrentUserNotes().document(noteId);
+        return getNotes().document(noteId);
     }
 
     @NonNull
-    public static CollectionReference  getCurrentUserFolders() {
+    public static Task<Void> updateUserNote(@NonNull NoteModel noteModel) {
+        return FirebaseUtil.getUserNote(noteModel.getDocumentId())
+                .update(Constants.KEY_TEXT, noteModel.getText(),
+                        Constants.KEY_LAST_EDITED, new Date());
+    }
+
+    @NonNull
+    public static CollectionReference getFolders() {
         return FirebaseUtil.getCurrentUserDetails()
                 .collection(Constants.KEY_COLLECTION_FOLDERS_NAMES);
     }

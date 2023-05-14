@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import org.jetbrains.annotations.Contract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,6 +51,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     }
 
     public static final Creator<NoteModel> CREATOR = new Creator<NoteModel>() {
+        @Nullable
         @Override
         public NoteModel createFromParcel(Parcel in) {
             try {
@@ -58,6 +62,8 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
             return null;
         }
 
+        @NonNull
+        @Contract(value = "_ -> new", pure = true)
         @Override
         public NoteModel[] newArray(int size) {
             return new NoteModel[size];
@@ -89,7 +95,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     }
 
     @Override
-    public int compareTo(NoteModel noteModel) {
+    public int compareTo(@NonNull NoteModel noteModel) {
         return noteModel.getLastEdited().compareTo(this.getLastEdited());
     }
 

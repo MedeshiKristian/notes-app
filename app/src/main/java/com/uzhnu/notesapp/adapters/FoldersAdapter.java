@@ -9,11 +9,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ItemFolderBinding;
+import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utils.PreferencesManager;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersViewHolder> {
     private static final int SPECIAL = 0;
@@ -22,12 +25,9 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     private List<FolderModel> folders;
 
-    private final Function<String, Void> showFolderCallback;
 
-    public FoldersAdapter(List<FolderModel> categoryModels,
-                          Function<String, Void> showFolderCallback) {
+    public FoldersAdapter(List<FolderModel> categoryModels) {
         this.folders = categoryModels;
-        this.showFolderCallback = showFolderCallback;
     }
 
     @NonNull
@@ -52,9 +52,11 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             });
         } else {
             int finalPosition = position;
-            holder.setData(folders.get(finalPosition));
+            holder.setData(folders.get(position));
             holder.itemView.setOnClickListener(view -> {
-                showFolderCallback.apply(folders.get(finalPosition).getName());
+                // TODO Load notes from folderName collection
+                SelectFolderEvent event = new SelectFolderEvent(folders.get(position).getName());
+                EventBus.getDefault().post(event);
             });
         }
     }
@@ -91,7 +93,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         private void chooseStyle(int type) {
             switch (type) {
                 case SPECIAL:
-                    binding.textViewFolderName.setText(Constants.KEY_COLLECTION_FOLDERS_DEFAULT);
+                    binding.textViewFolderName.setText(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
                     binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
                             R.drawable.ic_outline_folder_special_24, 0, 0, 0);
                     break;

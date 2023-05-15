@@ -63,6 +63,9 @@ dependencies {
     // Event bus
     implementation 'org.greenrobot:eventbus:3.3.1'
 
+    // Rich Editor
+    implementation 'jp.wasabeef:richeditor-android:2.0.0'
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
 

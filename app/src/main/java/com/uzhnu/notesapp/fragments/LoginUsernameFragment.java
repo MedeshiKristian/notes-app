@@ -1,18 +1,12 @@
 package com.uzhnu.notesapp.fragments;
 
-import android.Manifest;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,13 +14,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.uzhnu.notesapp.R;
-import com.uzhnu.notesapp.activities.FullscreenPhotoActivity;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.callbacks.CameraResultCallback;
 import com.uzhnu.notesapp.callbacks.GalleryResultCallback;
-import com.uzhnu.notesapp.callbacks.RequestCameraPermissionsCallback;
+import com.uzhnu.notesapp.callbacks.RequestCameraPermissionCallback;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
@@ -34,8 +25,6 @@ import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
-
-import java.util.Arrays;
 
 public class LoginUsernameFragment extends Fragment {
     private FragmentLoginUsernameBinding binding;
@@ -46,7 +35,7 @@ public class LoginUsernameFragment extends Fragment {
 
     private ActivityResultLauncher<Intent> pickImageFromGallery;
     private ActivityResultLauncher<Intent> pickImageFromCamera;
-    private ActivityResultLauncher<String[]> requestCameraPermissions;
+    private ActivityResultLauncher<String> requestCameraPermission;
 
     private Uri cameraUri;
     private ImageUtil imageUtil;
@@ -67,20 +56,17 @@ public class LoginUsernameFragment extends Fragment {
         pickImageFromGallery = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new GalleryResultCallback(getContext(), binding.imageViewUser));
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
-        cameraUri = requireActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        cameraUri = ImageUtil.createImageUri(requireContext());
         pickImageFromCamera = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new CameraResultCallback(getContext(), binding.imageViewUser, cameraUri)
         );
-        requestCameraPermissions = registerForActivityResult(
-                new ActivityResultContracts.RequestMultiplePermissions(),
-                new RequestCameraPermissionsCallback(imageUtil)
+        requestCameraPermission = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                new RequestCameraPermissionCallback(imageUtil)
         );
         imageUtil = new ImageUtil(requireActivity(), pickImageFromGallery,
-                pickImageFromCamera, requestCameraPermissions, cameraUri);
+                pickImageFromCamera, requestCameraPermission, cameraUri);
         return binding.getRoot();
     }
 

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FirebaseUtil {
+    @NonNull
     public static FirebaseFirestore getDatebase() {
         return FirebaseFirestore.getInstance();
     }
@@ -62,34 +63,34 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static CollectionReference getNotes() {
+    public static CollectionReference getCurrentFolderNotes() {
         return FirebaseUtil.getCurrentUserDetails().collection(getCurrentFolder());
     }
 
     @NonNull
-    public static Task<DocumentReference> addUserNote(@NonNull NoteModel noteModel) {
+    public static Task<DocumentReference> addUserNoteToFolder(@NonNull NoteModel noteModel) {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put(Constants.KEY_TEXT, noteModel.getText());
         objectMap.put(Constants.KEY_LAST_EDITED, noteModel.getLastEdited());
         objectMap.put(Constants.KEY_CREATED_AT, noteModel.getCreatedAt());
-        return FirebaseUtil.getNotes().add(objectMap);
+        return FirebaseUtil.getCurrentFolderNotes().add(objectMap);
     }
 
     @NonNull
     public static Task<Void> deleteUserNote(@NonNull NoteModel noteModel) {
-        return getNotes().document(noteModel.getDocumentId()).delete();
+        return getCurrentFolderNotes().document(noteModel.getDocumentId()).delete();
     }
 
     @NonNull
-    public static DocumentReference getUserNote(String noteId) {
-        return getNotes().document(noteId);
+    public static DocumentReference getNoteFromFolder(String noteId) {
+        return getCurrentFolderNotes().document(noteId);
     }
 
     @NonNull
     public static Task<Void> updateUserNote(@NonNull NoteModel noteModel) {
-        return FirebaseUtil.getUserNote(noteModel.getDocumentId())
+        return FirebaseUtil.getNoteFromFolder(noteModel.getDocumentId())
                 .update(Constants.KEY_TEXT, noteModel.getText(),
-                        Constants.KEY_LAST_EDITED, new Date());
+                        Constants.KEY_LAST_EDITED, noteModel.getLastEdited());
     }
 
     @NonNull

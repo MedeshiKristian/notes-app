@@ -3,7 +3,6 @@ package com.uzhnu.notesapp.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import com.uzhnu.notesapp.activities.EditNoteActivity;
 import com.uzhnu.notesapp.databinding.ItemNoteBinding;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
@@ -63,7 +63,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         mSelectedNotes = new SparseBooleanArray();
 
         holder.itemView.setOnClickListener(view -> {
-            if (isDeleteActionVisible()) {
+            if (isMultiSelect()) {
                 // Select note to delete
                 view.performLongClick();
             } else {
@@ -154,7 +154,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return mSelectedNotes.size();
     }
 
-    public boolean isDeleteActionVisible() {
+    public boolean isMultiSelect() {
         return getCountSelectedNotes() != 0;
     }
 
@@ -167,7 +167,11 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
 
         private void setData(@NonNull NoteModel noteModel) {
-            binding.textViewNoteTitle.setText(StringUtils.abbreviate(noteModel.getText(), TEXT_LIMIT));
+            binding.textViewNoteTitle.setText(
+                    StringUtils.abbreviate(
+                            AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
+                    )
+            );
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));

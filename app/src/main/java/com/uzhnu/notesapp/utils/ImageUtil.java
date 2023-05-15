@@ -1,13 +1,13 @@
 package com.uzhnu.notesapp.utils;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -24,13 +25,12 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.FullscreenPhotoActivity;
 import com.uzhnu.notesapp.callbacks.CameraResultCallback;
 import com.uzhnu.notesapp.callbacks.GalleryResultCallback;
-import com.uzhnu.notesapp.callbacks.RequestCameraPermissionsCallback;
+import com.uzhnu.notesapp.callbacks.RequestCameraPermissionCallback;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Map;
 
 public class ImageUtil {
     private final ActivityResultLauncher<Intent> pickImageFromGallery;
@@ -38,7 +38,7 @@ public class ImageUtil {
     Uri cameraUri;
     private final ActivityResultLauncher<Intent> pickImageFromCamera;
 
-    private final ActivityResultLauncher<String[]> requestCameraPermissions;
+    private final ActivityResultLauncher<String> requestCameraPermissions;
 
     FragmentActivity activity;
 
@@ -50,25 +50,29 @@ public class ImageUtil {
                 new GalleryResultCallback(context, imageView)
         );
         // TODO Check WRITE_EXTERNAL_STORAGE permission
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
-        cameraUri = context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+        cameraUri = createImageUri(context);
         pickImageFromCamera = activity.registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new CameraResultCallback(context, imageView, cameraUri)
         );
         assert cameraUri != null;
         requestCameraPermissions = activity.registerForActivityResult(
-                new ActivityResultContracts.RequestMultiplePermissions(),
-                new RequestCameraPermissionsCallback(this)
+                new ActivityResultContracts.RequestPermission(),
+                new RequestCameraPermissionCallback(this)
         );
+    }
+
+    public static Uri createImageUri(@NonNull Context context) {
+        return FileProvider.getUriForFile(context,
+                "com.uzhnu.notesapp.GenericFileProvider",
+                new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                        "image"));
     }
 
     public ImageUtil(@NonNull FragmentActivity activity,
                      @NonNull ActivityResultLauncher<Intent> pickImageFromGallery,
                      @NonNull ActivityResultLauncher<Intent> pickImageFromCamera,
-                     @NonNull ActivityResultLauncher<String[]> requestCameraPermissions,
+                     @NonNull ActivityResultLauncher<String> requestCameraPermissions,
                      @NonNull Uri cameraUri) {
         this.activity = activity;
         this.pickImageFromGallery = pickImageFromGallery;
@@ -77,27 +81,10 @@ public class ImageUtil {
         this.cameraUri = cameraUri;
     }
 
-
-    public static boolean isGrantedPermission(@NonNull Map<String, Boolean> permissions) {
-        for (String permission : permissions.keySet()) {
-            if (!Boolean.TRUE.equals(permissions.get(permission))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public void checkPermissionsAndLaunchCamera() {
-        String[] permissions = {
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-        String[] permissionsToRequest = Arrays.stream(permissions)
-                .filter(permission -> activity.checkSelfPermission(permission)
-                        != PackageManager.PERMISSION_GRANTED)
-                .toArray(String[]::new);
-        if (permissionsToRequest.length > 0) {
-            requestCameraPermissions.launch(permissionsToRequest);
+        if (activity.checkSelfPermission(Manifest.permission.CAMERA) !=
+                PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermissions.launch(Manifest.permission.CAMERA);
         } else {
             launchCamera();
         }
@@ -106,11 +93,8 @@ public class ImageUtil {
     public void launchCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+//        cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         pickImageFromCamera.launch(cameraIntent);
-    }
-
-    public Uri getCameraUri() {
-        return cameraUri;
     }
 
     public void launchGallery() {

@@ -1,6 +1,7 @@
 package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -13,9 +14,11 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import android.view.ContextThemeWrapper;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
@@ -148,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         NoteModel noteModel = new NoteModel(event.getNoteText());
         setIsProgressNotes(true);
         if (event.getNoteId().isEmpty()) {
-            FirebaseUtil.addUserNote(noteModel).addOnCompleteListener(task -> {
+            FirebaseUtil.addUserNoteToFolder(noteModel).addOnCompleteListener(task -> {
                 noteModels.add(0, noteModel);
                 noteModel.setDocumentId(task.getResult().getId());
                 notesAdapter.notifyDataSetChanged();
@@ -211,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("NotifyDataSetChanged")
     private void loadUserNotes() {
         setIsProgressNotes(true);
-        FirebaseUtil.getNotes().get()
+        FirebaseUtil.getCurrentFolderNotes().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         noteModels.clear();
@@ -309,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             toggleNavigationView();
-        } else if (notesAdapter.isDeleteActionVisible()) {
+        } else if (notesAdapter.isMultiSelect()) {
             EventBus.getDefault().post(new SelectNoteEvent(0));
             notesAdapter.removeAllSelections(true);
             setInitToolBar();

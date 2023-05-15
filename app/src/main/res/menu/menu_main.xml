@@ -5,7 +5,7 @@
         android:id="@+id/optionDelete"
         android:icon="@drawable/ic_outline_delete_24"
         android:visible="false"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
     <item
         android:id="@+id/optionLogOut"
         android:title="Log out"

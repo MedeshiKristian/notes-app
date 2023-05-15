@@ -78,6 +78,10 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         this.text = text;
     }
 
+    public void updateLastEdited() {
+        this.lastEdited = new Date();
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }

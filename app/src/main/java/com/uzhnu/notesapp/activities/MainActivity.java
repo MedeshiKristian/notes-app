@@ -1,7 +1,6 @@
 package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -14,11 +13,9 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.view.ContextThemeWrapper;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
@@ -75,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        this.toolBarMenu = menu;
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         if (!EventBus.getDefault().isRegistered(this)) {
@@ -90,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         noteModels = new ArrayList<>();
         notesAdapter = new NotesAdapter(noteModels, getApplicationContext());
-        binding.recyclerViewNotes.setAdapter(notesAdapter);
+        binding.notesContent.recyclerViewNotes.setAdapter(notesAdapter);
 
         folderModels = new ArrayList<>();
         foldersAdapter = new FoldersAdapter(folderModels);
@@ -137,8 +142,8 @@ public class MainActivity extends AppCompatActivity {
 
         boolean show = countSelectedNotes > 0;
         if (this.toolBarMenu != null) {
-            this.toolBarMenu.findItem(R.id.optionDelete).setVisible(show);
-            this.toolBarMenu.findItem(R.id.optionLogOut).setVisible(!show);
+            this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
+            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!show);
             if (!show) {
                 setInitToolBar();
             }
@@ -155,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 noteModels.add(0, noteModel);
                 noteModel.setDocumentId(task.getResult().getId());
                 notesAdapter.notifyDataSetChanged();
-                binding.recyclerViewNotes.smoothScrollToPosition(0);
+                binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                 setIsProgressNotes(false);
             });
         } else {
@@ -224,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                         if (noteModels.size() > 0) {
                             Collections.sort(noteModels);
                             notesAdapter.notifyDataSetChanged();
-                            binding.recyclerViewNotes.smoothScrollToPosition(0);
+                            binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                         }
                     }
                     setIsProgressNotes(false);
@@ -254,12 +259,12 @@ public class MainActivity extends AppCompatActivity {
     private void setIsProgressNotes(boolean show) {
         if (binding == null) return;
         if (show) {
-            binding.recyclerViewNotes.setVisibility(View.GONE);
+            binding.notesContent.recyclerViewNotes.setVisibility(View.GONE);
             binding.circularProgressIndicatorNotes.show();
             binding.circularProgressIndicatorNotes.setProgress(100, true);
         } else {
             binding.circularProgressIndicatorNotes.hide();
-            binding.recyclerViewNotes.setVisibility(View.VISIBLE);
+            binding.notesContent.recyclerViewNotes.setVisibility(View.VISIBLE);
         }
     }
 
@@ -276,20 +281,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        this.toolBarMenu = menu;
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case (R.id.optionDelete):
+            case (R.id.option_delete):
                 notesAdapter.deleteAllSelectedNotes();
                 return true;
-            case (R.id.optionLogOut):
+            case (R.id.option_log_out):
                 FirebaseUtil.signOut();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

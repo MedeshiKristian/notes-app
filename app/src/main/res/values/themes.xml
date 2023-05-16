@@ -1,17 +1,18 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
-    <style name="Theme.NotesApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.NotesApp" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary</item>
         <item name="colorOnPrimary">@color/primary</item>
         <item name="colorOnPrimarySurface">@color/white</item>
         <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorSurface">@color/white</item>
 
         <!-- Top bar icons color-->
         <item name="colorControlNormal">@color/white</item>
 
-<!--        <item name="colorOnSurfaceVariant">@color/white</item>-->
+        <!--        <item name="colorOnSurfaceVariant">@color/white</item>-->
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/teal_200</item>
@@ -19,7 +20,7 @@
         <item name="colorOnSecondaryContainer">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-<!--        <item name="android:windowLightStatusBar">true</item>-->
+        <!--        <item name="android:windowLightStatusBar">true</item>-->
         <!-- Customize your theme here. -->
         <item name="background">@color/white</item>
         <item name="android:itemBackground">@color/primary_text</item>

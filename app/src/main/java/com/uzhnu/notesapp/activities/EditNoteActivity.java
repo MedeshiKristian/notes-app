@@ -54,7 +54,11 @@ public class EditNoteActivity extends AppCompatActivity {
 
         setListeners();
 
-        new Handler().postDelayed(() -> setIsProgress(false), 1500);
+        binding.editor.setOnInitialLoadListener(isReady -> {
+            if (isReady) {
+                setIsProgress(false);
+            }
+        });
     }
 
     private void setListeners() {

@@ -2,12 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/optionDelete"
+        android:id="@+id/option_delete"
         android:icon="@drawable/ic_outline_delete_24"
         android:visible="false"
         app:showAsAction="always" />
+
     <item
-        android:id="@+id/optionLogOut"
+        android:id="@+id/option_log_out"
         android:title="Log out"
-        android:visible="true" />
+        android:visible="true"
+        app:showAsAction="never" />
+
 </menu>

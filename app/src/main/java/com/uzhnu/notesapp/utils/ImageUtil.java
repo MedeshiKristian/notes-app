@@ -49,7 +49,6 @@ public class ImageUtil {
                 new ActivityResultContracts.StartActivityForResult(),
                 new GalleryResultCallback(context, imageView)
         );
-        // TODO Check WRITE_EXTERNAL_STORAGE permission
         cameraUri = createImageUri(context);
         pickImageFromCamera = activity.registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -93,7 +92,6 @@ public class ImageUtil {
     public void launchCamera() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
-//        cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         pickImageFromCamera.launch(cameraIntent);
     }
 

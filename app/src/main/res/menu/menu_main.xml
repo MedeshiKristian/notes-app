@@ -8,6 +8,14 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/option_search"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="Search"
+        android:visible="true"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/option_log_out"
         android:title="Log out"
         android:visible="true"

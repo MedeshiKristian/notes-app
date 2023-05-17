@@ -20,9 +20,11 @@
             android:foregroundTint="@color/primary_text">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/topAppBar"
+                android:id="@+id/toolbar_init"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="0px"
+                android:backgroundTint="@color/primary"
                 android:fitsSystemWindows="true"
                 app:menu="@menu/menu_main"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
@@ -30,18 +32,10 @@
                 app:titleMargin="0dp"
                 app:titleTextColor="@color/primary_text" />
 
-            <com.google.android.material.search.SearchBar
-                android:id="@+id/search_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:navigationIcon="@drawable/ic_baseline_search_24"
-                android:textAppearance="@color/primary_text"
-                android:padding="@dimen/_10sdp"
-                android:hint="Search text" />
-
         </com.google.android.material.appbar.AppBarLayout>
 
-        <include android:id="@+id/notes_content"
+        <include
+            android:id="@+id/notes_content"
             layout="@layout/notes_content" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -71,57 +65,7 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/navigation_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:layout_behavior="com.google.android.material.appbar.ScrollingViewBehavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/secondary"
-            android:orientation="vertical">
-
-            <include
-                android:id="@+id/header"
-                layout="@layout/navigation_header" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginBottom="@dimen/_15sdp"
-                android:text="Folders"
-                android:textColor="@color/secondary_text"
-                android:textSize="@dimen/_14ssp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_folders"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:overScrollMode="never"
-                android:visibility="gone"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/circular_progress_indicator_folders"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/_30sdp"
-                android:indeterminate="true"
-                android:progress="0"
-                app:indicatorColor="@color/primary_light"
-                app:indicatorSize="@dimen/_25sdp"
-                app:trackColor="@color/primary"
-                app:trackCornerRadius="10dp"
-                app:trackThickness="@dimen/_4sdp" />
-        </LinearLayout>
-    </com.google.android.material.navigation.NavigationView>
+    <include
+        android:id="@+id/navigationStart"
+        layout="@layout/navigation_view_main" />
 </androidx.drawerlayout.widget.DrawerLayout>

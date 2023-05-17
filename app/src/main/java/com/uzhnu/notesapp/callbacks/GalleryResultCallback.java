@@ -10,6 +10,7 @@ import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
+import androidx.annotation.NonNull;
 
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
@@ -29,7 +30,7 @@ public class GalleryResultCallback implements ActivityResultCallback<ActivityRes
     }
 
     @Override
-    public void onActivityResult(ActivityResult result) {
+    public void onActivityResult(@NonNull ActivityResult result) {
         if (result.getResultCode() == RESULT_OK) {
             if (result.getData() != null) {
                 Uri imageUri = result.getData().getData();

@@ -37,8 +37,8 @@
         <activity
             android:name=".activities.EditNoteActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

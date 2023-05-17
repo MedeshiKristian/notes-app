@@ -13,6 +13,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 
@@ -45,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private List<NoteModel> noteModels;
+    private List<NoteModel> allNoteModels;
     private NotesAdapter notesAdapter;
 
     private List<FolderModel> folderModels;
     private FoldersAdapter foldersAdapter;
 
     private Menu toolBarMenu;
+    private SearchView searchView;
 
     private ImageUtil imageUtil;
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        setSupportActionBar(binding.topAppBar);
+        setSupportActionBar(binding.toolbarInit);
 
         setInitToolBar();
 
@@ -68,15 +71,69 @@ public class MainActivity extends AppCompatActivity {
         loadUserDetails();
         loadUserNotes();
         loadUserFolders();
+
         setListeners();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         this.toolBarMenu = menu;
+
+        searchView = (SearchView) menu.findItem(R.id.option_search).getActionView();
+
+        searchView.setIconifiedByDefault(true);
+
+        searchView.setQueryHint("Search...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                Log.i(Constants.TAG, "Submit");
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Log.i(Constants.TAG, s);
+                noteModels.clear();
+                Log.i(Constants.TAG, "before" + allNoteModels.size());
+                for (NoteModel note : allNoteModels) {
+                    if (note.getText().contains(s)) {
+                        noteModels.add(note);
+                    }
+                }
+                Log.i(Constants.TAG, "after" + allNoteModels.size());
+                notesAdapter.notifyDataSetChanged();
+                return false;
+            }
+        });
+
+        searchView.setOnCloseListener(() -> {
+            noteModels.clear();
+            noteModels.addAll(allNoteModels);
+            notesAdapter.notifyDataSetChanged();
+            return false;
+        });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case (R.id.option_delete):
+                notesAdapter.deleteAllSelectedNotes();
+                return true;
+            case (R.id.option_log_out):
+                FirebaseUtil.signOut();
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -91,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
-        imageUtil = new ImageUtil(this, binding.header.imageViewUser);
+        imageUtil = new ImageUtil(this, binding.navigationStart.header.imageViewUser);
 
         noteModels = new ArrayList<>();
         notesAdapter = new NotesAdapter(noteModels, getApplicationContext());
@@ -99,26 +156,40 @@ public class MainActivity extends AppCompatActivity {
 
         folderModels = new ArrayList<>();
         foldersAdapter = new FoldersAdapter(folderModels);
-        binding.recyclerViewFolders.setAdapter(foldersAdapter);
-
+        binding.navigationStart.recyclerViewFolders.setAdapter(foldersAdapter);
     }
 
     private void setInitToolBar() {
-        binding.topAppBar.setTitle(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+        binding.toolbarInit.setTitle(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                binding.drawerLayout, binding.topAppBar,
+                binding.drawerLayout, binding.toolbarInit,
                 R.string.navigation_open, R.string.navigation_close) {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                float moveFactor = binding.navigationView.getWidth() * slideOffset;
+                float coefficient = 0.40f;
+                float moveFactor = binding.navigationStart.navigationView.getWidth()
+                        * slideOffset * coefficient;
                 binding.coordinatorContent.setTranslationX(moveFactor);
             }
         };
         binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-        binding.topAppBar.setNavigationOnClickListener(view -> toggleNavigationView());
+        binding.toolbarInit.setNavigationOnClickListener(view -> toggleNavigationView());
+        binding.navigationStart.navigationView.setVisibility(View.VISIBLE);
+        binding.floatingActionButtonAddNote.setVisibility(View.VISIBLE);
+    }
+
+    private void setContextToolBar() {
+        binding.toolbarInit.setNavigationIcon(
+                ContextCompat.getDrawable(
+                        getApplicationContext(), R.drawable.ic_baseline_close_24
+                )
+        );
+        binding.toolbarInit.setNavigationOnClickListener(view -> onBackPressed());
+        binding.navigationStart.navigationView.setVisibility(View.GONE);
+        binding.floatingActionButtonAddNote.setVisibility(View.GONE);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -128,25 +199,18 @@ public class MainActivity extends AppCompatActivity {
             setInitToolBar();
         } else {
             if (countSelectedNotes == 1) {
-                binding.topAppBar.setNavigationIcon(
-                        ContextCompat.getDrawable(
-                                getApplicationContext(), R.drawable.ic_baseline_arrow_back_24
-                        )
-                );
-                binding.topAppBar.setNavigationOnClickListener(view -> onBackPressed());
-                binding.topAppBar.setTitle("1 item selected");
+                setContextToolBar();
+                binding.toolbarInit.setTitle("1 item selected");
             } else {
-                binding.topAppBar.setTitle(countSelectedNotes + " items selected");
+                binding.toolbarInit.setTitle(countSelectedNotes + " items selected");
             }
         }
 
         boolean show = countSelectedNotes > 0;
         if (this.toolBarMenu != null) {
             this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
+            this.toolBarMenu.findItem(R.id.option_search).setVisible(!show);
             this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!show);
-            if (!show) {
-                setInitToolBar();
-            }
         }
     }
 
@@ -155,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
     public void onEditNoteEvent(@NonNull EditNoteEvent event) {
         NoteModel noteModel = new NoteModel(event.getNoteText());
         setIsProgressNotes(true);
-        if (event.getNoteId().isEmpty()) {
+        if (event.isNewNote()) {
             FirebaseUtil.addUserNoteToFolder(noteModel).addOnCompleteListener(task -> {
                 noteModels.add(0, noteModel);
                 noteModel.setDocumentId(task.getResult().getId());
@@ -183,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
     public void onSelectFolderEvent(@NonNull SelectFolderEvent event) {
         toggleNavigationView();
         String folderName = event.getFolderName();
-        binding.topAppBar.setTitle(folderName);
+        binding.toolbarInit.setTitle(folderName);
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER, folderName);
         loadUserNotes();
     }
@@ -193,7 +257,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, EditNoteActivity.class);
             startActivity(intent);
         });
-        binding.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
+
+        binding.navigationStart.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
     }
 
     private void loadUserDetails() {
@@ -203,10 +268,10 @@ public class MainActivity extends AppCompatActivity {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
                         assert userModel != null;
                         PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
-                        binding.header.imageViewUser
+                        binding.navigationStart.header.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
-                        binding.header.textViewUsername.setText(userModel.getUsername());
-                        binding.header.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
+                        binding.navigationStart.header.textViewUsername.setText(userModel.getUsername());
+                        binding.navigationStart.header.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
                                 userModel.getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         ));
@@ -228,6 +293,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (noteModels.size() > 0) {
                             Collections.sort(noteModels);
+                            allNoteModels = new ArrayList<>(noteModels);
+                            Log.i(Constants.TAG, "Loaded" + allNoteModels.size());
                             notesAdapter.notifyDataSetChanged();
                             binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                         }
@@ -249,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (folderModels.size() > 0) {
                             foldersAdapter.notifyDataSetChanged();
-                            binding.recyclerViewFolders.smoothScrollToPosition(0);
+                            binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
                         }
                     }
                     setIsProgressFolders(false);
@@ -271,29 +338,12 @@ public class MainActivity extends AppCompatActivity {
     private void setIsProgressFolders(boolean show) {
         if (binding == null) return;
         if (show) {
-            binding.recyclerViewFolders.setVisibility(View.GONE);
-            binding.circularProgressIndicatorFolders.show();
-            binding.circularProgressIndicatorFolders.setProgress(100, true);
+            binding.navigationStart.recyclerViewFolders.setVisibility(View.GONE);
+            binding.navigationStart.circularProgressIndicatorFolders.show();
+            binding.navigationStart.circularProgressIndicatorFolders.setProgress(100, true);
         } else {
-            binding.circularProgressIndicatorFolders.hide();
-            binding.recyclerViewFolders.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case (R.id.option_delete):
-                notesAdapter.deleteAllSelectedNotes();
-                return true;
-            case (R.id.option_log_out):
-                FirebaseUtil.signOut();
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            binding.navigationStart.circularProgressIndicatorFolders.hide();
+            binding.navigationStart.recyclerViewFolders.setVisibility(View.VISIBLE);
         }
     }
 
@@ -311,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
             toggleNavigationView();
         } else if (notesAdapter.isMultiSelect()) {
             EventBus.getDefault().post(new SelectNoteEvent(0));
-            notesAdapter.removeAllSelections(true);
+            notesAdapter.removeAllSelections();
             setInitToolBar();
         } else {
             super.onBackPressed();

@@ -3,6 +3,7 @@ package com.uzhnu.notesapp.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +64,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         mSelectedNotes = new SparseBooleanArray();
 
         holder.itemView.setOnClickListener(view -> {
+            Log.i(Constants.TAG, "size" + mSelectedNotes.size());
             if (isMultiSelect()) {
                 // Select note to delete
                 view.performLongClick();
@@ -95,16 +97,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
     }
 
-    public void removeAllSelections(boolean clearSelections) {
+    public void removeAllSelections() {
         if (recyclerView != null) {
-            for (int i = 0; i < noteModels.size(); i++) {
-                if (mSelectedNotes.get(i)) {
-                    removeSelectionAt(i);
-                }
+            for (int i = 0; i < getItemCount(); i++) {
+                removeSelectionAt(i);
             }
-            if (clearSelections) {
-                mSelectedNotes.clear();
-            }
+            mSelectedNotes.clear();
         }
     }
 
@@ -112,20 +110,20 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void deleteAllSelectedNotes() {
         if (recyclerView != null) {
             EventBus.getDefault().post(new SelectNoteEvent(0));
-            removeAllSelections(false);
-            for (int i = noteModels.size() - 1; i >= 0; i--) {
+            for (int i = 0; i < getItemCount(); i++) {
+                removeSelectionAt(i);
                 if (mSelectedNotes.get(i)) {
                     int finalI = i;
                     FirebaseUtil.deleteUserNote(noteModels.get(i))
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    mSelectedNotes.delete(finalI);
                                     noteModels.remove(finalI);
                                     notifyItemRemoved(finalI);
                                 }
                             });
                 }
             }
+            mSelectedNotes.clear();
         }
     }
 
@@ -137,17 +135,17 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     private void toggleSelection(@NonNull NotesViewHolder holder, int position) {
         if (mSelectedNotes.get(position)) {
+            Log.i(Constants.TAG, "position" + position);
             mSelectedNotes.delete(position);
-            if (mSelectedNotes.size() == 0) {
-                EventBus.getDefault().post(new SelectNoteEvent(0));
-            }
+//            if (mSelectedNotes.size() == 0) {
+//                EventBus.getDefault().post(new SelectNoteEvent(0));
+//            }
             holder.removeSelection();
         } else {
             mSelectedNotes.put(position, true);
             holder.selectItem();
         }
         EventBus.getDefault().post(new SelectNoteEvent(getCountSelectedNotes()));
-        //selectNote(holder, position, !mSelectedNotes.get(position));
     }
 
     public int getCountSelectedNotes() {
@@ -175,8 +173,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
-
-            setListeners();
         }
 
         private void selectItem() {
@@ -196,9 +192,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                             R.drawable.white_rounded_corners_background
                     )
             );
-        }
-
-        private void setListeners() {
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.uzhnu.notesapp.callbacks;
 
 import androidx.activity.result.ActivityResultCallback;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.uzhnu.notesapp.utils.ImageUtil;
@@ -16,7 +17,7 @@ public class RequestCameraPermissionCallback implements ActivityResultCallback<B
     }
 
     @Override
-    public void onActivityResult(Boolean result) {
+    public void onActivityResult(@NonNull Boolean result) {
         if (result) {
             imageUtil.launchCamera();
         }

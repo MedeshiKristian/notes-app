@@ -2,14 +2,11 @@ package com.uzhnu.notesapp.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,27 +15,27 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
 
-import jp.wasabeef.richeditor.RichEditor;
-
 public class EditNoteActivity extends AppCompatActivity {
+    private static final int MIN_FONT_SIZE = 1;
+    private static final int MAX_FONT_SIZE = 7;
+
+    private int fontSize;
+
     private ActivityEditNoteBinding binding;
 
     private NoteModel noteModel;
-
-    private int fontSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setSupportActionBar(binding.topAppBar);
+        setSupportActionBar(binding.toolbarInit);
 
         setIsProgress(true);
 
@@ -62,7 +59,7 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        binding.topAppBar.setNavigationOnClickListener(view -> onBackPressed());
+        binding.toolbarInit.setNavigationOnClickListener(view -> onBackPressed());
 
         findViewById(R.id.action_undo).setOnClickListener(v -> binding.editor.undo());
 
@@ -82,29 +79,21 @@ public class EditNoteActivity extends AppCompatActivity {
 
         fontSize = 1;
 
-        findViewById(R.id.action_increase_text).setOnClickListener(v -> {
+        findViewById(R.id.action_decrease_text).setOnClickListener(v -> {
             fontSize -= 1;
-            if (fontSize < 1) fontSize = 1;
+            if (fontSize < MIN_FONT_SIZE) {
+                fontSize = MIN_FONT_SIZE;
+            }
             binding.editor.setFontSize(fontSize);
         });
 
         findViewById(R.id.action_increase_text).setOnClickListener(v -> {
             fontSize += 1;
-            if (fontSize > 7) fontSize = 6;
+            if (fontSize > MAX_FONT_SIZE) {
+                fontSize = MAX_FONT_SIZE;
+            }
             binding.editor.setFontSize(fontSize);
         });
-
-//        findViewById(R.id.action_heading1).setOnClickListener(v -> binding.editor.setHeading(1));
-//
-//        findViewById(R.id.action_heading2).setOnClickListener(v -> binding.editor.setHeading(2));
-//
-//        findViewById(R.id.action_heading3).setOnClickListener(v -> binding.editor.setHeading(3));
-//
-//        findViewById(R.id.action_heading4).setOnClickListener(v -> binding.editor.setHeading(4));
-//
-//        findViewById(R.id.action_heading5).setOnClickListener(v -> binding.editor.setHeading(5));
-//
-//        findViewById(R.id.action_heading6).setOnClickListener(v -> binding.editor.setHeading(6));
 
         findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
             private boolean isChanged = false;

@@ -32,7 +32,6 @@ public class CameraResultCallback implements ActivityResultCallback<ActivityResu
         this.imageUri = imageUri;
     }
 
-
     @Override
     public void onActivityResult(@NonNull ActivityResult result) {
         if (result.getResultCode() == RESULT_OK) {

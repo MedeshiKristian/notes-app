@@ -23,6 +23,10 @@ public class EditNoteEvent {
         return noteId;
     }
 
+    public boolean isNewNote() {
+        return getNoteId().isEmpty();
+    }
+
     public int getPosition() {
         return position;
     }

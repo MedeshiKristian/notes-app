@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PreferencesManager {
-    private static Map<String, Object> data;
+    private static Map<String, Object> instance;
 
     public static Map<String, Object> getInstance() {
-        if (data == null) {
-            data = new HashMap<>();
+        if (instance == null) {
+            instance = new HashMap<>();
         }
-        return data;
+        return instance;
     }
 }

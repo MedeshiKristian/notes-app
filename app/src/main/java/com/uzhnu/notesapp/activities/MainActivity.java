@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
@@ -23,6 +24,7 @@ import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.events.EditNoteEvent;
+import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.FolderModel;
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         setInitToolBar();
 
         init();
+
         loadUserDetails();
         loadUserNotes();
         loadUserFolders();
@@ -142,11 +145,16 @@ public class MainActivity extends AppCompatActivity {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
+        EventBus.getDefault().register(notesAdapter);
     }
 
     private void init() {
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+
+//        for (int i = 0; i < 120; i++) {
+//            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
+//        }
 
         imageUtil = new ImageUtil(this, binding.navigationStart.header.imageViewUser);
 
@@ -194,23 +202,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSelectNoteEvent(@NonNull SelectNoteEvent event) {
-        int countSelectedNotes = event.getCountSelectedItems();
+        int countSelectedNotes = notesAdapter.getCountSelectedNotes();
         if (countSelectedNotes == 0) {
             setInitToolBar();
         } else {
             if (countSelectedNotes == 1) {
-                setContextToolBar();
                 binding.toolbarInit.setTitle("1 item selected");
             } else {
                 binding.toolbarInit.setTitle(countSelectedNotes + " items selected");
             }
-        }
-
-        boolean show = countSelectedNotes > 0;
-        if (this.toolBarMenu != null) {
-            this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
-            this.toolBarMenu.findItem(R.id.option_search).setVisible(!show);
-            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!show);
         }
     }
 
@@ -250,6 +250,21 @@ public class MainActivity extends AppCompatActivity {
         binding.toolbarInit.setTitle(folderName);
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER, folderName);
         loadUserNotes();
+    }
+
+    @Subscribe
+    public void onMultiSelectEvent(@NonNull MultiSelectEvent event) {
+        boolean show = event.isShow();
+        if (show) {
+            setContextToolBar();
+        } else {
+            setInitToolBar();
+        }
+        if (this.toolBarMenu != null) {
+            this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
+            this.toolBarMenu.findItem(R.id.option_search).setVisible(!show);
+            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!show);
+        }
     }
 
     private void setListeners() {
@@ -360,12 +375,16 @@ public class MainActivity extends AppCompatActivity {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             toggleNavigationView();
         } else if (notesAdapter.isMultiSelect()) {
-            EventBus.getDefault().post(new SelectNoteEvent(0));
-            notesAdapter.removeAllSelections();
-            setInitToolBar();
+            EventBus.getDefault().post(new MultiSelectEvent(false));
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(notesAdapter);
     }
 
     @Override

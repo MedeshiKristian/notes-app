@@ -20,6 +20,7 @@
             android:fitsSystemWindows="true"
             app:subtitleTextColor="@color/primary"
             app:title="@string/app_name"
+            app:subtitle="@null"
             app:titleTextColor="@color/primary_text" />
 
     </com.google.android.material.appbar.AppBarLayout>

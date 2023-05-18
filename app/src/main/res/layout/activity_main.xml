@@ -30,7 +30,7 @@
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
                 app:title="@string/page_title"
                 app:titleMargin="0dp"
-                app:titleTextColor="@color/primary_text" />
+                app:titleTextColor="@color/primary_text"/>
 
         </com.google.android.material.appbar.AppBarLayout>
 

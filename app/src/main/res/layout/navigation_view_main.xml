@@ -2,7 +2,7 @@
 <com.google.android.material.navigation.NavigationView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/navigation_view"
-    android:layout_width="@dimen/_250sdp"
+    android:layout_width="@dimen/_260sdp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     app:layout_behavior="com.google.android.material.appbar.ScrollingViewBehavior">

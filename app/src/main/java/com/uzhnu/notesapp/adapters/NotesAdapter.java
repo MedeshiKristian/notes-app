@@ -1,6 +1,5 @@
 package com.uzhnu.notesapp.adapters;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.EditNoteActivity;
 import com.uzhnu.notesapp.databinding.ItemNoteBinding;
+import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
@@ -23,8 +23,8 @@ import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
-import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -37,12 +37,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     private final List<NoteModel> noteModels;
 
-    private SparseBooleanArray mSelectedNotes;
     private RecyclerView recyclerView;
+
+    private SparseBooleanArray mSelectedPositions;
 
     public NotesAdapter(List<NoteModel> noteModels, Context context) {
         this.noteModels = noteModels;
         this.context = context;
+        mSelectedPositions = new SparseBooleanArray();
     }
 
     @NonNull
@@ -59,17 +61,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @Override
     public void onBindViewHolder(@NonNull NotesViewHolder holder, int position) {
-        holder.setData(noteModels.get(position));
+        holder.setIsRecyclable(false);
 
-        mSelectedNotes = new SparseBooleanArray();
+        holder.bind(noteModels.get(position));
 
         holder.itemView.setOnClickListener(view -> {
-            Log.i(Constants.TAG, "size" + mSelectedNotes.size());
             if (isMultiSelect()) {
-                // Select note to delete
                 view.performLongClick();
             } else {
-                // Edit note
                 Intent intent = new Intent(context, EditNoteActivity.class);
                 PreferencesManager.getInstance().put(Constants.KEY_NOTE, noteModels.get(position));
                 PreferencesManager.getInstance().put(Constants.KEY_POSITION, position);
@@ -79,7 +78,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         });
 
         holder.itemView.setOnLongClickListener(view -> {
-            EventBus.getDefault().post(new SelectNoteEvent(getCountSelectedNotes()));
             toggleSelection(holder, position);
             return true;
         });
@@ -90,41 +88,25 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return noteModels.size();
     }
 
-    private void removeSelectionAt(int position) {
-        RecyclerView.ViewHolder holder = recyclerView.findViewHolderForAdapterPosition(position);
-        if (holder instanceof NotesViewHolder) {
-            ((NotesViewHolder) holder).removeSelection();
+    private void toggleSelection(@NonNull NotesViewHolder holder, int position) {
+        if (isSelected(position)) {
+            removeSelection(holder, position);
+        } else {
+            addSelection(holder, position);
         }
+        EventBus.getDefault().post(new SelectNoteEvent());
     }
 
-    public void removeAllSelections() {
-        if (recyclerView != null) {
-            for (int i = 0; i < getItemCount(); i++) {
-                removeSelectionAt(i);
-            }
-            mSelectedNotes.clear();
-        }
+    private boolean isSelected(int position) {
+        return Boolean.TRUE.equals(mSelectedPositions.get(position));
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    public void deleteAllSelectedNotes() {
-        if (recyclerView != null) {
-            EventBus.getDefault().post(new SelectNoteEvent(0));
-            for (int i = 0; i < getItemCount(); i++) {
-                removeSelectionAt(i);
-                if (mSelectedNotes.get(i)) {
-                    int finalI = i;
-                    FirebaseUtil.deleteUserNote(noteModels.get(i))
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    noteModels.remove(finalI);
-                                    notifyItemRemoved(finalI);
-                                }
-                            });
-                }
-            }
-            mSelectedNotes.clear();
-        }
+    public int getCountSelectedNotes() {
+        return mSelectedPositions.size();
+    }
+
+    public boolean isMultiSelect() {
+        return mSelectedPositions.size() != 0;
     }
 
     @Override
@@ -133,27 +115,68 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.recyclerView = recyclerView;
     }
 
-    private void toggleSelection(@NonNull NotesViewHolder holder, int position) {
-        if (mSelectedNotes.get(position)) {
-            Log.i(Constants.TAG, "position" + position);
-            mSelectedNotes.delete(position);
-//            if (mSelectedNotes.size() == 0) {
-//                EventBus.getDefault().post(new SelectNoteEvent(0));
-//            }
-            holder.removeSelection();
-        } else {
-            mSelectedNotes.put(position, true);
-            holder.selectItem();
+    @Subscribe
+    public void onMultiSelect(@NonNull MultiSelectEvent event) {
+        boolean show = event.isShow();
+        if (!show) {
+            for (int i = getItemCount() - 1; i >= 0; i--) {
+                if (isSelected(i)) {
+                    removeSelectionAt(i);
+                }
+            }
         }
-        EventBus.getDefault().post(new SelectNoteEvent(getCountSelectedNotes()));
+        assert isMultiSelect() == show;
     }
 
-    public int getCountSelectedNotes() {
-        return mSelectedNotes.size();
+    public void deleteAllSelectedNotes() {
+        for (int i = getItemCount() - 1; i >= 0; --i) {
+            if (isSelected(i)) {
+                int finalI = i;
+                FirebaseUtil.deleteUserNote(noteModels.get(i))
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                noteModels.remove(finalI);
+                                notifyItemRemoved(finalI);
+                            }
+                        });
+            }
+        }
     }
 
-    public boolean isMultiSelect() {
-        return getCountSelectedNotes() != 0;
+    private void addSelection(@NonNull NotesViewHolder holder, int position) {
+        if (getCountSelectedNotes() == 0) {
+            EventBus.getDefault().post(new MultiSelectEvent(true));
+        }
+        ItemNoteBinding binding = holder.binding;
+        binding.layoutNote
+                .setBackgroundColor(ContextCompat.getColor(
+                                binding.layoutNote.getContext(),
+                                R.color.md_grey_200
+                        )
+                );
+        binding.imageViewSelected.setVisibility(View.VISIBLE);
+        mSelectedPositions.put(position, true);
+    }
+
+    private void removeSelection(@NonNull NotesViewHolder holder, int position) {
+        ItemNoteBinding binding = holder.binding;
+        binding.imageViewSelected.setVisibility(View.GONE);
+        binding.layoutNote.setBackground(ContextCompat.getDrawable(
+                        binding.layoutNote.getContext(),
+                        R.drawable.white_rounded_corners_background
+                )
+        );
+        mSelectedPositions.delete(position);
+        if (getCountSelectedNotes() == 0) {
+            EventBus.getDefault().post(new MultiSelectEvent(false));
+        }
+    }
+
+    private void removeSelectionAt(int position) {
+        NotesViewHolder holder =
+                (NotesViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+        assert holder != null;
+        removeSelection(holder, position);
     }
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
@@ -162,36 +185,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding) {
             super(itemNoteBinding.getRoot());
             binding = itemNoteBinding;
+            Log.i(Constants.TAG, "construct");
         }
 
-        private void setData(@NonNull NoteModel noteModel) {
-            binding.textViewNoteTitle.setText(
-                    StringUtils.abbreviate(
-                            AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
-                    )
-            );
+        private void bind(@NonNull NoteModel noteModel) {
+            binding.textViewNoteTitle.setText(AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()));
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
-        }
-
-        private void selectItem() {
-            binding.layoutNote
-                    .setBackgroundColor(ContextCompat.getColor(
-                                    binding.layoutNote.getContext(),
-                                    R.color.md_grey_200
-                            )
-                    );
-            binding.imageViewSelected.setVisibility(View.VISIBLE);
-        }
-
-        private void removeSelection() {
-            binding.imageViewSelected.setVisibility(View.GONE);
-            binding.layoutNote.setBackground(ContextCompat.getDrawable(
-                            binding.layoutNote.getContext(),
-                            R.drawable.white_rounded_corners_background
-                    )
-            );
         }
     }
 }

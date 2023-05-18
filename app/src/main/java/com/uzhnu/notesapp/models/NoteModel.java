@@ -21,6 +21,8 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     private Date lastEdited;
     private Date createdAt;
 
+    private boolean isSelected = false;
+
     public NoteModel() {
     }
 
@@ -109,5 +111,13 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
     }
 }

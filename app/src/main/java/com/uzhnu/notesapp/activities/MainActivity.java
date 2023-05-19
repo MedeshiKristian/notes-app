@@ -48,8 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private List<NoteModel> noteModels;
-    private List<NoteModel> allNoteModels;
+    //    private List<NoteModel> allNoteModels;
     private NotesAdapter notesAdapter;
+    private LinearLayoutManager layoutManager;
 
     private List<FolderModel> folderModels;
     private FoldersAdapter foldersAdapter;
@@ -89,6 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
         searchView.setIconifiedByDefault(true);
 
+        searchView.setOnSearchClickListener(view -> {
+            binding.floatingActionButtonAddNote.setVisibility(View.INVISIBLE);
+        });
+
         searchView.setQueryHint("Search...");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -99,27 +104,26 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                Log.i(Constants.TAG, s);
-                noteModels.clear();
-                Log.i(Constants.TAG, "before" + allNoteModels.size());
-                for (NoteModel note : allNoteModels) {
-                    if (note.getText().contains(s)) {
-                        noteModels.add(note);
-                    }
-                }
-                Log.i(Constants.TAG, "after" + allNoteModels.size());
-                notesAdapter.notifyDataSetChanged();
+                filter(s);
                 return false;
             }
         });
 
         searchView.setOnCloseListener(() -> {
-            noteModels.clear();
-            noteModels.addAll(allNoteModels);
-            notesAdapter.notifyDataSetChanged();
+            binding.floatingActionButtonAddNote.setVisibility(View.VISIBLE);
             return false;
         });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void filter(String s) {
+        ArrayList<NoteModel> filteredNotes = new ArrayList<>();
+        for (NoteModel note : noteModels) {
+            if (s.isEmpty() || note.getText().contains(s)) {
+                filteredNotes.add(note);
+            }
+        }
+        notesAdapter.setDataSet(filteredNotes);
     }
 
     @Override
@@ -127,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case (R.id.option_delete):
                 notesAdapter.deleteAllSelectedNotes();
+                loadUserNotes();
                 return true;
             case (R.id.option_log_out):
                 FirebaseUtil.signOut();
@@ -158,8 +163,12 @@ public class MainActivity extends AppCompatActivity {
 
         imageUtil = new ImageUtil(this, binding.navigationStart.header.imageViewUser);
 
+        layoutManager
+                = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
+
         noteModels = new ArrayList<>();
-        notesAdapter = new NotesAdapter(noteModels, getApplicationContext());
+        notesAdapter = new NotesAdapter(noteModels, layoutManager, getApplicationContext());
+        binding.notesContent.recyclerViewNotes.setLayoutManager(layoutManager);
         binding.notesContent.recyclerViewNotes.setAdapter(notesAdapter);
 
         folderModels = new ArrayList<>();
@@ -221,10 +230,7 @@ public class MainActivity extends AppCompatActivity {
         setIsProgressNotes(true);
         if (event.isNewNote()) {
             FirebaseUtil.addUserNoteToFolder(noteModel).addOnCompleteListener(task -> {
-                noteModels.add(0, noteModel);
-                noteModel.setDocumentId(task.getResult().getId());
-                notesAdapter.notifyDataSetChanged();
-                binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
+                loadUserNotes();
                 setIsProgressNotes(false);
             });
         } else {
@@ -232,10 +238,7 @@ public class MainActivity extends AppCompatActivity {
             FirebaseUtil.updateUserNote(noteModel)
                     .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    NoteModel note = noteModels.get(0);
-                                    noteModels.set(0, noteModel);
-                                    noteModels.set(event.getPosition(), note);
-                                    notesAdapter.notifyDataSetChanged();
+                                    loadUserNotes();
                                     setIsProgressNotes(false);
                                 }
                             }
@@ -256,9 +259,12 @@ public class MainActivity extends AppCompatActivity {
     public void onMultiSelectEvent(@NonNull MultiSelectEvent event) {
         boolean show = event.isShow();
         if (show) {
+            Log.i(Constants.TAG, "showing multiselect");
             setContextToolBar();
+            binding.navigationStart.navigationView.setVisibility(View.GONE);
         } else {
             setInitToolBar();
+            binding.navigationStart.navigationView.setVisibility(View.VISIBLE);
         }
         if (this.toolBarMenu != null) {
             this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
@@ -308,9 +314,9 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (noteModels.size() > 0) {
                             Collections.sort(noteModels);
-                            allNoteModels = new ArrayList<>(noteModels);
-                            Log.i(Constants.TAG, "Loaded" + allNoteModels.size());
-                            notesAdapter.notifyDataSetChanged();
+//                            allNoteModels = new ArrayList<>(noteModels);
+//                            Log.i(Constants.TAG, "Loaded" + allNoteModels.size());
+                            notesAdapter.setDataSet(noteModels);
                             binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                         }
                     }

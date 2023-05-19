@@ -24,6 +24,22 @@ public class EditNoteActivity extends AppCompatActivity {
     private static final int MIN_FONT_SIZE = 1;
     private static final int MAX_FONT_SIZE = 7;
 
+    // 148, 0, 211 Violet
+    // 75, 0, 130 Indigo
+    // 0, 0, 255 Blue
+    // 0, 255, 0 Green
+    // 255, 255, 0 Yellow
+    // 255, 127, 0 Orange
+    // 255, 0, 0 Red
+
+    private static final int COLOR_VIOLET = Color.rgb(148, 0, 211);
+    private static final int COLOR_INDIGO = Color.rgb(75, 0, 130);
+    private static final int COLOR_BLUE = Color.rgb(0, 0, 255);
+    private static final int COLOR_GREEN = Color.rgb(0, 255, 0);
+    private static final int COLOR_YELLOW = Color.rgb(255, 255, 0);
+    private static final int COLOR_ORANGE = Color.rgb(255, 127, 0);
+    private static final int COLOR_RED = Color.rgb(255, 127, 0);
+
     private int fontSize;
 
     private ActivityEditNoteBinding binding;
@@ -61,6 +77,12 @@ public class EditNoteActivity extends AppCompatActivity {
     private void setListeners() {
         binding.toolbarInit.setNavigationOnClickListener(view -> onBackPressed());
 
+        setActionButtons();
+        setTextColorButtons();
+        setTextBackgroundColorButtons();
+    }
+
+    private void setActionButtons() {
         findViewById(R.id.action_undo).setOnClickListener(v -> binding.editor.undo());
 
         findViewById(R.id.action_redo).setOnClickListener(v -> binding.editor.redo());
@@ -96,22 +118,32 @@ public class EditNoteActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
-            private boolean isChanged = false;
+            private boolean isVisible = false;
 
             @Override
             public void onClick(View v) {
-                binding.editor.setTextColor(isChanged ? Color.BLACK : Color.RED);
-                isChanged = !isChanged;
+                if (!isVisible) {
+                    binding.backgroundColorsLayout.getRoot()
+                            .setVisibility(View.GONE);
+                }
+                binding.textColorsLayout.getRoot()
+                        .setVisibility(isVisible ? View.GONE : View.VISIBLE);
+                isVisible = !isVisible;
             }
         });
 
         findViewById(R.id.action_bg_color).setOnClickListener(new View.OnClickListener() {
-            private boolean isChanged;
+            private boolean isVisible = false;
 
             @Override
             public void onClick(View v) {
-                binding.editor.setTextBackgroundColor(isChanged ? Color.TRANSPARENT : Color.YELLOW);
-                isChanged = !isChanged;
+                if (!isVisible) {
+                    binding.textColorsLayout.getRoot()
+                            .setVisibility(View.GONE);
+                }
+                binding.backgroundColorsLayout.getRoot()
+                        .setVisibility(isVisible ? View.GONE : View.VISIBLE);
+                isVisible = !isVisible;
             }
         });
 
@@ -143,6 +175,80 @@ public class EditNoteActivity extends AppCompatActivity {
         findViewById(R.id.action_insert_link).setOnClickListener(v -> binding.editor.insertLink("https://github.com/wasabeef", "wasabeef"));
 
         findViewById(R.id.action_insert_checkbox).setOnClickListener(v -> binding.editor.insertTodo());
+    }
+    
+    private void setTextColorButtons() {
+        binding.textColorsLayout.violetColor.setBackgroundColor(COLOR_VIOLET);
+        binding.textColorsLayout.violetColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_VIOLET);
+        });
+
+        binding.textColorsLayout.indigoColor.setBackgroundColor(COLOR_INDIGO);
+        binding.textColorsLayout.indigoColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_INDIGO);
+        });
+
+        binding.textColorsLayout.blueColor.setBackgroundColor(COLOR_BLUE);
+        binding.textColorsLayout.blueColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_BLUE);
+        });
+
+        binding.textColorsLayout.greenColor.setBackgroundColor(COLOR_GREEN);
+        binding.textColorsLayout.greenColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_GREEN);
+        });
+
+        binding.textColorsLayout.yellowColor.setBackgroundColor(COLOR_YELLOW);
+        binding.textColorsLayout.yellowColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_YELLOW);
+        });
+
+        binding.textColorsLayout.orangeColor.setBackgroundColor(COLOR_ORANGE);
+        binding.textColorsLayout.orangeColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_ORANGE);
+        });
+
+        binding.textColorsLayout.redColor.setBackgroundColor(COLOR_RED);
+        binding.textColorsLayout.redColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_RED);
+        });
+    }
+
+    private void setTextBackgroundColorButtons() {
+        binding.backgroundColorsLayout.violetColor.setBackgroundColor(COLOR_VIOLET);
+        binding.backgroundColorsLayout.violetColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_VIOLET);
+        });
+
+        binding.backgroundColorsLayout.indigoColor.setBackgroundColor(COLOR_INDIGO);
+        binding.backgroundColorsLayout.indigoColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_INDIGO);
+        });
+
+        binding.backgroundColorsLayout.blueColor.setBackgroundColor(COLOR_BLUE);
+        binding.backgroundColorsLayout.blueColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_BLUE);
+        });
+
+        binding.backgroundColorsLayout.greenColor.setBackgroundColor(COLOR_GREEN);
+        binding.backgroundColorsLayout.greenColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_GREEN);
+        });
+
+        binding.backgroundColorsLayout.yellowColor.setBackgroundColor(COLOR_YELLOW);
+        binding.backgroundColorsLayout.yellowColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_YELLOW);
+        });
+
+        binding.backgroundColorsLayout.orangeColor.setBackgroundColor(COLOR_ORANGE);
+        binding.backgroundColorsLayout.orangeColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_ORANGE);
+        });
+
+        binding.backgroundColorsLayout.redColor.setBackgroundColor(COLOR_RED);
+        binding.backgroundColorsLayout.redColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_RED);
+        });
     }
 
     @Override

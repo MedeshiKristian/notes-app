@@ -1,15 +1,15 @@
 package com.uzhnu.notesapp.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
@@ -23,39 +23,47 @@ import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private static final int TEXT_LIMIT = 45;
 
     private final Context context;
 
-    private final List<NoteModel> noteModels;
+    private List<NoteModel> noteModels;
 
     private RecyclerView recyclerView;
 
-    private SparseBooleanArray mSelectedPositions;
+    private final LinearLayoutManager layoutManager;
 
-    public NotesAdapter(List<NoteModel> noteModels, Context context) {
+    private final Set<Integer> mSelectedPositions;
+
+    public NotesAdapter(List<NoteModel> noteModels, LinearLayoutManager layoutManager, Context context) {
         this.noteModels = noteModels;
         this.context = context;
-        mSelectedPositions = new SparseBooleanArray();
+        this.layoutManager = layoutManager;
+        mSelectedPositions = new HashSet<>();
     }
 
     @NonNull
     @Override
     public NotesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+//        Log.i(Constants.TAG, viewType + " " + isSelected(viewType));
         return new NotesViewHolder(
                 ItemNoteBinding.inflate(
                         LayoutInflater.from(parent.getContext()),
                         parent,
                         false
-                )
+                ),
+                isSelected(viewType)
         );
     }
 
@@ -88,17 +96,35 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return noteModels.size();
     }
 
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
     private void toggleSelection(@NonNull NotesViewHolder holder, int position) {
-        if (isSelected(position)) {
-            removeSelection(holder, position);
+        if (!isSelected(position)) {
+            if (getCountSelectedNotes() == 0) {
+                EventBus.getDefault().post(new MultiSelectEvent(true));
+            }
+            holder.addSelection();
+            mSelectedPositions.add(position);
         } else {
-            addSelection(holder, position);
+            holder.removeSelection();
+            mSelectedPositions.remove(position);
+            if (getCountSelectedNotes() == 0) {
+                EventBus.getDefault().post(new MultiSelectEvent(false));
+            }
         }
         EventBus.getDefault().post(new SelectNoteEvent());
     }
 
     private boolean isSelected(int position) {
-        return Boolean.TRUE.equals(mSelectedPositions.get(position));
+        return mSelectedPositions.contains(position);
     }
 
     public int getCountSelectedNotes() {
@@ -106,7 +132,14 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     }
 
     public boolean isMultiSelect() {
-        return mSelectedPositions.size() != 0;
+        return !mSelectedPositions.isEmpty();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setDataSet(List<NoteModel> filteredNotes) {
+        noteModels = filteredNotes;
+        layoutManager.removeAllViews();
+        notifyDataSetChanged();
     }
 
     @Override
@@ -119,16 +152,20 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void onMultiSelect(@NonNull MultiSelectEvent event) {
         boolean show = event.isShow();
         if (!show) {
-            for (int i = getItemCount() - 1; i >= 0; i--) {
-                if (isSelected(i)) {
-                    removeSelectionAt(i);
-                }
+            mSelectedPositions.clear();
+//            Log.i(Constants.TAG, "multiselect off " + mSelectedPositions.size());
+            final int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+            final int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+            for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; ++i) {
+                NotesViewHolder holder = (NotesViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                assert holder != null;
+                holder.removeSelection();
             }
         }
-        assert isMultiSelect() == show;
     }
 
     public void deleteAllSelectedNotes() {
+        recyclerView.getRecycledViewPool().clear();
         for (int i = getItemCount() - 1; i >= 0; --i) {
             if (isSelected(i)) {
                 int finalI = i;
@@ -137,62 +174,58 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                             if (task.isSuccessful()) {
                                 noteModels.remove(finalI);
                                 notifyItemRemoved(finalI);
+                                layoutManager.removeViewAt(finalI);
                             }
                         });
             }
         }
-    }
-
-    private void addSelection(@NonNull NotesViewHolder holder, int position) {
-        if (getCountSelectedNotes() == 0) {
-            EventBus.getDefault().post(new MultiSelectEvent(true));
-        }
-        ItemNoteBinding binding = holder.binding;
-        binding.layoutNote
-                .setBackgroundColor(ContextCompat.getColor(
-                                binding.layoutNote.getContext(),
-                                R.color.md_grey_200
-                        )
-                );
-        binding.imageViewSelected.setVisibility(View.VISIBLE);
-        mSelectedPositions.put(position, true);
-    }
-
-    private void removeSelection(@NonNull NotesViewHolder holder, int position) {
-        ItemNoteBinding binding = holder.binding;
-        binding.imageViewSelected.setVisibility(View.GONE);
-        binding.layoutNote.setBackground(ContextCompat.getDrawable(
-                        binding.layoutNote.getContext(),
-                        R.drawable.white_rounded_corners_background
-                )
-        );
-        mSelectedPositions.delete(position);
-        if (getCountSelectedNotes() == 0) {
-            EventBus.getDefault().post(new MultiSelectEvent(false));
-        }
-    }
-
-    private void removeSelectionAt(int position) {
-        NotesViewHolder holder =
-                (NotesViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
-        assert holder != null;
-        removeSelection(holder, position);
+        mSelectedPositions.clear();
+        EventBus.getDefault().post(new MultiSelectEvent(false));
     }
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private final ItemNoteBinding binding;
 
-        public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding) {
+        public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
             super(itemNoteBinding.getRoot());
             binding = itemNoteBinding;
-            Log.i(Constants.TAG, "construct");
+            if (selected) {
+                addSelection();
+            } else {
+                removeSelection();
+            }
         }
 
         private void bind(@NonNull NoteModel noteModel) {
-            binding.textViewNoteTitle.setText(AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()));
+//            Log.i(Constants.TAG, "bind");
+            binding.textViewNoteTitle.setText(
+                    StringUtils.abbreviate(
+                            AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
+                    )
+            );
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
+        }
+
+        private void addSelection() {
+            binding.layoutNote
+                    .setBackgroundColor(ContextCompat.getColor(
+                                    binding.layoutNote.getContext(),
+                                    R.color.md_grey_200
+                            )
+                    );
+            binding.imageViewSelected.setVisibility(View.VISIBLE);
+        }
+
+        private void removeSelection() {
+//            Log.i(Constants.TAG, "removing selection");
+            binding.imageViewSelected.setVisibility(View.GONE);
+            binding.layoutNote.setBackground(ContextCompat.getDrawable(
+                            binding.layoutNote.getContext(),
+                            R.drawable.white_rounded_corners_background
+                    )
+            );
         }
     }
 }

@@ -33,12 +33,12 @@
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <jp.wasabeef.richeditor.RichEditor
-            android:id="@+id/editor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:overScrollMode="never"
-            android:hint="Write your text here" />
+                <jp.wasabeef.richeditor.RichEditor
+                    android:id="@+id/editor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Write your text here"
+                    android:overScrollMode="never" />
     </LinearLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -54,7 +54,24 @@
         app:trackCornerRadius="8dp"
         app:trackThickness="@dimen/_4sdp" />
 
-    <include
-        android:id="@+id/rich_edit_toolbar"
-        layout="@layout/rich_editor_toolbar" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/text_colors_layout"
+            android:visibility="gone"
+            layout="@layout/rich_edit_colors" />
+
+        <include
+            android:id="@+id/background_colors_layout"
+            android:visibility="gone"
+            layout="@layout/rich_edit_colors" />
+
+        <include
+            android:id="@+id/rich_edit_toolbar"
+            layout="@layout/rich_editor_toolbar" />
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

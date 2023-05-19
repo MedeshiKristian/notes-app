@@ -97,7 +97,8 @@
             android:elevation="@dimen/_3sdp"
             android:hint="OTP"
             android:inputType="number"
-            android:padding="@dimen/_10sdp" />
+            android:padding="@dimen/_10sdp"
+            android:textColor="@color/black" />
     </LinearLayout>
 
     <LinearLayout

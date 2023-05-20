@@ -41,7 +41,6 @@ public class GalleryResultCallback implements ActivityResultCallback<ActivityRes
                     String encodedImage = ImageUtil.encodeImage(bitmap);
                     FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_IMAGE, encodedImage);
                     PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
-
                 } catch (FileNotFoundException exception) {
                     exception.printStackTrace();
                 }

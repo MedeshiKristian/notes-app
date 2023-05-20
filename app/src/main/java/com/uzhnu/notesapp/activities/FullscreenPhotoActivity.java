@@ -19,7 +19,6 @@ public class FullscreenPhotoActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         String encodedImage = (String) PreferencesManager.getInstance().get(Constants.KEY_IMAGE);
-
         assert encodedImage != null;
         binding.photoViewFullscreen.setImageBitmap(ImageUtil.decodeImage(encodedImage));
     }

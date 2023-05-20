@@ -51,6 +51,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.context = context;
         this.layoutManager = layoutManager;
         mSelectedPositions = new HashSet<>();
+        setHasStableIds(true);
     }
 
     @NonNull
@@ -152,31 +153,32 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void onMultiSelect(@NonNull MultiSelectEvent event) {
         boolean show = event.isShow();
         if (!show) {
-            mSelectedPositions.clear();
 //            Log.i(Constants.TAG, "multiselect off " + mSelectedPositions.size());
             final int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
             final int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
             for (int i = firstVisibleItemPosition; i <= lastVisibleItemPosition; ++i) {
-                NotesViewHolder holder = (NotesViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
-                assert holder != null;
-                holder.removeSelection();
+                if (isSelected(i)) {
+                    NotesViewHolder holder = (NotesViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    assert holder != null;
+                    holder.removeSelection();
+                }
             }
+            mSelectedPositions.clear();
         }
     }
 
     public void deleteAllSelectedNotes() {
         recyclerView.getRecycledViewPool().clear();
-        for (int i = getItemCount() - 1; i >= 0; --i) {
+        for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                int finalI = i;
-                FirebaseUtil.deleteUserNote(noteModels.get(i))
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                noteModels.remove(finalI);
-                                notifyItemRemoved(finalI);
-                                layoutManager.removeViewAt(finalI);
-                            }
-                        });
+                FirebaseUtil.deleteUserNote(noteModels.get(i));
+            }
+        }
+        for (int i = noteModels.size() - 1; i >= 0; i--) {
+            if (isSelected(i)) {
+                layoutManager.removeViewAt(i);
+                noteModels.remove(i);
+                notifyItemRemoved(i);
             }
         }
         mSelectedPositions.clear();
@@ -219,7 +221,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
 
         private void removeSelection() {
-//            Log.i(Constants.TAG, "removing selection");
             binding.imageViewSelected.setVisibility(View.GONE);
             binding.layoutNote.setBackground(ContextCompat.getDrawable(
                             binding.layoutNote.getContext(),

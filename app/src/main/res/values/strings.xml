@@ -6,5 +6,9 @@
     <string name="navigation_close">Close navigation sidebar</string>
     <string name="save_note">Save note</string>
     <string name="folders_title">Folders</string>
+
+    <string name="dialog_delete_notes">Are you sure you want to delete selected notes?</string>
+    <string name="string_ok">OK</string>
+    <string name="string_cancel">Cancel</string>
     <!--    <string name="default_folder">Notes</string>-->
 </resources>

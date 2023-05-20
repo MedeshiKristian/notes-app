@@ -127,8 +127,7 @@ public class LoginOtpFragment extends Fragment {
                 mVerificationId = verificationId;
                 mResendToken = token;
 
-                AndroidUtil.showToast(getContext(),
-                        "OTP has been sent successfully");
+                AndroidUtil.showToast(getContext(), "OTP has been sent successfully");
 
                 startResendTimer();
                 setIsProgress(false);

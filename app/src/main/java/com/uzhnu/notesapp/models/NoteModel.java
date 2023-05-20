@@ -14,14 +14,12 @@ import java.util.Date;
 import java.util.Locale;
 
 public class NoteModel implements Comparable<NoteModel>, Parcelable {
-    public static final String format = "dd MMMM yyyy HH:mm:ss";
+    public static final String DATE_FORMAT = "dd MMMM yyyy HH:mm:ss";
 
     private String documentId;
     private String text;
     private Date lastEdited;
     private Date createdAt;
-
-    private boolean isSelected = false;
 
     public NoteModel() {
     }
@@ -35,8 +33,8 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     public NoteModel(@NonNull Parcel in) throws ParseException {
         this.text = in.readString();
         this.documentId = in.readString();
-        this.createdAt = new SimpleDateFormat(format, Locale.getDefault()).parse(in.readString());
-        this.lastEdited = new SimpleDateFormat(format, Locale.getDefault()).parse(in.readString());
+        this.createdAt = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(in.readString());
+        this.lastEdited = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(in.readString());
     }
 
     @Override
@@ -48,8 +46,8 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeString(getText());
         parcel.writeString(getDocumentId());
-        parcel.writeString(new SimpleDateFormat(format, Locale.getDefault()).format(getCreatedAt()));
-        parcel.writeString(new SimpleDateFormat(format, Locale.getDefault()).format(getLastEdited()));
+        parcel.writeString(new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(getCreatedAt()));
+        parcel.writeString(new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(getLastEdited()));
     }
 
     public static final Creator<NoteModel> CREATOR = new Creator<NoteModel>() {
@@ -111,13 +109,5 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
-    }
-
-    public boolean isSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(boolean selected) {
-        isSelected = selected;
     }
 }

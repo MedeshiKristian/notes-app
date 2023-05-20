@@ -1,10 +1,13 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
@@ -15,6 +18,7 @@ import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
 
@@ -25,6 +29,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     private List<FolderModel> folders;
 
+    private FoldersViewHolder currentFolderHolder;
 
     public FoldersAdapter(List<FolderModel> categoryModels) {
         this.folders = categoryModels;
@@ -51,11 +56,16 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
                 // TODO Edit folders activity
             });
         } else {
-            int finalPosition = position;
-            holder.setData(folders.get(position));
+            FolderModel folder = folders.get(position);
+            holder.setData(folder);
+
+            String currentFolderName = (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER);
+            if (folder.getName().equals(currentFolderName)) {
+                setCurrentFolderHolder(holder);
+            }
+
             holder.itemView.setOnClickListener(view -> {
-                // TODO Load notes from folderName collection
-                SelectFolderEvent event = new SelectFolderEvent(folders.get(position).getName());
+                SelectFolderEvent event = new SelectFolderEvent(folder.getName(), holder);
                 EventBus.getDefault().post(event);
             });
         }
@@ -68,13 +78,43 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) {
-            return SPECIAL;
-        } else if (position == folders.size()) {
+        if (position == folders.size()) {
             return ADD;
+        } else if (position == 0) {
+            return SPECIAL;
         } else {
             return REGULAR;
         }
+    }
+
+    private void setCurrentFolderHolder(FoldersViewHolder holder) {
+        if (this.currentFolderHolder != null) {
+            removeSelection(currentFolderHolder);
+        }
+        addSelection(holder);
+        currentFolderHolder = holder;
+    }
+
+    private void addSelection(@NonNull FoldersViewHolder holder) {
+        holder.binding.getRoot()
+                .setBackgroundColor(ContextCompat.getColor(
+                                holder.binding.getRoot().getContext(),
+                                R.color.md_grey_300
+                        )
+                );
+    }
+
+    private void removeSelection(@NonNull FoldersViewHolder holder) {
+        holder.binding.getRoot().setBackgroundColor(Color.WHITE);
+    }
+
+    @Subscribe
+    public void onSelectFolderEvent(@NonNull SelectFolderEvent event) {
+        Log.i(Constants.TAG, "called event in folder adapter");
+        FoldersViewHolder holder = event.getHolder();
+        setCurrentFolderHolder(holder);
+        currentFolderHolder = holder;
+        Log.i(Constants.TAG, "called");
     }
 
     public static class FoldersViewHolder extends RecyclerView.ViewHolder {

@@ -9,15 +9,19 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
+import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
+import org.checkerframework.checker.units.qual.A;
 import org.greenrobot.eventbus.EventBus;
 
 public class EditNoteActivity extends AppCompatActivity {
@@ -31,6 +35,8 @@ public class EditNoteActivity extends AppCompatActivity {
     // 255, 255, 0 Yellow
     // 255, 127, 0 Orange
     // 255, 0, 0 Red
+
+    // TODO 255, 255, 255 White
 
     private static final int COLOR_VIOLET = Color.rgb(148, 0, 211);
     private static final int COLOR_INDIGO = Color.rgb(75, 0, 130);
@@ -261,7 +267,7 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case (R.id.save_note):
+            case (R.id.option_save_note):
                 String newText = binding.editor.getHtml();
                 Log.i(Constants.TAG, newText);
                 if (newText.isEmpty()) {

@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -35,7 +34,7 @@ import java.io.InputStream;
 public class ImageUtil {
     private final ActivityResultLauncher<Intent> pickImageFromGallery;
 
-    Uri cameraUri;
+    private final Uri cameraUri;
     private final ActivityResultLauncher<Intent> pickImageFromCamera;
 
     private final ActivityResultLauncher<String> requestCameraPermissions;
@@ -49,7 +48,7 @@ public class ImageUtil {
                 new ActivityResultContracts.StartActivityForResult(),
                 new GalleryResultCallback(context, imageView)
         );
-        cameraUri = createImageUri(context);
+        cameraUri = getUri(context);
         pickImageFromCamera = activity.registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new CameraResultCallback(context, imageView, cameraUri)
@@ -61,7 +60,7 @@ public class ImageUtil {
         );
     }
 
-    public static Uri createImageUri(@NonNull Context context) {
+    public static Uri getUri(@NonNull Context context) {
         return FileProvider.getUriForFile(context,
                 "com.uzhnu.notesapp.GenericFileProvider",
                 new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
@@ -134,7 +133,6 @@ public class ImageUtil {
 
         assert cameraLayout != null;
         cameraLayout.setOnClickListener(view -> {
-            Log.i(Constants.TAG, "Camera clicked");
             checkPermissionsAndLaunchCamera();
             bottomSheetDialog.hide();
         });

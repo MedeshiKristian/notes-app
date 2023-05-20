@@ -36,7 +36,7 @@
 
         <include
             android:id="@+id/notes_content"
-            layout="@layout/notes_content" />
+            layout="@layout/notes_recycler_view" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator_notes"

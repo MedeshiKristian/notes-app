@@ -56,7 +56,7 @@ public class LoginUsernameFragment extends Fragment {
         pickImageFromGallery = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new GalleryResultCallback(getContext(), binding.imageViewUser));
-        cameraUri = ImageUtil.createImageUri(requireContext());
+        cameraUri = ImageUtil.getUri(requireContext());
         pickImageFromCamera = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new CameraResultCallback(getContext(), binding.imageViewUser, cameraUri)

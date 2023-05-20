@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -23,6 +24,7 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
+import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
@@ -44,11 +46,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DeleteNotesDialog.DeleteNotesListener {
     private ActivityMainBinding binding;
 
     private List<NoteModel> noteModels;
-    //    private List<NoteModel> allNoteModels;
     private NotesAdapter notesAdapter;
     private LinearLayoutManager layoutManager;
 
@@ -86,9 +87,17 @@ public class MainActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu_main, menu);
         this.toolBarMenu = menu;
 
+        Object multiselect = PreferencesManager.getInstance().get(Constants.KEY_MULTISELECT);
+        if (multiselect != null) {
+            boolean show = (boolean) multiselect;
+            setOptionsVisibility(show);
+        }
+
         searchView = (SearchView) menu.findItem(R.id.option_search).getActionView();
 
         searchView.setIconifiedByDefault(true);
+
+        searchView.setPadding(0, 0, 0, 5);
 
         searchView.setOnSearchClickListener(view -> {
             binding.floatingActionButtonAddNote.setVisibility(View.INVISIBLE);
@@ -117,9 +126,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void filter(String s) {
+        s = s.toLowerCase();
         ArrayList<NoteModel> filteredNotes = new ArrayList<>();
         for (NoteModel note : noteModels) {
-            if (s.isEmpty() || note.getText().contains(s)) {
+            if (s.isEmpty() || note.getText().toLowerCase().contains(s)) {
                 filteredNotes.add(note);
             }
         }
@@ -130,8 +140,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case (R.id.option_delete):
-                notesAdapter.deleteAllSelectedNotes();
-                loadUserNotes();
+                DeleteNotesDialog dialog = new DeleteNotesDialog();
+                dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
             case (R.id.option_log_out):
                 FirebaseUtil.signOut();
@@ -151,13 +161,15 @@ public class MainActivity extends AppCompatActivity {
             EventBus.getDefault().register(this);
         }
         EventBus.getDefault().register(notesAdapter);
+        EventBus.getDefault().register(foldersAdapter);
+
     }
 
     private void init() {
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
-//        for (int i = 0; i < 120; i++) {
+//        for (int i = 0; i < 50; i++) {
 //            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
 //        }
 
@@ -193,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
         };
         binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
         binding.toolbarInit.setNavigationOnClickListener(view -> toggleNavigationView());
         binding.navigationStart.navigationView.setVisibility(View.VISIBLE);
         binding.floatingActionButtonAddNote.setVisibility(View.VISIBLE);
@@ -258,18 +271,22 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void onMultiSelectEvent(@NonNull MultiSelectEvent event) {
         boolean show = event.isShow();
+        PreferencesManager.getInstance().put(Constants.KEY_MULTISELECT, show);
         if (show) {
-            Log.i(Constants.TAG, "showing multiselect");
             setContextToolBar();
-            binding.navigationStart.navigationView.setVisibility(View.GONE);
+            binding.navigationStart.getRoot().setVisibility(View.GONE);
         } else {
             setInitToolBar();
             binding.navigationStart.navigationView.setVisibility(View.VISIBLE);
         }
+        setOptionsVisibility(show);
+    }
+
+    private void setOptionsVisibility(boolean multiselectShow) {
         if (this.toolBarMenu != null) {
-            this.toolBarMenu.findItem(R.id.option_delete).setVisible(show);
-            this.toolBarMenu.findItem(R.id.option_search).setVisible(!show);
-            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!show);
+            this.toolBarMenu.findItem(R.id.option_delete).setVisible(multiselectShow);
+            this.toolBarMenu.findItem(R.id.option_search).setVisible(!multiselectShow);
+            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!multiselectShow);
         }
     }
 
@@ -312,13 +329,9 @@ public class MainActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             noteModels.add(FirebaseUtil.getNoteFromDocument(queryDocumentSnapshot));
                         }
-                        if (noteModels.size() > 0) {
-                            Collections.sort(noteModels);
-//                            allNoteModels = new ArrayList<>(noteModels);
-//                            Log.i(Constants.TAG, "Loaded" + allNoteModels.size());
-                            notesAdapter.setDataSet(noteModels);
-                            binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
-                        }
+                        Collections.sort(noteModels);
+                        notesAdapter.setDataSet(noteModels);
+                        binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                     }
                     setIsProgressNotes(false);
                 });
@@ -332,13 +345,12 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         folderModels.clear();
+                        folderModels.add(new FolderModel("Notes"));
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             folderModels.add(FirebaseUtil.getFolderFromDocument(queryDocumentSnapshot));
                         }
-                        if (folderModels.size() > 0) {
-                            foldersAdapter.notifyDataSetChanged();
-                            binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
-                        }
+                        foldersAdapter.notifyDataSetChanged();
+                        binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
                     }
                     setIsProgressFolders(false);
                 });
@@ -391,11 +403,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(notesAdapter);
+        EventBus.getDefault().unregister(foldersAdapter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+        notesAdapter.deleteAllSelectedNotes();
+        loadUserNotes();
+    }
+
+    @Override
+    public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+        assert dialog.getDialog() != null;
+        dialog.getDialog().cancel();
+        EventBus.getDefault().post(new MultiSelectEvent(true));
     }
 }

@@ -9,8 +9,7 @@ import com.uzhnu.notesapp.utils.ImageUtil;
 import java.util.Map;
 
 public class RequestCameraPermissionCallback implements ActivityResultCallback<Boolean> {
-    private ImageUtil imageUtil;
-    private FragmentActivity activity;
+    private final ImageUtil imageUtil;
 
     public RequestCameraPermissionCallback(ImageUtil imageUtil) {
         this.imageUtil = imageUtil;

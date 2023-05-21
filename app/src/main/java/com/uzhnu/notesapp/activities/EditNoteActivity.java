@@ -27,17 +27,6 @@ import org.greenrobot.eventbus.EventBus;
 public class EditNoteActivity extends AppCompatActivity {
     private static final int MIN_FONT_SIZE = 1;
     private static final int MAX_FONT_SIZE = 7;
-
-    // 148, 0, 211 Violet
-    // 75, 0, 130 Indigo
-    // 0, 0, 255 Blue
-    // 0, 255, 0 Green
-    // 255, 255, 0 Yellow
-    // 255, 127, 0 Orange
-    // 255, 0, 0 Red
-
-    // TODO 255, 255, 255 White
-
     private static final int COLOR_VIOLET = Color.rgb(148, 0, 211);
     private static final int COLOR_INDIGO = Color.rgb(75, 0, 130);
     private static final int COLOR_BLUE = Color.rgb(0, 0, 255);
@@ -45,6 +34,8 @@ public class EditNoteActivity extends AppCompatActivity {
     private static final int COLOR_YELLOW = Color.rgb(255, 255, 0);
     private static final int COLOR_ORANGE = Color.rgb(255, 127, 0);
     private static final int COLOR_RED = Color.rgb(255, 127, 0);
+    private static final int COLOR_WHITE = Color.rgb(255, 255, 255);
+    private static final int COLOR_BLACK = Color.rgb(0, 0, 0);
 
     private int fontSize;
 
@@ -218,6 +209,16 @@ public class EditNoteActivity extends AppCompatActivity {
         binding.textColorsLayout.redColor.setOnClickListener(view -> {
             binding.editor.setTextColor(COLOR_RED);
         });
+
+        binding.textColorsLayout.whiteColor.setBackgroundColor(COLOR_WHITE);
+        binding.textColorsLayout.whiteColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_WHITE);
+        });
+
+        binding.textColorsLayout.blackColor.setBackgroundColor(COLOR_BLACK);
+        binding.textColorsLayout.blackColor.setOnClickListener(view -> {
+            binding.editor.setTextColor(COLOR_BLACK);
+        });
     }
 
     private void setTextBackgroundColorButtons() {
@@ -254,6 +255,16 @@ public class EditNoteActivity extends AppCompatActivity {
         binding.backgroundColorsLayout.redColor.setBackgroundColor(COLOR_RED);
         binding.backgroundColorsLayout.redColor.setOnClickListener(view -> {
             binding.editor.setTextBackgroundColor(COLOR_RED);
+        });
+
+        binding.backgroundColorsLayout.whiteColor.setBackgroundColor(COLOR_WHITE);
+        binding.backgroundColorsLayout.whiteColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_WHITE);
+        });
+
+        binding.backgroundColorsLayout.blackColor.setBackgroundColor(COLOR_BLACK);
+        binding.backgroundColorsLayout.blackColor.setOnClickListener(view -> {
+            binding.editor.setTextBackgroundColor(COLOR_BLACK);
         });
     }
 

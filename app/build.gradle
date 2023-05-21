@@ -66,6 +66,9 @@ dependencies {
     // Rich Editor
     implementation 'jp.wasabeef:richeditor-android:2.0.0'
 
+    // SwipeRefreshLayout
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
 

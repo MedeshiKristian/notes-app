@@ -32,6 +32,7 @@ import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
         s = s.toLowerCase();
         ArrayList<NoteModel> filteredNotes = new ArrayList<>();
         for (NoteModel note : noteModels) {
-            if (s.isEmpty() || note.getText().toLowerCase().contains(s)) {
+            if (s.isEmpty() || AndroidUtil.getPlainTextFromHtmlp(note.getText()).toLowerCase().contains(s)) {
                 filteredNotes.add(note);
             }
         }
@@ -297,6 +298,8 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
         });
 
         binding.navigationStart.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
+
+        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserDetails);
     }
 
     private void loadUserDetails() {
@@ -313,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                                 userModel.getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         ));
+                        binding.notesContent.swipeRefreshNotes.setRefreshing(false);
                     } else {
                         Log.e(Constants.TAG, "Task for getting user image failed");
                     }

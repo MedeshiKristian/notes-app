@@ -105,7 +105,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
     }
 
     private void removeSelection(@NonNull FoldersViewHolder holder) {
-        holder.binding.getRoot().setBackgroundColor(Color.WHITE);
+        holder.binding.getRoot().setBackgroundResource(R.drawable.ripple_effect);
     }
 
     @Subscribe

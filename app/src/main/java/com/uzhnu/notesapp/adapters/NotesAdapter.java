@@ -35,16 +35,56 @@ import java.util.Set;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
     private static final int TEXT_LIMIT = 45;
-
     private final Context context;
-
     private List<NoteModel> noteModels;
-
     private RecyclerView recyclerView;
-
     private final LinearLayoutManager layoutManager;
-
     private final Set<Integer> mSelectedPositions;
+
+    public static class NotesViewHolder extends RecyclerView.ViewHolder {
+        private final ItemNoteBinding binding;
+
+        public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
+            super(itemNoteBinding.getRoot());
+            binding = itemNoteBinding;
+            if (selected) {
+                addSelection();
+            } else {
+                removeSelection();
+            }
+        }
+
+        private void bind(@NonNull NoteModel noteModel) {
+//            Log.i(Constants.TAG, "bind");
+            binding.textViewNoteTitle.setText(
+                    StringUtils.abbreviate(
+                            AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
+                    )
+            );
+            SimpleDateFormat simpleDateFormat
+                    = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
+            binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
+        }
+
+        private void addSelection() {
+            binding.layoutNote
+                    .setBackgroundColor(ContextCompat.getColor(
+                                    binding.layoutNote.getContext(),
+                                    R.color.md_grey_200
+                            )
+                    );
+            binding.imageViewSelected.setVisibility(View.VISIBLE);
+        }
+
+        private void removeSelection() {
+            binding.imageViewSelected.setVisibility(View.GONE);
+            binding.layoutNote.setBackground(ContextCompat.getDrawable(
+                            binding.layoutNote.getContext(),
+                            R.drawable.white_rounded_corners_background
+                    )
+            );
+        }
+    }
 
     public NotesAdapter(List<NoteModel> noteModels, LinearLayoutManager layoutManager, Context context) {
         this.noteModels = noteModels;
@@ -143,6 +183,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         notifyDataSetChanged();
     }
 
+    public List<NoteModel> getDataSet() {
+        return this.noteModels;
+    }
+
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -176,57 +220,20 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                layoutManager.removeViewAt(i);
-                noteModels.remove(i);
-                notifyItemRemoved(i);
+                remove(i);
             }
         }
         mSelectedPositions.clear();
         EventBus.getDefault().post(new MultiSelectEvent(false));
     }
 
-    public static class NotesViewHolder extends RecyclerView.ViewHolder {
-        private final ItemNoteBinding binding;
-
-        public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
-            super(itemNoteBinding.getRoot());
-            binding = itemNoteBinding;
-            if (selected) {
-                addSelection();
-            } else {
-                removeSelection();
-            }
-        }
-
-        private void bind(@NonNull NoteModel noteModel) {
-//            Log.i(Constants.TAG, "bind");
-            binding.textViewNoteTitle.setText(
-                    StringUtils.abbreviate(
-                            AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
-                    )
-            );
-            SimpleDateFormat simpleDateFormat
-                    = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
-            binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
-        }
-
-        private void addSelection() {
-            binding.layoutNote
-                    .setBackgroundColor(ContextCompat.getColor(
-                                    binding.layoutNote.getContext(),
-                                    R.color.md_grey_200
-                            )
-                    );
-            binding.imageViewSelected.setVisibility(View.VISIBLE);
-        }
-
-        private void removeSelection() {
-            binding.imageViewSelected.setVisibility(View.GONE);
-            binding.layoutNote.setBackground(ContextCompat.getDrawable(
-                            binding.layoutNote.getContext(),
-                            R.drawable.white_rounded_corners_background
-                    )
-            );
-        }
+    public void remove(int position) {
+        layoutManager.removeViewAt(position);
+        noteModels.remove(position);
+        notifyItemRemoved(position);
     }
+
+    // TODO
+//    public void restore(NoteModel note, int position) {
+//    }
 }

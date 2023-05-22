@@ -17,12 +17,15 @@ import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
+import com.uzhnu.notesapp.callbacks.SwipeToDeleteCallback;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
@@ -299,7 +302,35 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
 
         binding.navigationStart.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
 
-        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserDetails);
+        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserNotes);
+
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this) {
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                final int position = viewHolder.getLayoutPosition();
+                final NoteModel note = notesAdapter.getDataSet().get(position);
+                FirebaseUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        notesAdapter.remove(position);
+                    }
+                });
+
+                // TODO restore with snackbar
+//                String text = "Note was removed from the list";
+//                Snackbar snackbar = Snackbar
+//                        .make(binding.coordinatorContent, text, Snackbar.LENGTH_LONG);
+//                snackbar.setAction("UNDO", view -> {
+//                    notesAdapter.restore(note, position);
+//                    binding.notesContent.recyclerViewNotes.scrollToPosition(position);
+//                });
+//
+//                snackbar.setActionTextColor(ContextCompat
+//                        .getColor(getApplicationContext(), R.color.primary));
+//                snackbar.show();
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchHelper.attachToRecyclerView(binding.notesContent.recyclerViewNotes);
     }
 
     private void loadUserDetails() {
@@ -316,7 +347,6 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                                 userModel.getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         ));
-                        binding.notesContent.swipeRefreshNotes.setRefreshing(false);
                     } else {
                         Log.e(Constants.TAG, "Task for getting user image failed");
                     }
@@ -336,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                         Collections.sort(noteModels);
                         notesAdapter.setDataSet(noteModels);
                         binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
+                        binding.notesContent.swipeRefreshNotes.setRefreshing(false);
                     }
                     setIsProgressNotes(false);
                 });

@@ -12,6 +12,8 @@ import androidx.fragment.app.DialogFragment;
 import com.uzhnu.notesapp.R;
 
 public class DeleteNotesDialog extends DialogFragment {
+    private DeleteNotesListener listener;
+
     public interface DeleteNotesListener {
         void onDialogPositiveClick(@NonNull DialogFragment dialog);
 
@@ -42,8 +44,6 @@ public class DeleteNotesDialog extends DialogFragment {
                 });
         return builder.create();
     }
-
-    private DeleteNotesListener listener;
 
     @Override
     public void onAttach(@NonNull Context context) {

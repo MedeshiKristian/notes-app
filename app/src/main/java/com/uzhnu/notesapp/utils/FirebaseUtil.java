@@ -1,5 +1,7 @@
 package com.uzhnu.notesapp.utils;
 
+import android.provider.ContactsContract;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.Task;
@@ -68,15 +70,28 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static Task<DocumentReference> addUserNoteToFolder(@NonNull NoteModel noteModel) {
+    public static Map<String, Object> getObjectFromNote(@NonNull NoteModel noteModel) {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put(Constants.KEY_TEXT, noteModel.getText());
         objectMap.put(Constants.KEY_LAST_EDITED, noteModel.getLastEdited());
         objectMap.put(Constants.KEY_CREATED_AT, noteModel.getCreatedAt());
-        return FirebaseUtil.getCurrentFolderNotes().add(objectMap);
+        return objectMap;
     }
 
     @NonNull
+    public static Task<DocumentReference> addUserNoteToFolder(@NonNull NoteModel noteModel) {
+        return FirebaseUtil.getCurrentFolderNotes()
+                .add(getObjectFromNote(noteModel));
+    }
+
+    @NonNull
+    public static Task<Void> restoreNoteToFolder(@NonNull NoteModel noteModel) {
+        return FirebaseUtil.getCurrentFolderNotes()
+                .document(noteModel.getDocumentId())
+                .set(getObjectFromNote(noteModel));
+    }
+
+                                                              @NonNull
     public static Task<Void> deleteUserNote(@NonNull NoteModel noteModel) {
         return getCurrentFolderNotes().document(noteModel.getDocumentId()).delete();
     }

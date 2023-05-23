@@ -2,6 +2,7 @@ package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
@@ -70,17 +72,11 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.toolbarInit);
-
-        setInitToolBar();
-
         init();
-
         loadUserDetails();
         loadUserNotes();
         loadUserFolders();
-
         setListeners();
     }
 
@@ -170,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
     }
 
     private void init() {
+        setInitToolBar();
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
@@ -177,10 +174,15 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
 //            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
 //        }
 
+        binding.notesContent.swipeRefreshNotes.setColorSchemeColors(
+                ContextCompat.getColor(getApplicationContext(), R.color.primary)
+        );
+
         imageUtil = new ImageUtil(this, binding.navigationStart.header.imageViewUser);
 
         layoutManager
-                = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
+                = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL,
+                false);
 
         noteModels = new ArrayList<>();
         notesAdapter = new NotesAdapter(noteModels, layoutManager, getApplicationContext());
@@ -244,11 +246,11 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
     @Subscribe
     public void onEditNoteEvent(@NonNull EditNoteEvent event) {
         NoteModel noteModel = new NoteModel(event.getNoteText());
-        setIsProgressNotes(true);
+        setProgressNotes(true);
         if (event.isNewNote()) {
             FirebaseUtil.addUserNoteToFolder(noteModel).addOnCompleteListener(task -> {
                 loadUserNotes();
-                setIsProgressNotes(false);
+                setProgressNotes(false);
             });
         } else {
             noteModel.setDocumentId(event.getNoteId());
@@ -256,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                     .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     loadUserNotes();
-                                    setIsProgressNotes(false);
+                                    setProgressNotes(false);
                                 }
                             }
                     );
@@ -315,18 +317,23 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                     }
                 });
 
-                // TODO restore with snackbar
-//                String text = "Note was removed from the list";
-//                Snackbar snackbar = Snackbar
-//                        .make(binding.coordinatorContent, text, Snackbar.LENGTH_LONG);
-//                snackbar.setAction("UNDO", view -> {
-//                    notesAdapter.restore(note, position);
-//                    binding.notesContent.recyclerViewNotes.scrollToPosition(position);
-//                });
-//
-//                snackbar.setActionTextColor(ContextCompat
-//                        .getColor(getApplicationContext(), R.color.primary));
-//                snackbar.show();
+                String text = "Note was removed from the list";
+                Snackbar snackbar = Snackbar
+                        .make(binding.coordinatorContent, text, Snackbar.LENGTH_LONG);
+                snackbar.setBackgroundTint(Color.WHITE);
+                snackbar.setTextColor(Color.BLACK);
+                snackbar.setAction("UNDO", view -> {
+                    FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            notesAdapter.restore(note, position);
+                        }
+                    });
+                    binding.notesContent.recyclerViewNotes.scrollToPosition(position);
+                });
+
+                snackbar.setActionTextColor(ContextCompat
+                        .getColor(getApplicationContext(), R.color.primary));
+                snackbar.show();
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
@@ -355,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadUserNotes() {
-        setIsProgressNotes(true);
+        setProgressNotes(true);
         FirebaseUtil.getCurrentFolderNotes().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -368,14 +375,14 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                         binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
                         binding.notesContent.swipeRefreshNotes.setRefreshing(false);
                     }
-                    setIsProgressNotes(false);
+                    setProgressNotes(false);
                 });
 
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadUserFolders() {
-        setIsProgressFolders(true);
+        setProgressFolders(true);
         FirebaseUtil.getFolders().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -387,11 +394,11 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                         foldersAdapter.notifyDataSetChanged();
                         binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
                     }
-                    setIsProgressFolders(false);
+                    setProgressFolders(false);
                 });
     }
 
-    private void setIsProgressNotes(boolean show) {
+    private void setProgressNotes(boolean show) {
         if (binding == null) return;
         if (show) {
             binding.notesContent.recyclerViewNotes.setVisibility(View.GONE);
@@ -403,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
         }
     }
 
-    private void setIsProgressFolders(boolean show) {
+    private void setProgressFolders(boolean show) {
         if (binding == null) return;
         if (show) {
             binding.navigationStart.recyclerViewFolders.setVisibility(View.GONE);

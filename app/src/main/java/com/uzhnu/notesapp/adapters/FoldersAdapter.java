@@ -31,6 +31,39 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     private FoldersViewHolder currentFolderHolder;
 
+    public static class FoldersViewHolder extends RecyclerView.ViewHolder {
+        private ItemFolderBinding binding;
+
+        public FoldersViewHolder(@NonNull ItemFolderBinding itemFolderBinding) {
+            super(itemFolderBinding.getRoot());
+            binding = itemFolderBinding;
+        }
+
+        private void setData(@NonNull FolderModel folderModel) {
+            binding.textViewFolderName.setText(folderModel.getName());
+        }
+
+        @SuppressLint("SetTextI18n")
+        private void chooseStyle(int type) {
+            switch (type) {
+                case SPECIAL:
+                    binding.textViewFolderName.setText(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_outline_folder_special_24, 0, 0, 0);
+                    break;
+                case REGULAR:
+                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_outline_folder_24, 0, 0, 0);
+                    break;
+                case ADD:
+                    binding.textViewFolderName.setText("Edit folders");
+                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_outline_create_new_folder_24, 0, 0, 0);
+                    break;
+            }
+        }
+    }
+
     public FoldersAdapter(List<FolderModel> categoryModels) {
         this.folders = categoryModels;
     }
@@ -53,7 +86,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         holder.chooseStyle(type);
         if (type == ADD) {
             holder.itemView.setOnClickListener(view -> {
-                // TODO Edit folders activity
+                // TODO Edit folders
             });
         } else {
             FolderModel folder = folders.get(position);
@@ -115,38 +148,5 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         setCurrentFolderHolder(holder);
         currentFolderHolder = holder;
         Log.i(Constants.TAG, "called");
-    }
-
-    public static class FoldersViewHolder extends RecyclerView.ViewHolder {
-        private ItemFolderBinding binding;
-
-        public FoldersViewHolder(@NonNull ItemFolderBinding itemFolderBinding) {
-            super(itemFolderBinding.getRoot());
-            binding = itemFolderBinding;
-        }
-
-        private void setData(@NonNull FolderModel folderModel) {
-            binding.textViewFolderName.setText(folderModel.getName());
-        }
-
-        @SuppressLint("SetTextI18n")
-        private void chooseStyle(int type) {
-            switch (type) {
-                case SPECIAL:
-                    binding.textViewFolderName.setText(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
-                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
-                            R.drawable.ic_outline_folder_special_24, 0, 0, 0);
-                    break;
-                case REGULAR:
-                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
-                            R.drawable.ic_outline_folder_24, 0, 0, 0);
-                    break;
-                case ADD:
-                    binding.textViewFolderName.setText("Edit folders");
-                    binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
-                            R.drawable.ic_outline_create_new_folder_24, 0, 0, 0);
-                    break;
-            }
-        }
     }
 }

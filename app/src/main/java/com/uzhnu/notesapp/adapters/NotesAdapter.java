@@ -233,7 +233,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         notifyItemRemoved(position);
     }
 
-    // TODO
-//    public void restore(NoteModel note, int position) {
-//    }
+    public void restore(@NonNull NoteModel note, int position) {
+        noteModels.add(position, note);
+        notifyItemInserted(position);
+    }
 }

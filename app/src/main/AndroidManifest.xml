@@ -43,6 +43,7 @@
             android:exported="false"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.SlidrActivityTheme"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"

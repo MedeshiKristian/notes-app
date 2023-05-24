@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
+import com.r0adkll.slidr.Slidr;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
 import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
@@ -49,6 +50,8 @@ public class EditNoteActivity extends AppCompatActivity {
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbarInit);
+
+        Slidr.attach(this);
 
         setIsProgress(true);
 

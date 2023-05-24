@@ -69,6 +69,9 @@ dependencies {
     // SwipeRefreshLayout
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
+    // Slidr library
+    implementation 'com.r0adkll:slidableactivity:2.1.0'
+
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:32.0.0')
 

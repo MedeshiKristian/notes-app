@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -311,11 +312,6 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getLayoutPosition();
                 final NoteModel note = notesAdapter.getDataSet().get(position);
-                FirebaseUtil.deleteUserNote(note).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        notesAdapter.remove(position);
-                    }
-                });
 
                 String text = "Note was removed from the list";
                 Snackbar snackbar = Snackbar
@@ -323,8 +319,8 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                 snackbar.setBackgroundTint(Color.WHITE);
                 snackbar.setTextColor(Color.BLACK);
                 snackbar.setAction("UNDO", view -> {
-                    FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
+                    FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
                             notesAdapter.restore(note, position);
                         }
                     });
@@ -333,7 +329,14 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
 
                 snackbar.setActionTextColor(ContextCompat
                         .getColor(getApplicationContext(), R.color.primary));
-                snackbar.show();
+
+                FirebaseUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        notesAdapter.remove(position);
+
+                        snackbar.show();
+                    }
+                });
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);

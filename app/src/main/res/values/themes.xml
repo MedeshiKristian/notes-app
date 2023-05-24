@@ -30,4 +30,9 @@
         <item name="android:editTextColor">@android:color/white</item>
         <item name="android:textColorHint">@color/greyColor</item>
     </style>
+
+    <style name="Theme.NotesApp.SlidrActivityTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

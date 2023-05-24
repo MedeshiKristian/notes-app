@@ -87,8 +87,6 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
 
         deleteDrawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
         deleteDrawable.draw(c);
-
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
     private void clearCanvas(Canvas c, Float left, Float top, Float right, Float bottom) {

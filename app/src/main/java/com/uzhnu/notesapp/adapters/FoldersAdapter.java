@@ -1,20 +1,26 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ItemFolderBinding;
+import com.uzhnu.notesapp.dialogs.AddFolderDialog;
+import com.uzhnu.notesapp.dialogs.EditFolderDialog;
+import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +33,9 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
     private static final int REGULAR = 1;
     private static final int ADD = 2;
 
-    private List<FolderModel> folders;
+    private FragmentActivity activity;
+
+    private List<FolderModel> folderModels;
 
     private FoldersViewHolder currentFolderHolder;
 
@@ -64,8 +72,9 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         }
     }
 
-    public FoldersAdapter(List<FolderModel> categoryModels) {
-        this.folders = categoryModels;
+    public FoldersAdapter(FragmentActivity activity, List<FolderModel> categoryModels) {
+        this.activity = activity;
+        this.folderModels = categoryModels;
     }
 
     @NonNull
@@ -85,11 +94,48 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         int type = getItemViewType(position);
         holder.chooseStyle(type);
         if (type == ADD) {
+            AddFolderDialog addDialog = new AddFolderDialog(new AddFolderDialog.AddFolderListener() {
+                @Override
+                public void onDialogPositiveClick(@NonNull DialogFragment dialog,
+                                                  String folderName) {
+                    FirebaseUtil.getFolders().get()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful() && task.getResult() != null) {
+                                    boolean ok = true;
+                                    for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                                        FolderModel folder = FirebaseUtil
+                                                .getFolderFromDocument(queryDocumentSnapshot);
+                                        if (folder.getName().equals(folderName)) {
+                                            ok = false;
+                                        }
+                                    }
+                                    if (ok) {
+                                        FolderModel folder = new FolderModel(folderName);
+                                        FirebaseUtil.addFolder(folder)
+                                                .addOnCompleteListener(task1 -> {
+                                                    if (task1.isSuccessful()) {
+                                                        folderModels.add(folder);
+                                                        notifyItemInserted(folderModels.size() - 1);
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
+
+                }
+
+                @Override
+                public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                    assert dialog.getDialog() != null;
+                    dialog.getDialog().cancel();
+                }
+            });
+
             holder.itemView.setOnClickListener(view -> {
-                // TODO Edit folders
+                addDialog.show(activity.getSupportFragmentManager(), "Add folder dialog");
             });
         } else {
-            FolderModel folder = folders.get(position);
+            FolderModel folder = folderModels.get(position);
             holder.setData(folder);
 
             String currentFolderName = (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER);
@@ -101,17 +147,39 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
                 SelectFolderEvent event = new SelectFolderEvent(folder.getName(), holder);
                 EventBus.getDefault().post(event);
             });
+
+            EditFolderDialog editDialog = new EditFolderDialog(new EditFolderDialog.EditFolderListener() {
+                @Override
+                public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
+
+                }
+
+                @Override
+                public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
+
+                }
+
+                @Override
+                public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+
+                }
+            });
+
+            holder.itemView.setOnLongClickListener(view -> {
+                editDialog.show(activity.getSupportFragmentManager(), "Edit folder dialog");
+                return false;
+            });
         }
     }
 
     @Override
     public int getItemCount() {
-        return 1 + folders.size();
+        return 1 + folderModels.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == folders.size()) {
+        if (position == folderModels.size()) {
             return ADD;
         } else if (position == 0) {
             return SPECIAL;
@@ -143,10 +211,8 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     @Subscribe
     public void onSelectFolderEvent(@NonNull SelectFolderEvent event) {
-        Log.i(Constants.TAG, "called event in folder adapter");
         FoldersViewHolder holder = event.getHolder();
         setCurrentFolderHolder(holder);
         currentFolderHolder = holder;
-        Log.i(Constants.TAG, "called");
     }
 }

@@ -55,9 +55,10 @@ public class FirebaseUtil {
     @NonNull
     public static FolderModel getFolderFromDocument(
             @NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
-        FolderModel categoryMode = new FolderModel();
-        categoryMode.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
-        return categoryMode;
+        FolderModel folderModel = new FolderModel();
+        folderModel.setName(queryDocumentSnapshot.getString(Constants.KEY_NAME));
+        folderModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        return folderModel;
     }
 
     private static String getCurrentFolder() {
@@ -91,7 +92,7 @@ public class FirebaseUtil {
                 .set(getObjectFromNote(noteModel));
     }
 
-                                                              @NonNull
+    @NonNull
     public static Task<Void> deleteUserNote(@NonNull NoteModel noteModel) {
         return getCurrentFolderNotes().document(noteModel.getDocumentId()).delete();
     }
@@ -112,5 +113,13 @@ public class FirebaseUtil {
     public static CollectionReference getFolders() {
         return FirebaseUtil.getCurrentUserDetails()
                 .collection(Constants.KEY_COLLECTION_FOLDERS_NAMES);
+    }
+
+    @NonNull
+    public static Task<DocumentReference> addFolder(@NonNull FolderModel folderModel) {
+        Map<String, Object> objectMap = new HashMap<>();
+        objectMap.put(Constants.KEY_NAME, folderModel.getName());
+        objectMap.put(Constants.KEY_CREATED_AT, folderModel.getCreatedAt());
+        return FirebaseUtil.getFolders().add(objectMap);
     }
 }

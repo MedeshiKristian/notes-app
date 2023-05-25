@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -53,7 +52,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements DeleteNotesDialog.DeleteNotesListener {
+public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private List<NoteModel> noteModels;
@@ -141,7 +140,20 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case (R.id.option_delete):
-                DeleteNotesDialog dialog = new DeleteNotesDialog();
+                DeleteNotesDialog dialog = new DeleteNotesDialog(new DeleteNotesDialog.DeleteNotesListener() {
+                    @Override
+                    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+                        notesAdapter.deleteAllSelectedNotes();
+                        loadUserNotes();
+                    }
+
+                    @Override
+                    public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                        assert dialog.getDialog() != null;
+                        dialog.getDialog().cancel();
+                        EventBus.getDefault().post(new MultiSelectEvent(true));
+                    }
+                });
                 dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
             case (R.id.option_log_out):
@@ -191,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
         binding.notesContent.recyclerViewNotes.setAdapter(notesAdapter);
 
         folderModels = new ArrayList<>();
-        foldersAdapter = new FoldersAdapter(folderModels);
+        foldersAdapter = new FoldersAdapter(this, folderModels);
         binding.navigationStart.recyclerViewFolders.setAdapter(foldersAdapter);
     }
 
@@ -394,6 +406,7 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             folderModels.add(FirebaseUtil.getFolderFromDocument(queryDocumentSnapshot));
                         }
+                        Collections.sort(folderModels);
                         foldersAdapter.notifyDataSetChanged();
                         binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
                     }
@@ -455,18 +468,5 @@ public class MainActivity extends AppCompatActivity implements DeleteNotesDialog
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-    }
-
-    @Override
-    public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
-        notesAdapter.deleteAllSelectedNotes();
-        loadUserNotes();
-    }
-
-    @Override
-    public void onDialogCancelClick(@NonNull DialogFragment dialog) {
-        assert dialog.getDialog() != null;
-        dialog.getDialog().cancel();
-        EventBus.getDefault().post(new MultiSelectEvent(true));
     }
 }

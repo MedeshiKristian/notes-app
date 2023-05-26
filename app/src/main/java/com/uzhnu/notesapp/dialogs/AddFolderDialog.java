@@ -35,12 +35,10 @@ public class AddFolderDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-
         DialogAddFolderBinding binding = DialogAddFolderBinding.inflate(getLayoutInflater());
 
         builder.setView(binding.getRoot())
-                .setMessage(R.string.dialog_add_folder)
+                .setTitle(R.string.dialog_add_folder)
                 .setPositiveButton(R.string.string_add, (dialog, id) -> {
                     if (listener != null) {
                         listener.onDialogPositiveClick(AddFolderDialog.this,

@@ -1,13 +1,15 @@
 package com.uzhnu.notesapp.callbacks;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Vibrator;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -16,27 +18,32 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.NotesAdapter;
 
 abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
-    private static final float SWIPE_THRESHOLD = 0.7f;
-    Context mContext;
-    private Paint mClearPaint;
-    private ColorDrawable mBackground;
+    private static final float SWIPE_THRESHOLD = 0.45f;
+    private Context context;
+    private Paint clearPaint;
+    private ColorDrawable backgroundDrawable;
     private int backgroundColor;
+    private boolean vibrated;
     private Drawable deleteDrawable;
     private int intrinsicWidth;
     private int intrinsicHeight;
+    private NotesAdapter adapter;
 
-    public SwipeToDeleteCallback(Context context) {
-        mContext = context;
-        mBackground = new ColorDrawable();
+    public SwipeToDeleteCallback(Context context, NotesAdapter adapter) {
+        this.context = context;
+        this.adapter = adapter;
+        backgroundDrawable = new ColorDrawable();
         backgroundColor = ContextCompat.getColor(context, R.color.primary);
-        mClearPaint = new Paint();
-        mClearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        deleteDrawable = ContextCompat.getDrawable(mContext, R.drawable.ic_outline_delete_24);
+        clearPaint = new Paint();
+        clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        deleteDrawable = ContextCompat.getDrawable(this.context, R.drawable.ic_outline_delete_24);
         assert deleteDrawable != null;
         intrinsicWidth = deleteDrawable.getIntrinsicWidth();
         intrinsicHeight = deleteDrawable.getIntrinsicHeight();
+        vibrated = false;
     }
 
     @Override
@@ -57,6 +64,9 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
                             @NonNull RecyclerView recyclerView,
                             @NonNull RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        if (adapter.isMultiSelect()) {
+            return;
+        }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
         View itemView = viewHolder.itemView;
@@ -75,9 +85,26 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
             return;
         }
 
-        mBackground.setColor(backgroundColor);
-        mBackground.setBounds(left + (int) dX - 100, top, right, bottom);
-        mBackground.draw(c);
+        float swipeThreshold = viewHolder.itemView.getWidth() * getSwipeThreshold(viewHolder);
+        if (Math.abs(dX) >= swipeThreshold) {
+            if (!vibrated) {
+                vibrated = true;
+                long vibrationDuration = 200;
+                Vibrator vibrator = (Vibrator) getSystemService(context, Vibrator.class);
+                assert vibrator != null;
+                if (vibrator.hasVibrator()) {
+                    vibrator.vibrate(vibrationDuration);
+                }
+            }
+            backgroundColor = ContextCompat.getColor(context, R.color.greyColor);
+        } else if (Math.abs(dX) < swipeThreshold) {
+            vibrated = false;
+            backgroundColor = ContextCompat.getColor(context, R.color.primary);
+        }
+
+        backgroundDrawable.setColor(backgroundColor);
+        backgroundDrawable.setBounds(left + (int) dX - 100, top, right, bottom);
+        backgroundDrawable.draw(c);
 
         int deleteIconTop = itemView.getTop() + (itemHeight - intrinsicHeight) / 2;
         int deleteIconMargin = (itemHeight - intrinsicHeight) / 2;
@@ -89,9 +116,8 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         deleteDrawable.draw(c);
     }
 
-    private void clearCanvas(Canvas c, Float left, Float top, Float right, Float bottom) {
-        c.drawRect(left, top, right, bottom, mClearPaint);
-
+    private void clearCanvas(@NonNull Canvas c, Float left, Float top, Float right, Float bottom) {
+        c.drawRect(left, top, right, bottom, clearPaint);
     }
 
     @Override

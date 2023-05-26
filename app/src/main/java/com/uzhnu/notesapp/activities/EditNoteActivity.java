@@ -1,5 +1,7 @@
 package com.uzhnu.notesapp.activities;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,21 +11,22 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
 
 import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrInterface;
+import com.r0adkll.slidr.model.SlidrListener;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
-import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
+import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
-import org.checkerframework.checker.units.qual.A;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 public class EditNoteActivity extends AppCompatActivity {
     private static final int MIN_FONT_SIZE = 1;
@@ -44,14 +47,21 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private NoteModel noteModel;
 
+    private SlidrInterface slidrInterface;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setSupportActionBar(binding.toolbarInit);
+        setSupportActionBar(binding.toolbar);
 
-        Slidr.attach(this);
+//        getWindow().setStatusBarColor(Color.TRANSPARENT);
+
+        // TODO
+        SlidrConfig config = new SlidrConfig.Builder().build();
+
+        slidrInterface = Slidr.attach(this, config);
 
         setIsProgress(true);
 
@@ -66,16 +76,30 @@ public class EditNoteActivity extends AppCompatActivity {
         binding.editor.setEditorFontSize(22);
 
         setListeners();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    private void setListeners() {
+        binding.toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
         binding.editor.setOnInitialLoadListener(isReady -> {
             if (isReady) {
                 setIsProgress(false);
             }
         });
-    }
 
-    private void setListeners() {
-        binding.toolbarInit.setNavigationOnClickListener(view -> onBackPressed());
+//        binding.editor.setOnFocusChangeListener((view, b) -> {
+//            if (b) {
+//                slidrInterface.lock();
+//            } else {
+//                slidrInterface.unlock();
+//            }
+//        });
 
         setActionButtons();
         setTextColorButtons();
@@ -176,7 +200,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
         findViewById(R.id.action_insert_checkbox).setOnClickListener(v -> binding.editor.insertTodo());
     }
-    
+
     private void setTextColorButtons() {
         binding.textColorsLayout.violetColor.setBackgroundColor(COLOR_VIOLET);
         binding.textColorsLayout.violetColor.setOnClickListener(view -> {
@@ -304,6 +328,17 @@ public class EditNoteActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (MainActivity.isRunning) {
+            super.onBackPressed();
+        } else {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
     private void setIsProgress(boolean show) {
         if (binding == null) return;
         if (show) {
@@ -316,5 +351,18 @@ public class EditNoteActivity extends AppCompatActivity {
             binding.editor.setVisibility(View.VISIBLE);
             binding.richEditToolbar.scrollViewActions.setVisibility(View.VISIBLE);
         }
+    }
+
+    @SuppressLint("ResourceAsColor")
+    @Subscribe
+    public void onLockSlidrEvent(LockSlidrEvent event) {
+        getWindow().setStatusBarColor(R.color.primary);
+        slidrInterface.lock();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }

@@ -86,7 +86,7 @@
         android:layout_marginStart="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_20sdp"
-        android:background="@drawable/white_rounded_corners_background"
+        android:background="@drawable/rounded_corners_white_background"
         android:elevation="@dimen/_3sdp"
         android:gravity="center"
         android:orientation="horizontal"
@@ -106,7 +106,7 @@
             android:id="@+id/edit_text_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/white_rounded_corners_background"
+            android:background="@drawable/rounded_corners_white_background"
             android:hint="Your phone number"
             android:inputType="phone"
             android:textColor="@color/black" />

@@ -11,26 +11,22 @@ import androidx.fragment.app.DialogFragment;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.DialogRenameBinding;
-import com.uzhnu.notesapp.models.FolderModel;
+import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.utils.FirebaseUtil;
 
-public class EditFolderDialog extends DialogFragment {
-    private EditFolderListener listener;
-    private final FolderModel folderModel;
+public class EditUsernameDialog extends DialogFragment {
+    private EditUsernameListener listener;
 
-    public interface EditFolderListener {
-        void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName);
-
-        void onDialogNegativeClick(@NonNull DialogFragment dialog);
+    public interface EditUsernameListener {
+        void onDialogPositiveClick(@NonNull DialogFragment dialog, String newUsername);
 
         void onDialogCancelClick(@NonNull DialogFragment dialog);
     }
 
-    public EditFolderDialog(FolderModel folderModel) {
-        this.folderModel = folderModel;
+    public EditUsernameDialog() {
     }
 
-    public EditFolderDialog(FolderModel folderModel, EditFolderListener listener) {
-        this.folderModel = folderModel;
+    public EditUsernameDialog(EditUsernameListener listener) {
         this.listener = listener;
     }
 
@@ -39,24 +35,26 @@ public class EditFolderDialog extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         DialogRenameBinding binding = DialogRenameBinding.inflate(getLayoutInflater());
-        binding.editTextRename.setText(folderModel.getName());
+        FirebaseUtil.getCurrentUserDetails().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        UserModel userModel = task.getResult().toObject(UserModel.class);
+                        assert userModel != null;
+                        binding.editTextRename.setText(userModel.getUsername());
+                    }
+                });
 
         builder.setView(binding.getRoot())
                 .setTitle(R.string.dialog_edit_folder)
                 .setPositiveButton(R.string.string_rename, (dialog, id) -> {
                     if (listener != null) {
-                        listener.onDialogPositiveClick(EditFolderDialog.this,
+                        listener.onDialogPositiveClick(EditUsernameDialog.this,
                                 binding.editTextRename.getText().toString());
-                    }
-                })
-                .setNegativeButton(R.string.string_delete, (dialog, id) -> {
-                    if (listener != null) {
-                        listener.onDialogNegativeClick(EditFolderDialog.this);
                     }
                 })
                 .setNeutralButton(R.string.string_cancel, (dialog, id) -> {
                     if (listener != null) {
-                        listener.onDialogCancelClick(EditFolderDialog.this);
+                        listener.onDialogCancelClick(EditUsernameDialog.this);
                     }
                 });
 
@@ -68,7 +66,7 @@ public class EditFolderDialog extends DialogFragment {
         super.onAttach(context);
         if (listener == null) {
             try {
-                listener = (EditFolderListener) context;
+                listener = (EditUsernameListener) context;
             } catch (ClassCastException e) {
                 e.printStackTrace();
             }

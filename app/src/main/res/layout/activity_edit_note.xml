@@ -12,10 +12,10 @@
         android:foregroundTint="@color/primary_text">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_init"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:fitsSystemWindows="true"
+            android:backgroundTint="@color/primary"
             app:menu="@menu/menu_edit_note"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             app:title="Edit note"
@@ -31,15 +31,16 @@
         android:layout_marginTop="@dimen/_10sdp"
         android:layout_marginEnd="@dimen/_5sdp"
         android:layout_marginBottom="@dimen/_48sdp"
+        android:fitsSystemWindows="true"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-                <jp.wasabeef.richeditor.RichEditor
-                    android:id="@+id/editor"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Write your text here"
-                    android:overScrollMode="never" />
+        <jp.wasabeef.richeditor.RichEditor
+            android:id="@+id/editor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Write your text here"
+            android:overScrollMode="never" />
     </LinearLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -63,13 +64,13 @@
 
         <include
             android:id="@+id/text_colors_layout"
-            android:visibility="gone"
-            layout="@layout/rich_edit_colors" />
+            layout="@layout/rich_edit_colors"
+            android:visibility="gone" />
 
         <include
             android:id="@+id/background_colors_layout"
-            android:visibility="gone"
-            layout="@layout/rich_edit_colors" />
+            layout="@layout/rich_edit_colors"
+            android:visibility="gone" />
 
         <include
             android:id="@+id/rich_edit_toolbar"

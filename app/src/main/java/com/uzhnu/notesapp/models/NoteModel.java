@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.uzhnu.notesapp.utils.FirebaseUtil;
+
 import org.jetbrains.annotations.Contract;
 
 import java.text.ParseException;
@@ -20,14 +22,18 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     private String text;
     private Date lastEdited;
     private Date createdAt;
+    private String createdBy;
+    private Boolean isPined;
 
     public NoteModel() {
     }
 
     public NoteModel(String text) {
         this.text = text;
+        this.isPined = false;
         this.createdAt = new Date();
         this.lastEdited = this.createdAt;
+        this.createdBy = FirebaseUtil.getCurrentUserId();
     }
 
     public NoteModel(@NonNull Parcel in) throws ParseException {
@@ -100,6 +106,9 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     @Override
     public int compareTo(@NonNull NoteModel noteModel) {
+        if (this.isPined() != noteModel.isPined()) {
+            return noteModel.isPined().compareTo(this.isPined());
+        }
         return noteModel.getLastEdited().compareTo(this.getLastEdited());
     }
 
@@ -109,5 +118,25 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Boolean isPined() {
+        return isPined;
+    }
+
+    public void setPined(Boolean pined) {
+        isPined = pined;
+    }
+
+    public void togglePin() {
+        setPined(!isPined());
     }
 }

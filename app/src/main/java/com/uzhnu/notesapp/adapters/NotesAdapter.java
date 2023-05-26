@@ -64,6 +64,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             SimpleDateFormat simpleDateFormat
                     = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
+
+            if (noteModel.isPined()) {
+                binding.imageViewPinned.setVisibility(View.VISIBLE);
+            }
         }
 
         private void addSelection() {
@@ -80,7 +84,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             binding.imageViewSelected.setVisibility(View.GONE);
             binding.layoutNote.setBackground(ContextCompat.getDrawable(
                             binding.layoutNote.getContext(),
-                            R.drawable.white_rounded_corners_background
+                            R.drawable.rounded_corners_white_background
                     )
             );
         }
@@ -221,6 +225,22 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
                 remove(i);
+            }
+        }
+        mSelectedPositions.clear();
+        EventBus.getDefault().post(new MultiSelectEvent(false));
+    }
+
+    public void togglePinOnSelectedNotes() {
+        recyclerView.getRecycledViewPool().clear();
+        for (int i = noteModels.size() - 1; i >= 0; i--) {
+            if (isSelected(i)) {
+                noteModels.get(i).togglePin();
+            }
+        }
+        for (int i = noteModels.size() - 1; i >= 0; i--) {
+            if (isSelected(i)) {
+                FirebaseUtil.updateUserNote(noteModels.get(i));
             }
         }
         mSelectedPositions.clear();

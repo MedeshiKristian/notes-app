@@ -5,7 +5,6 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity"
     tools:openDrawer="start">
 
@@ -22,10 +21,9 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar_init"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="?attr/actionBarSize"
                 android:layout_marginBottom="0px"
                 android:backgroundTint="@color/primary"
-                android:fitsSystemWindows="true"
                 app:menu="@menu/menu_main"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
                 app:title="@string/page_title"

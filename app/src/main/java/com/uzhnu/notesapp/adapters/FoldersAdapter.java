@@ -1,7 +1,6 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -16,7 +15,6 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ItemFolderBinding;
 import com.uzhnu.notesapp.dialogs.AddFolderDialog;
 import com.uzhnu.notesapp.dialogs.EditFolderDialog;
-import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
@@ -64,7 +62,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
                             R.drawable.ic_outline_folder_24, 0, 0, 0);
                     break;
                 case ADD:
-                    binding.textViewFolderName.setText("Edit folders");
+                    binding.textViewFolderName.setText("Add folder");
                     binding.textViewFolderName.setCompoundDrawablesWithIntrinsicBounds(
                             R.drawable.ic_outline_create_new_folder_24, 0, 0, 0);
                     break;
@@ -114,6 +112,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
                                         FirebaseUtil.addFolder(folder)
                                                 .addOnCompleteListener(task1 -> {
                                                     if (task1.isSuccessful()) {
+                                                        folder.setDocumentId(task1.getResult().getId());
                                                         folderModels.add(folder);
                                                         notifyItemInserted(folderModels.size() - 1);
                                                     }
@@ -144,26 +143,36 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             }
 
             holder.itemView.setOnClickListener(view -> {
-                SelectFolderEvent event = new SelectFolderEvent(folder.getName(), holder);
+                SelectFolderEvent event = new SelectFolderEvent(folder, holder);
                 EventBus.getDefault().post(event);
             });
 
-            EditFolderDialog editDialog = new EditFolderDialog(new EditFolderDialog.EditFolderListener() {
-                @Override
-                public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
+            if (type == SPECIAL) {
+                return;
+            }
 
-                }
+            EditFolderDialog editDialog =
+                    new EditFolderDialog(folder, new EditFolderDialog.EditFolderListener() {
+                        @Override
+                        public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
+                            folder.setName(folderName);
+                            notifyItemChanged(holder.getLayoutPosition());
+                            FirebaseUtil.updateFolder(folder);
+                        }
 
-                @Override
-                public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
+                        @Override
+                        public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
+                            FirebaseUtil.deleteFolder(folder);
+                            folderModels.remove(holder.getLayoutPosition());
+                            notifyItemRemoved(holder.getLayoutPosition());
+                        }
 
-                }
-
-                @Override
-                public void onDialogCancelClick(@NonNull DialogFragment dialog) {
-
-                }
-            });
+                        @Override
+                        public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                            assert dialog.getDialog() != null;
+                            dialog.getDialog().cancel();
+                        }
+                    });
 
             holder.itemView.setOnLongClickListener(view -> {
                 editDialog.show(activity.getSupportFragmentManager(), "Edit folder dialog");

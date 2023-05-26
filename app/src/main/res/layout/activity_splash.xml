@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:gravity="center"
     android:orientation="vertical"
     tools:context=".activities.SplashActivity">
@@ -16,11 +17,11 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_init"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:fitsSystemWindows="true"
-            app:subtitleTextColor="@color/primary"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0px"
+            android:backgroundTint="@color/primary"
             app:title="@string/app_name"
-            app:subtitle="@null"
+            app:titleMargin="0dp"
             app:titleTextColor="@color/primary_text" />
 
     </com.google.android.material.appbar.AppBarLayout>

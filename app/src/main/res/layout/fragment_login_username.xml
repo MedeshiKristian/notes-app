@@ -97,7 +97,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
-            android:background="@drawable/white_rounded_corners_background"
+            android:background="@drawable/rounded_corners_white_background"
             android:elevation="@dimen/_3sdp"
             android:hint="Username"
             android:inputType="text"

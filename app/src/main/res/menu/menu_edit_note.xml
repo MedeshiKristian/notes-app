@@ -5,6 +5,7 @@
         android:id="@+id/option_save_note"
         android:icon="@drawable/ic_baseline_done_24"
         android:title="@string/save_note"
+        android:fitsSystemWindows="true"
         app:iconTint="@color/primary_text"
         app:showAsAction="always" />
 </menu>

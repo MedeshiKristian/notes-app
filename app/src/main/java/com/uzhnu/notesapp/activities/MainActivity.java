@@ -10,6 +10,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -30,7 +33,9 @@ import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.callbacks.SwipeToDeleteCallback;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
+import com.uzhnu.notesapp.dialogs.EditUsernameDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
+import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
@@ -53,6 +58,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+    public static boolean isRunning = false;
     private ActivityMainBinding binding;
 
     private List<NoteModel> noteModels;
@@ -67,12 +73,35 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageUtil imageUtil;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbarInit);
+
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+        int statusBarHeight = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        ViewGroup.MarginLayoutParams params
+                = (ViewGroup.MarginLayoutParams) binding.toolbarInit.getLayoutParams();
+        params.setMargins(0, statusBarHeight, 0, 0);
+        binding.toolbarInit.setLayoutParams(params);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(Color.TRANSPARENT);
+
+        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        window.getDecorView().setSystemUiVisibility(flags);
+
         init();
         loadUserDetails();
         loadUserNotes();
@@ -156,6 +185,11 @@ public class MainActivity extends AppCompatActivity {
                 });
                 dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
+            case (R.id.option_pin):
+                notesAdapter.togglePinOnSelectedNotes();
+                layoutManager.removeAllViews();
+                loadUserNotes();
+                return true;
             case (R.id.option_log_out):
                 FirebaseUtil.signOut();
                 Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -170,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        isRunning = true;
+
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
@@ -183,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
-//        for (int i = 0; i < 50; i++) {
+//        for (int i = 0; i < 20; i++) {
 //            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
 //        }
 
@@ -281,9 +318,10 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void onSelectFolderEvent(@NonNull SelectFolderEvent event) {
         toggleNavigationView();
-        String folderName = event.getFolderName();
-        binding.toolbarInit.setTitle(folderName);
-        PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER, folderName);
+        FolderModel folder = event.getFolder();
+        binding.toolbarInit.setTitle(folder.getName());
+        PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
+                folder.getCollectionName());
         loadUserNotes();
     }
 
@@ -304,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
     private void setOptionsVisibility(boolean multiselectShow) {
         if (this.toolBarMenu != null) {
             this.toolBarMenu.findItem(R.id.option_delete).setVisible(multiselectShow);
+            this.toolBarMenu.findItem(R.id.option_pin).setVisible(multiselectShow);
             this.toolBarMenu.findItem(R.id.option_search).setVisible(!multiselectShow);
             this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!multiselectShow);
         }
@@ -319,9 +358,12 @@ public class MainActivity extends AppCompatActivity {
 
         binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserNotes);
 
-        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this) {
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this, notesAdapter) {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                if (notesAdapter.isMultiSelect()) {
+                    return;
+                }
                 final int position = viewHolder.getLayoutPosition();
                 final NoteModel note = notesAdapter.getDataSet().get(position);
 
@@ -345,7 +387,6 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUtil.deleteUserNote(note).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         notesAdapter.remove(position);
-
                         snackbar.show();
                     }
                 });
@@ -353,6 +394,29 @@ public class MainActivity extends AppCompatActivity {
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(binding.notesContent.recyclerViewNotes);
+
+        EditUsernameDialog dialog = new EditUsernameDialog(new EditUsernameDialog.EditUsernameListener() {
+            @Override
+            public void onDialogPositiveClick(@NonNull DialogFragment dialog,
+                                              String newUsername) {
+                FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                binding.navigationStart.header.textViewUsername.setText(newUsername);
+                            }
+                        });
+            }
+
+            @Override
+            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                assert dialog.getDialog() != null;
+                dialog.getDialog().cancel();
+            }
+        });
+
+        binding.navigationStart.header.textViewUsername.setOnClickListener(view -> {
+            dialog.show(getSupportFragmentManager(), "Update username");
+        });
     }
 
     private void loadUserDetails() {
@@ -402,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         folderModels.clear();
-                        folderModels.add(new FolderModel("Notes"));
+                        folderModels.add(new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                             folderModels.add(FirebaseUtil.getFolderFromDocument(queryDocumentSnapshot));
                         }
@@ -462,10 +526,13 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         EventBus.getDefault().unregister(notesAdapter);
         EventBus.getDefault().unregister(foldersAdapter);
+        isRunning = false;
+        EventBus.getDefault().post(new LockSlidrEvent());
     }
 
     @Override
     protected void onDestroy() {
+        Log.i(Constants.TAG, "destroy");
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }

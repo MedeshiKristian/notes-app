@@ -1,18 +1,19 @@
 package com.uzhnu.notesapp.events;
 
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
+import com.uzhnu.notesapp.models.FolderModel;
 
 public class SelectFolderEvent {
-    private final String folderName;
+    private final FolderModel folderModel;
     private final FoldersAdapter.FoldersViewHolder holder;
 
-    public SelectFolderEvent(String folderName, FoldersAdapter.FoldersViewHolder holder) {
-        this.folderName = folderName;
+    public SelectFolderEvent(FolderModel folderModel, FoldersAdapter.FoldersViewHolder holder) {
+        this.folderModel = folderModel;
         this.holder = holder;
     }
 
-    public String getFolderName() {
-        return folderName;
+    public FolderModel getFolder() {
+        return folderModel;
     }
 
     public FoldersAdapter.FoldersViewHolder getHolder() {

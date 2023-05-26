@@ -8,10 +8,15 @@
     <string name="folders_title">Folders</string>
 
     <string name="dialog_delete_notes">Are you sure you want to delete selected notes?</string>
-    <string name="string_ok">OK</string>
-    <string name="string_cancel">Cancel</string>
 
     <string name="dialog_add_folder">Add folder</string>
+    <string name="dialog_edit_folder">Edit folder</string>
+
+    <string name="string_ok">OK</string>
     <string name="string_add">Add</string>
+    <string name="string_rename">Rename</string>
+    <string name="string_delete">Delete</string>
+    <string name="string_cancel">Cancel</string>
+
     <!--    <string name="default_folder">Notes</string>-->
 </resources>

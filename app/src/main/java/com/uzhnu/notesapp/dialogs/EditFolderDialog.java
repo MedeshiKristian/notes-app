@@ -10,8 +10,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogRenameBinding;
 import com.uzhnu.notesapp.models.FolderModel;
+import com.uzhnu.notesapp.utils.FirebaseUtil;
+
+import java.util.List;
 
 public class EditFolderDialog extends DialogFragment {
     private EditFolderListener listener;
@@ -32,6 +36,33 @@ public class EditFolderDialog extends DialogFragment {
     public EditFolderDialog(FolderModel folderModel, EditFolderListener listener) {
         this.folderModel = folderModel;
         this.listener = listener;
+    }
+
+    public EditFolderDialog(FoldersAdapter adapter, List<FolderModel> folderModels,
+                            @NonNull FoldersAdapter.FoldersViewHolder holder,
+                            FolderModel folder) {
+        this.folderModel = folder;
+        this.listener = new EditFolderListener() {
+            @Override
+            public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
+                folder.setName(folderName);
+                adapter.notifyItemChanged(holder.getLayoutPosition());
+                FirebaseUtil.updateFolder(folder);
+            }
+
+            @Override
+            public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
+                FirebaseUtil.deleteFolder(folder);
+                folderModels.remove(holder.getLayoutPosition());
+                adapter.notifyItemRemoved(holder.getLayoutPosition());
+            }
+
+            @Override
+            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                assert dialog.getDialog() != null;
+                dialog.getDialog().cancel();
+            }
+        };
     }
 
     @NonNull

@@ -92,43 +92,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
         int type = getItemViewType(position);
         holder.chooseStyle(type);
         if (type == ADD) {
-            AddFolderDialog addDialog = new AddFolderDialog(new AddFolderDialog.AddFolderListener() {
-                @Override
-                public void onDialogPositiveClick(@NonNull DialogFragment dialog,
-                                                  String folderName) {
-                    FirebaseUtil.getFolders().get()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful() && task.getResult() != null) {
-                                    boolean ok = true;
-                                    for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                                        FolderModel folder = FirebaseUtil
-                                                .getFolderFromDocument(queryDocumentSnapshot);
-                                        if (folder.getName().equals(folderName)) {
-                                            ok = false;
-                                        }
-                                    }
-                                    if (ok) {
-                                        FolderModel folder = new FolderModel(folderName);
-                                        FirebaseUtil.addFolder(folder)
-                                                .addOnCompleteListener(task1 -> {
-                                                    if (task1.isSuccessful()) {
-                                                        folder.setDocumentId(task1.getResult().getId());
-                                                        folderModels.add(folder);
-                                                        notifyItemInserted(folderModels.size() - 1);
-                                                    }
-                                                });
-                                    }
-                                }
-                            });
-
-                }
-
-                @Override
-                public void onDialogCancelClick(@NonNull DialogFragment dialog) {
-                    assert dialog.getDialog() != null;
-                    dialog.getDialog().cancel();
-                }
-            });
+            AddFolderDialog addDialog = new AddFolderDialog(this, folderModels);
 
             holder.itemView.setOnClickListener(view -> {
                 addDialog.show(activity.getSupportFragmentManager(), "Add folder dialog");
@@ -152,27 +116,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             }
 
             EditFolderDialog editDialog =
-                    new EditFolderDialog(folder, new EditFolderDialog.EditFolderListener() {
-                        @Override
-                        public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
-                            folder.setName(folderName);
-                            notifyItemChanged(holder.getLayoutPosition());
-                            FirebaseUtil.updateFolder(folder);
-                        }
-
-                        @Override
-                        public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
-                            FirebaseUtil.deleteFolder(folder);
-                            folderModels.remove(holder.getLayoutPosition());
-                            notifyItemRemoved(holder.getLayoutPosition());
-                        }
-
-                        @Override
-                        public void onDialogCancelClick(@NonNull DialogFragment dialog) {
-                            assert dialog.getDialog() != null;
-                            dialog.getDialog().cancel();
-                        }
-                    });
+                    new EditFolderDialog(this, folderModels, holder, folder);
 
             holder.itemView.setOnLongClickListener(view -> {
                 editDialog.show(activity.getSupportFragmentManager(), "Edit folder dialog");

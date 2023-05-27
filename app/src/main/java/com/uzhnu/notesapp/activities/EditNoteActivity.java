@@ -48,22 +48,35 @@ public class EditNoteActivity extends AppCompatActivity {
     private NoteModel noteModel;
 
     private SlidrInterface slidrInterface;
+    private AppCompatActivity activity;
 
+    private View backgroundView;
+
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
-
-//        getWindow().setStatusBarColor(Color.TRANSPARENT);
-
-        // TODO
-        SlidrConfig config = new SlidrConfig.Builder().build();
-
-        slidrInterface = Slidr.attach(this, config);
-
+        
         setIsProgress(true);
+        init();
+        setListeners();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+    
+    private void init() {
+        activity = (AppCompatActivity) PreferencesManager
+                .getInstance().get(Constants.KEY_MAIN_ACTIVITY);
+        if (activity != null) {
+            backgroundView = activity.findViewById(R.id.coordinatorContent);
+        }
 
         noteModel = (NoteModel) PreferencesManager.getInstance().get(Constants.KEY_NOTE);
         PreferencesManager.getInstance().remove(Constants.KEY_NOTE);
@@ -74,14 +87,6 @@ public class EditNoteActivity extends AppCompatActivity {
 
         binding.editor.setEditorHeight(200);
         binding.editor.setEditorFontSize(22);
-
-        setListeners();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
     }
 
     private void setListeners() {
@@ -93,13 +98,46 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         });
 
-//        binding.editor.setOnFocusChangeListener((view, b) -> {
-//            if (b) {
-//                slidrInterface.lock();
-//            } else {
-//                slidrInterface.unlock();
-//            }
-//        });
+        binding.toolbar.setOnClickListener(view -> {
+            binding.editor.clearFocus();
+        });
+
+        binding.editor.setOnFocusChangeListener((view, b) -> {
+            if (b) {
+                slidrInterface.lock();
+            } else {
+                slidrInterface.unlock();
+            }
+        });
+
+        SlidrConfig config = new SlidrConfig.Builder()
+                .listener(new SlidrListener() {
+                    @Override
+                    public void onSlideStateChanged(int state) {
+                    }
+
+                    @Override
+                    public void onSlideChange(float percent) {
+                        float coefficient = 0.25f;
+                        float moveFactor = binding.coordinatorContent.getWidth()
+                                * percent * coefficient;
+                        if (backgroundView != null) {
+                            backgroundView.setTranslationX(-moveFactor);
+                        }
+                    }
+
+                    @Override
+                    public void onSlideOpened() {
+                    }
+
+                    @Override
+                    public boolean onSlideClosed() {
+                        return false;
+                    }
+                })
+                .build();
+
+        slidrInterface = Slidr.attach(this, config);
 
         setActionButtons();
         setTextColorButtons();
@@ -107,25 +145,25 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private void setActionButtons() {
-        findViewById(R.id.action_undo).setOnClickListener(v -> binding.editor.undo());
+        binding.richEditToolbar.actionUndo.setOnClickListener(v -> binding.editor.undo());
 
-        findViewById(R.id.action_redo).setOnClickListener(v -> binding.editor.redo());
+        binding.richEditToolbar.actionRedo.setOnClickListener(v -> binding.editor.redo());
 
-        findViewById(R.id.action_bold).setOnClickListener(v -> binding.editor.setBold());
+        binding.richEditToolbar.actionBold.setOnClickListener(v -> binding.editor.setBold());
 
-        findViewById(R.id.action_italic).setOnClickListener(v -> binding.editor.setItalic());
+        binding.richEditToolbar.actionItalic.setOnClickListener(v -> binding.editor.setItalic());
 
-        findViewById(R.id.action_subscript).setOnClickListener(v -> binding.editor.setSubscript());
+        binding.richEditToolbar.actionSubscript.setOnClickListener(v -> binding.editor.setSubscript());
 
-        findViewById(R.id.action_superscript).setOnClickListener(v -> binding.editor.setSuperscript());
+        binding.richEditToolbar.actionSuperscript.setOnClickListener(v -> binding.editor.setSuperscript());
 
-        findViewById(R.id.action_strikethrough).setOnClickListener(v -> binding.editor.setStrikeThrough());
+        binding.richEditToolbar.actionStrikethrough.setOnClickListener(v -> binding.editor.setStrikeThrough());
 
-        findViewById(R.id.action_underline).setOnClickListener(v -> binding.editor.setUnderline());
+        binding.richEditToolbar.actionUnderline.setOnClickListener(v -> binding.editor.setUnderline());
 
         fontSize = 1;
 
-        findViewById(R.id.action_decrease_text).setOnClickListener(v -> {
+        binding.richEditToolbar.actionDecreaseText.setOnClickListener(v -> {
             fontSize -= 1;
             if (fontSize < MIN_FONT_SIZE) {
                 fontSize = MIN_FONT_SIZE;
@@ -133,7 +171,7 @@ public class EditNoteActivity extends AppCompatActivity {
             binding.editor.setFontSize(fontSize);
         });
 
-        findViewById(R.id.action_increase_text).setOnClickListener(v -> {
+        binding.richEditToolbar.actionIncreaseText.setOnClickListener(v -> {
             fontSize += 1;
             if (fontSize > MAX_FONT_SIZE) {
                 fontSize = MAX_FONT_SIZE;
@@ -141,7 +179,7 @@ public class EditNoteActivity extends AppCompatActivity {
             binding.editor.setFontSize(fontSize);
         });
 
-        findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
+        binding.richEditToolbar.actionTxtColor.setOnClickListener(new View.OnClickListener() {
             private boolean isVisible = false;
 
             @Override
@@ -156,7 +194,7 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.action_bg_color).setOnClickListener(new View.OnClickListener() {
+        binding.richEditToolbar.actionBgColor.setOnClickListener(new View.OnClickListener() {
             private boolean isVisible = false;
 
             @Override
@@ -171,34 +209,34 @@ public class EditNoteActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.action_indent).setOnClickListener(v -> binding.editor.setIndent());
+        binding.richEditToolbar.actionIndent.setOnClickListener(v -> binding.editor.setIndent());
 
-        findViewById(R.id.action_outdent).setOnClickListener(v -> binding.editor.setOutdent());
+        binding.richEditToolbar.actionOutdent.setOnClickListener(v -> binding.editor.setOutdent());
 
-        findViewById(R.id.action_align_left).setOnClickListener(v -> binding.editor.setAlignLeft());
+        binding.richEditToolbar.actionAlignLeft.setOnClickListener(v -> binding.editor.setAlignLeft());
 
-        findViewById(R.id.action_align_center).setOnClickListener(v -> binding.editor.setAlignCenter());
+        binding.richEditToolbar.actionAlignCenter.setOnClickListener(v -> binding.editor.setAlignCenter());
 
-        findViewById(R.id.action_align_right).setOnClickListener(v -> binding.editor.setAlignRight());
+        binding.richEditToolbar.actionAlignRight.setOnClickListener(v -> binding.editor.setAlignRight());
 
-        findViewById(R.id.action_blockquote).setOnClickListener(v -> binding.editor.setBlockquote());
+        binding.richEditToolbar.actionBlockquote.setOnClickListener(v -> binding.editor.setBlockquote());
 
-        findViewById(R.id.action_insert_bullets).setOnClickListener(v -> binding.editor.setBullets());
+        binding.richEditToolbar.actionInsertBullets.setOnClickListener(v -> binding.editor.setBullets());
 
-        findViewById(R.id.action_insert_numbers).setOnClickListener(v -> binding.editor.setNumbers());
+        binding.richEditToolbar.actionInsertNumbers.setOnClickListener(v -> binding.editor.setNumbers());
 
-        findViewById(R.id.action_insert_image).setOnClickListener(v -> binding.editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg",
+        binding.richEditToolbar.actionInsertImage.setOnClickListener(v -> binding.editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg",
                 "dachshund", 320));
 
-        findViewById(R.id.action_insert_youtube).setOnClickListener(v -> binding.editor.insertYoutubeVideo("https://www.youtube.com/embed/pS5peqApgUA"));
+        binding.richEditToolbar.actionInsertYoutube.setOnClickListener(v -> binding.editor.insertYoutubeVideo("https://www.youtube.com/embed/pS5peqApgUA"));
 
-        findViewById(R.id.action_insert_audio).setOnClickListener(v -> binding.editor.insertAudio("https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3"));
+        binding.richEditToolbar.actionInsertAudio.setOnClickListener(v -> binding.editor.insertAudio("https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3"));
 
-        findViewById(R.id.action_insert_video).setOnClickListener(v -> binding.editor.insertVideo("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4", 360));
+        binding.richEditToolbar.actionInsertVideo.setOnClickListener(v -> binding.editor.insertVideo("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4", 360));
 
-        findViewById(R.id.action_insert_link).setOnClickListener(v -> binding.editor.insertLink("https://github.com/wasabeef", "wasabeef"));
+        binding.richEditToolbar.actionInsertLink.setOnClickListener(v -> binding.editor.insertLink("https://github.com/wasabeef", "wasabeef"));
 
-        findViewById(R.id.action_insert_checkbox).setOnClickListener(v -> binding.editor.insertTodo());
+        binding.richEditToolbar.actionInsertCheckbox.setOnClickListener(v -> binding.editor.insertTodo());
     }
 
     private void setTextColorButtons() {
@@ -321,6 +359,9 @@ public class EditNoteActivity extends AppCompatActivity {
                     editNoteEvent.setNoteId(noteModel.getDocumentId());
                 }
                 EventBus.getDefault().post(editNoteEvent);
+                if (backgroundView != null) {
+                    backgroundView.setTranslationX(0);
+                }
                 finish();
                 return true;
             default:
@@ -331,6 +372,9 @@ public class EditNoteActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (MainActivity.isRunning) {
+            if (backgroundView != null) {
+                backgroundView.setTranslationX(0);
+            }
             super.onBackPressed();
         } else {
             Intent intent = new Intent(this, MainActivity.class);

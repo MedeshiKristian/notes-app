@@ -28,6 +28,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +40,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     private List<NoteModel> noteModels;
     private RecyclerView recyclerView;
     private final LinearLayoutManager layoutManager;
-    private final Set<Integer> mSelectedPositions;
+    private final Set<Integer> selectedPositions;
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private final ItemNoteBinding binding;
@@ -94,7 +95,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         this.noteModels = noteModels;
         this.context = context;
         this.layoutManager = layoutManager;
-        mSelectedPositions = new HashSet<>();
+        selectedPositions = new HashSet<>();
         setHasStableIds(true);
     }
 
@@ -157,10 +158,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 EventBus.getDefault().post(new MultiSelectEvent(true));
             }
             holder.addSelection();
-            mSelectedPositions.add(position);
+            selectedPositions.add(position);
         } else {
             holder.removeSelection();
-            mSelectedPositions.remove(position);
+            selectedPositions.remove(position);
             if (getCountSelectedNotes() == 0) {
                 EventBus.getDefault().post(new MultiSelectEvent(false));
             }
@@ -169,15 +170,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     }
 
     private boolean isSelected(int position) {
-        return mSelectedPositions.contains(position);
+        return selectedPositions.contains(position);
     }
 
     public int getCountSelectedNotes() {
-        return mSelectedPositions.size();
+        return selectedPositions.size();
     }
 
     public boolean isMultiSelect() {
-        return !mSelectedPositions.isEmpty();
+        return !selectedPositions.isEmpty();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -211,7 +212,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                     holder.removeSelection();
                 }
             }
-            mSelectedPositions.clear();
+            selectedPositions.clear();
         }
     }
 
@@ -227,7 +228,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 remove(i);
             }
         }
-        mSelectedPositions.clear();
+        selectedPositions.clear();
         EventBus.getDefault().post(new MultiSelectEvent(false));
     }
 
@@ -243,7 +244,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 FirebaseUtil.updateUserNote(noteModels.get(i));
             }
         }
-        mSelectedPositions.clear();
+        selectedPositions.clear();
         EventBus.getDefault().post(new MultiSelectEvent(false));
     }
 
@@ -256,5 +257,16 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void restore(@NonNull NoteModel note, int position) {
         noteModels.add(position, note);
         notifyItemInserted(position);
+    }
+
+    public void filter(String s, @NonNull List<NoteModel> allNotes) {
+        s = s.toLowerCase();
+        ArrayList<NoteModel> filteredNotes = new ArrayList<>();
+        for (NoteModel note : allNotes) {
+            if (s.isEmpty() || AndroidUtil.getPlainTextFromHtmlp(note.getText()).toLowerCase().contains(s)) {
+                filteredNotes.add(note);
+            }
+        }
+        setDataSet(filteredNotes);
     }
 }

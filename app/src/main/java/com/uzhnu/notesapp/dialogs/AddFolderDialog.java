@@ -11,9 +11,19 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogAddFolderBinding;
+import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utils.FirebaseUtil;
+
+import java.util.List;
 
 public class AddFolderDialog extends DialogFragment {
     private AddFolderListener listener;
@@ -29,6 +39,44 @@ public class AddFolderDialog extends DialogFragment {
 
     public AddFolderDialog(AddFolderListener listener) {
         this.listener = listener;
+    }
+
+    public AddFolderDialog(FoldersAdapter adapter, List<FolderModel> folderModels) {
+        this.listener = new AddFolderListener() {
+            @Override
+            public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
+                OnCompleteListener<QuerySnapshot> onCompleteListener = task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        boolean ok = true;
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            FolderModel folder = FirebaseUtil
+                                    .getFolderFromDocument(queryDocumentSnapshot);
+                            if (folder.getName().equals(folderName)) {
+                                ok = false;
+                            }
+                        }
+                        if (ok) {
+                            FolderModel folder = new FolderModel(folderName);
+                            FirebaseUtil.addFolder(folder)
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            folder.setDocumentId(task1.getResult().getId());
+                                            folderModels.add(folder);
+                                            adapter.notifyItemInserted(folderModels.size() - 1);
+                                        }
+                                    });
+                        }
+                    }
+                };
+                FirebaseUtil.getFolders().get().addOnCompleteListener(onCompleteListener);
+            }
+
+            @Override
+            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                assert dialog.getDialog() != null;
+                dialog.getDialog().cancel();
+            }
+        };
     }
 
     @NonNull

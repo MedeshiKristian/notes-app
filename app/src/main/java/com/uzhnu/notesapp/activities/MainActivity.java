@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.customview.widget.ViewDragHelper;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -42,7 +44,6 @@ import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
@@ -52,6 +53,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,27 +83,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbarInit);
 
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
-        int statusBarHeight = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }
-
-        ViewGroup.MarginLayoutParams params
-                = (ViewGroup.MarginLayoutParams) binding.toolbarInit.getLayoutParams();
-        params.setMargins(0, statusBarHeight, 0, 0);
-        binding.toolbarInit.setLayoutParams(params);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.setStatusBarColor(Color.TRANSPARENT);
-
-        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        window.getDecorView().setSystemUiVisibility(flags);
-
         init();
         loadUserDetails();
         loadUserNotes();
@@ -123,11 +104,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         searchView = (SearchView) menu.findItem(R.id.option_search).getActionView();
-
         searchView.setIconifiedByDefault(true);
-
         searchView.setPadding(0, 0, 0, 5);
-
         searchView.setOnSearchClickListener(view -> {
             binding.floatingActionButtonAddNote.setVisibility(View.INVISIBLE);
         });
@@ -142,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                filter(s);
+                assert notesAdapter != null;
+                notesAdapter.filter(s, noteModels);
                 return false;
             }
         });
@@ -152,17 +131,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
         return super.onCreateOptionsMenu(menu);
-    }
-
-    private void filter(String s) {
-        s = s.toLowerCase();
-        ArrayList<NoteModel> filteredNotes = new ArrayList<>();
-        for (NoteModel note : noteModels) {
-            if (s.isEmpty() || AndroidUtil.getPlainTextFromHtmlp(note.getText()).toLowerCase().contains(s)) {
-                filteredNotes.add(note);
-            }
-        }
-        notesAdapter.setDataSet(filteredNotes);
     }
 
     @Override
@@ -204,9 +172,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
         isRunning = true;
-
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
@@ -216,9 +182,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+        int statusBarHeight = 0;
+        @SuppressLint("InternalInsetResource")
+        int resourceId = getResources().getIdentifier(
+                "status_bar_height",
+                "dimen",
+                "android"
+        );
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        ViewGroup.MarginLayoutParams params
+                = (ViewGroup.MarginLayoutParams) binding.toolbarInit.getLayoutParams();
+        params.setMargins(0, statusBarHeight, 0, 0);
+        binding.toolbarInit.setLayoutParams(params);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(Color.TRANSPARENT);
+
+//        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+//        window.getDecorView().setSystemUiVisibility(flags);
+
         setInitToolBar();
+
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+
+        PreferencesManager.getInstance().put(Constants.KEY_MAIN_ACTIVITY, this);
 
 //        for (int i = 0; i < 20; i++) {
 //            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
@@ -354,24 +349,22 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+
         binding.navigationStart.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
 
-        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserNotes);
 
+        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserNotes);
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this, notesAdapter) {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                if (notesAdapter.isMultiSelect()) {
-                    return;
-                }
                 final int position = viewHolder.getLayoutPosition();
                 final NoteModel note = notesAdapter.getDataSet().get(position);
 
                 String text = "Note was removed from the list";
-                Snackbar snackbar = Snackbar
-                        .make(binding.coordinatorContent, text, Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG);
                 snackbar.setBackgroundTint(Color.WHITE);
                 snackbar.setTextColor(Color.BLACK);
+
                 snackbar.setAction("UNDO", view -> {
                     FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
@@ -380,7 +373,6 @@ public class MainActivity extends AppCompatActivity {
                     });
                     binding.notesContent.recyclerViewNotes.scrollToPosition(position);
                 });
-
                 snackbar.setActionTextColor(ContextCompat
                         .getColor(getApplicationContext(), R.color.primary));
 
@@ -395,28 +387,24 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(binding.notesContent.recyclerViewNotes);
 
-        EditUsernameDialog dialog = new EditUsernameDialog(new EditUsernameDialog.EditUsernameListener() {
-            @Override
-            public void onDialogPositiveClick(@NonNull DialogFragment dialog,
-                                              String newUsername) {
-                FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                binding.navigationStart.header.textViewUsername.setText(newUsername);
-                            }
-                        });
-            }
-
-            @Override
-            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
-                assert dialog.getDialog() != null;
-                dialog.getDialog().cancel();
-            }
-        });
+        EditUsernameDialog dialog =
+                new EditUsernameDialog(binding.navigationStart.header.textViewUsername);
 
         binding.navigationStart.header.textViewUsername.setOnClickListener(view -> {
             dialog.show(getSupportFragmentManager(), "Update username");
         });
+        
+        try {
+            Field dragger = binding.drawerLayout.getClass().getDeclaredField("mLeftDragger");
+            dragger.setAccessible(true);
+            ViewDragHelper draggerObj = (ViewDragHelper) dragger.get(binding.drawerLayout);
+            Field edgeSize = draggerObj.getClass().getDeclaredField("mEdgeSize");
+            edgeSize.setAccessible(true);
+            int edge = edgeSize.getInt(draggerObj);
+            edgeSize.setInt(draggerObj, edge * 100);
+        } catch (NoSuchFieldException | IllegalAccessException | NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadUserDetails() {

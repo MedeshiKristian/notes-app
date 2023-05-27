@@ -19,4 +19,5 @@ public class Constants {
     public static final String KEY_POSITION = "position";
     public static final String KEY_CURRENT_FOLDER = "currentFolder";
     public static final String KEY_MULTISELECT = "multiselect";
+    public static final String KEY_MAIN_ACTIVITY = "mainActivity";
 }

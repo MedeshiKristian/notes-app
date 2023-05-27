@@ -3,6 +3,7 @@ package com.uzhnu.notesapp.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,6 +13,7 @@ import androidx.fragment.app.DialogFragment;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.DialogRenameBinding;
 import com.uzhnu.notesapp.models.UserModel;
+import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
 
 public class EditUsernameDialog extends DialogFragment {
@@ -30,11 +32,33 @@ public class EditUsernameDialog extends DialogFragment {
         this.listener = listener;
     }
 
+    public EditUsernameDialog(TextView textView) {
+        this.listener = new EditUsernameListener() {
+            @Override
+            public void onDialogPositiveClick(@NonNull DialogFragment dialog,
+                                              String newUsername) {
+                FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                textView.setText(newUsername);
+                            }
+                        });
+            }
+
+            @Override
+            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                assert dialog.getDialog() != null;
+                dialog.getDialog().cancel();
+            }
+        };
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         DialogRenameBinding binding = DialogRenameBinding.inflate(getLayoutInflater());
+
         FirebaseUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -45,7 +69,7 @@ public class EditUsernameDialog extends DialogFragment {
                 });
 
         builder.setView(binding.getRoot())
-                .setTitle(R.string.dialog_edit_folder)
+                .setTitle(R.string.dialog_edit_username)
                 .setPositiveButton(R.string.string_rename, (dialog, id) -> {
                     if (listener != null) {
                         listener.onDialogPositiveClick(EditUsernameDialog.this,

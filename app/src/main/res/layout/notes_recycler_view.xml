@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     app:swipeRefreshLayoutProgressSpinnerBackgroundColor="@color/primary"
+    android:background="@color/white"
     app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
     <androidx.recyclerview.widget.RecyclerView

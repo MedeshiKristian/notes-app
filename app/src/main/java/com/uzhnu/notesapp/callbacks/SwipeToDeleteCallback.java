@@ -64,9 +64,6 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
                             @NonNull RecyclerView recyclerView,
                             @NonNull RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
-        if (adapter.isMultiSelect()) {
-            return;
-        }
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
         View itemView = viewHolder.itemView;
@@ -89,16 +86,14 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         if (Math.abs(dX) >= swipeThreshold) {
             if (!vibrated) {
                 vibrated = true;
-                long vibrationDuration = 200;
-                Vibrator vibrator = (Vibrator) getSystemService(context, Vibrator.class);
-                assert vibrator != null;
-                if (vibrator.hasVibrator()) {
-                    vibrator.vibrate(vibrationDuration);
-                }
+                vibrateOnce();
             }
             backgroundColor = ContextCompat.getColor(context, R.color.greyColor);
         } else if (Math.abs(dX) < swipeThreshold) {
-            vibrated = false;
+            if (vibrated) {
+                vibrated = false;
+                vibrateOnce();
+            }
             backgroundColor = ContextCompat.getColor(context, R.color.primary);
         }
 
@@ -114,6 +109,15 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
 
         deleteDrawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
         deleteDrawable.draw(c);
+    }
+
+    private void vibrateOnce() {
+        long vibrationDuration = 75;
+        Vibrator vibrator = (Vibrator) getSystemService(context, Vibrator.class);
+        assert vibrator != null;
+        if (vibrator.hasVibrator()) {
+            vibrator.vibrate(vibrationDuration);
+        }
     }
 
     private void clearCanvas(@NonNull Canvas c, Float left, Float top, Float right, Float bottom) {

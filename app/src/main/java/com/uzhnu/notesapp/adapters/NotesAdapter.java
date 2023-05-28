@@ -43,6 +43,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     private final Set<Integer> selectedPositions;
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
+        private static final String DATE_FORMAT = "MMMM/dd/yyyy - HH:mm:ss";
         private final ItemNoteBinding binding;
 
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
@@ -56,14 +57,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
 
         private void bind(@NonNull NoteModel noteModel) {
-//            Log.i(Constants.TAG, "bind");
             binding.textViewNoteTitle.setText(
                     StringUtils.abbreviate(
                             AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
                     )
             );
             SimpleDateFormat simpleDateFormat
-                    = new SimpleDateFormat("MMMM/dd/yyyy - HH:mm:ss", Locale.getDefault());
+                    = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
             binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
 
             if (noteModel.isPined()) {

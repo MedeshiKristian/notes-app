@@ -225,8 +225,7 @@ public class EditNoteActivity extends AppCompatActivity {
 
         binding.richEditToolbar.actionInsertNumbers.setOnClickListener(v -> binding.editor.setNumbers());
 
-        binding.richEditToolbar.actionInsertImage.setOnClickListener(v -> binding.editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg",
-                "dachshund", 320));
+        binding.richEditToolbar.actionInsertImage.setOnClickListener(v -> binding.editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg", "dachshund", 320));
 
         binding.richEditToolbar.actionInsertYoutube.setOnClickListener(v -> binding.editor.insertYoutubeVideo("https://www.youtube.com/embed/pS5peqApgUA"));
 

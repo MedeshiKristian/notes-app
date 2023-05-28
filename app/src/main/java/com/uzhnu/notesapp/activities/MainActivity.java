@@ -13,13 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
+import androidx.core.os.BuildCompat;
 import androidx.core.view.GravityCompat;
 import androidx.customview.widget.ViewDragHelper;
 import androidx.fragment.app.DialogFragment;
@@ -208,12 +208,13 @@ public class MainActivity extends AppCompatActivity {
 //        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 //        window.getDecorView().setSystemUiVisibility(flags);
 
-        setInitToolBar();
 
         PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
                 Constants.KEY_COLLECTION_FOLDER_DEFAULT);
 
         PreferencesManager.getInstance().put(Constants.KEY_MAIN_ACTIVITY, this);
+
+        setInitToolBar();
 
 //        for (int i = 0; i < 20; i++) {
 //            FirebaseUtil.addUserNoteToFolder(new NoteModel("Note " + i));
@@ -240,7 +241,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setInitToolBar() {
-        binding.toolbarInit.setTitle(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+        binding.toolbarInit.setTitle(
+                (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER));
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
                 binding.drawerLayout, binding.toolbarInit,
@@ -364,7 +366,6 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar snackbar = Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG);
                 snackbar.setBackgroundTint(Color.WHITE);
                 snackbar.setTextColor(Color.BLACK);
-
                 snackbar.setAction("UNDO", view -> {
                     FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
@@ -393,18 +394,6 @@ public class MainActivity extends AppCompatActivity {
         binding.navigationStart.header.textViewUsername.setOnClickListener(view -> {
             dialog.show(getSupportFragmentManager(), "Update username");
         });
-        
-        try {
-            Field dragger = binding.drawerLayout.getClass().getDeclaredField("mLeftDragger");
-            dragger.setAccessible(true);
-            ViewDragHelper draggerObj = (ViewDragHelper) dragger.get(binding.drawerLayout);
-            Field edgeSize = draggerObj.getClass().getDeclaredField("mEdgeSize");
-            edgeSize.setAccessible(true);
-            int edge = edgeSize.getInt(draggerObj);
-            edgeSize.setInt(draggerObj, edge * 100);
-        } catch (NoSuchFieldException | IllegalAccessException | NullPointerException e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadUserDetails() {
@@ -520,7 +509,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.i(Constants.TAG, "destroy");
         super.onDestroy();
         EventBus.getDefault().unregister(this);
     }

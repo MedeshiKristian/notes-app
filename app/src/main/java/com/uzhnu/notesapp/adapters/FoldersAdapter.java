@@ -6,11 +6,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ItemFolderBinding;
 import com.uzhnu.notesapp.dialogs.AddFolderDialog;
@@ -18,7 +16,6 @@ import com.uzhnu.notesapp.dialogs.EditFolderDialog;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,14 +28,14 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
     private static final int REGULAR = 1;
     private static final int ADD = 2;
 
-    private FragmentActivity activity;
+    private final FragmentActivity activity;
 
-    private List<FolderModel> folderModels;
+    private final List<FolderModel> folderModels;
 
     private FoldersViewHolder currentFolderHolder;
 
     public static class FoldersViewHolder extends RecyclerView.ViewHolder {
-        private ItemFolderBinding binding;
+        private final ItemFolderBinding binding;
 
         public FoldersViewHolder(@NonNull ItemFolderBinding itemFolderBinding) {
             super(itemFolderBinding.getRoot());

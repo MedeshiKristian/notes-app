@@ -25,9 +25,9 @@ public class SplashActivity extends AppCompatActivity {
         if (!FirebaseUtil.isLoggedIn()) {
             Log.i(Constants.TAG, "User is not logged in");
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
             return;
         }
 
@@ -40,6 +40,7 @@ public class SplashActivity extends AppCompatActivity {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+                        finish();
                         return;
                     }
                     if (task.getResult().toObject(UserModel.class) == null) {
@@ -56,6 +57,8 @@ public class SplashActivity extends AppCompatActivity {
                                 Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     }
+                    finish();
+
                 });
     }
 }

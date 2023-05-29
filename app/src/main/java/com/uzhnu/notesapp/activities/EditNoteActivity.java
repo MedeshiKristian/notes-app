@@ -1,18 +1,27 @@
 package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrInterface;
@@ -22,11 +31,17 @@ import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 public class EditNoteActivity extends AppCompatActivity {
     private static final int MIN_FONT_SIZE = 1;
@@ -40,6 +55,8 @@ public class EditNoteActivity extends AppCompatActivity {
     private static final int COLOR_RED = Color.rgb(255, 127, 0);
     private static final int COLOR_WHITE = Color.rgb(255, 255, 255);
     private static final int COLOR_BLACK = Color.rgb(0, 0, 0);
+    private static final SimpleDateFormat FORMATTER
+            = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault());
 
     private int fontSize;
 
@@ -52,6 +69,10 @@ public class EditNoteActivity extends AppCompatActivity {
 
     private View backgroundView;
 
+    private ActivityResultLauncher<Intent> uploadImageFile;
+    private ActivityResultLauncher<Intent> uploadAudioFile;
+    private ActivityResultLauncher<Intent> uploadVideoFile;
+
     @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,9 +80,18 @@ public class EditNoteActivity extends AppCompatActivity {
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
-        
+
         setIsProgress(true);
         init();
+        uploadImageFile = uploadFile("image/", url -> {
+            binding.editor.insertImage(url, "dachshund", 320);
+        });
+        uploadAudioFile = uploadFile("audio/", url -> {
+            binding.editor.insertAudio(url);
+        });
+        uploadVideoFile = uploadFile("video/", url -> {
+            binding.editor.insertVideo(url, 360);
+        });
         setListeners();
     }
 
@@ -70,7 +100,7 @@ public class EditNoteActivity extends AppCompatActivity {
         super.onStart();
         EventBus.getDefault().register(this);
     }
-    
+
     private void init() {
         activity = (AppCompatActivity) PreferencesManager
                 .getInstance().get(Constants.KEY_MAIN_ACTIVITY);
@@ -225,13 +255,33 @@ public class EditNoteActivity extends AppCompatActivity {
 
         binding.richEditToolbar.actionInsertNumbers.setOnClickListener(v -> binding.editor.setNumbers());
 
-        binding.richEditToolbar.actionInsertImage.setOnClickListener(v -> binding.editor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg", "dachshund", 320));
+        binding.richEditToolbar.actionInsertYoutube.setOnClickListener(v -> {
+            binding.editor.insertYoutubeVideo("https://www.youtube.com/embed/pS5peqApgUA");
+        });
 
-        binding.richEditToolbar.actionInsertYoutube.setOnClickListener(v -> binding.editor.insertYoutubeVideo("https://www.youtube.com/embed/pS5peqApgUA"));
+        binding.richEditToolbar.actionInsertImage.setOnClickListener(v -> {
+//            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            uploadImageFile.launch(Intent.createChooser(intent, null));
+        });
 
-        binding.richEditToolbar.actionInsertAudio.setOnClickListener(v -> binding.editor.insertAudio("https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3"));
+        binding.richEditToolbar.actionInsertAudio.setOnClickListener(v -> {
+//            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("audio/*");
+            uploadAudioFile.launch(Intent.createChooser(intent, null));
+        });
 
-        binding.richEditToolbar.actionInsertVideo.setOnClickListener(v -> binding.editor.insertVideo("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4", 360));
+        binding.richEditToolbar.actionInsertVideo.setOnClickListener(v -> {
+//            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            uploadVideoFile.launch(Intent.createChooser(intent, null));
+        });
 
         binding.richEditToolbar.actionInsertLink.setOnClickListener(v -> binding.editor.insertLink("https://github.com/wasabeef", "wasabeef"));
 
@@ -349,13 +399,12 @@ public class EditNoteActivity extends AppCompatActivity {
                     onBackPressed();
                     return true;
                 }
-                EditNoteEvent editNoteEvent = new EditNoteEvent(newText);
+                EditNoteEvent editNoteEvent;
                 if (noteModel != null) {
                     noteModel.setText(newText);
-                    noteModel.updateLastEdited();
-                    int position = (int) PreferencesManager.getInstance().get(Constants.KEY_POSITION);
-                    editNoteEvent.setPosition(position);
-                    editNoteEvent.setNoteId(noteModel.getDocumentId());
+                    editNoteEvent = new EditNoteEvent(noteModel);
+                } else {
+                    editNoteEvent = new EditNoteEvent(newText);
                 }
                 EventBus.getDefault().post(editNoteEvent);
                 if (backgroundView != null) {
@@ -407,5 +456,48 @@ public class EditNoteActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+    @NonNull
+    private ActivityResultLauncher<Intent> uploadFile(String location,
+                                                      ActivityResultCallback<String> callback) {
+        return registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    setIsProgress(true);
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        Uri uri = result.getData().getData();
+                        String[] typeInfo = getContentResolver().getType(uri).split("/");
+                        Log.d(Constants.TAG, "type: " + Arrays.toString(typeInfo));
+                        String fileName = FORMATTER.format(new Date());
+                        StorageReference storageReference
+                                = FirebaseStorage.getInstance().getReference(location + fileName);
+                        storageReference.putFile(uri).addOnSuccessListener(taskSnapshot -> {
+                            StorageMetadata metadata = taskSnapshot.getMetadata();
+                            if (metadata != null) {
+                                getUrlWithCallback(metadata.getReference(), callback);
+                            }
+                        });
+                    } else {
+                        setIsProgress(false);
+                        AndroidUtil.showToast(getApplicationContext(), "Failed to upload");
+                    }
+                }
+        );
+    }
+
+    private void getUrlWithCallback(StorageReference storageReference,
+                                    ActivityResultCallback<String> callback) {
+        if (storageReference != null) {
+            storageReference.getDownloadUrl().addOnCompleteListener(uriTask -> {
+                if (uriTask.isSuccessful()) {
+                    callback.onActivityResult(String.valueOf(uriTask.getResult()));
+                    Log.d(Constants.TAG, "" + uriTask.getResult());
+                }
+            });
+        } else {
+            Log.e(Constants.TAG, "Failed to get url");
+        }
+        setIsProgress(false);
     }
 }

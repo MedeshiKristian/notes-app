@@ -15,8 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.uzhnu.notesapp.activities.MainActivity;
-import com.uzhnu.notesapp.callbacks.CameraResultCallback;
-import com.uzhnu.notesapp.callbacks.GalleryResultCallback;
+import com.uzhnu.notesapp.callbacks.SetImageFromCameraCallback;
+import com.uzhnu.notesapp.callbacks.SetImageFromGalleryCallback;
 import com.uzhnu.notesapp.callbacks.RequestCameraPermissionCallback;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
@@ -55,11 +55,11 @@ public class LoginUsernameFragment extends Fragment {
         binding = FragmentLoginUsernameBinding.inflate(inflater, container, false);
         pickImageFromGallery = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new GalleryResultCallback(getContext(), binding.imageViewUser));
+                new SetImageFromGalleryCallback(getContext(), binding.imageViewUser));
         cameraUri = ImageUtil.getUri(requireContext());
         pickImageFromCamera = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new CameraResultCallback(getContext(), binding.imageViewUser, cameraUri)
+                new SetImageFromCameraCallback(getContext(), binding.imageViewUser, cameraUri)
         );
         requestCameraPermission = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
@@ -81,19 +81,19 @@ public class LoginUsernameFragment extends Fragment {
     }
 
     private void setListeners() {
-        binding.buttonLetMeIn.setOnClickListener(view1 -> setUser());
+        binding.buttonSignIn.setOnClickListener(view1 -> setUser());
 
         binding.imageViewUser.setOnClickListener(view1 -> imageUtil.showBottomSheetPickImage());
     }
 
     private void setIsProgress(boolean show) {
         if (show) {
-            binding.buttonLetMeIn.setEnabled(false);
+            binding.buttonSignIn.setEnabled(false);
             binding.circularProgressIndicator.show();
             binding.circularProgressIndicator.setProgress(100, true);
         } else {
             binding.circularProgressIndicator.hide();
-            binding.buttonLetMeIn.setEnabled(true);
+            binding.buttonSignIn.setEnabled(true);
         }
     }
 

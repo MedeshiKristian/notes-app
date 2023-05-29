@@ -100,6 +100,7 @@
             android:background="@drawable/rounded_corners_white_background"
             android:elevation="@dimen/_3sdp"
             android:hint="Username"
+            android:textColorHint="@color/white"
             android:inputType="text"
             android:padding="@dimen/_10sdp"
             android:textColor="@color/black" />
@@ -115,7 +116,7 @@
         android:paddingRight="@dimen/_20sdp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_let_me_in"
+            android:id="@+id/button_sign_in"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"

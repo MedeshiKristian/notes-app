@@ -1,37 +1,28 @@
 package com.uzhnu.notesapp.events;
 
+import com.uzhnu.notesapp.models.NoteModel;
+
 public class EditNoteEvent {
-    private final String noteText;
-    private String noteId;
-    private int position;
+    private NoteModel noteModel;
+    private String newNoteText;
 
-    public EditNoteEvent(String noteText) {
-        this.noteText = noteText;
-        this.noteId = "";
-        position = -1;
+    public EditNoteEvent(String newNoteText) {
+        this.newNoteText = newNoteText;
     }
 
-    public String getNoteText() {
-        return noteText;
-    }
-
-    public void setNoteId(String noteId) {
-        this.noteId = noteId;
-    }
-
-    public String getNoteId() {
-        return noteId;
+    public EditNoteEvent(NoteModel noteModel) {
+        this.noteModel = noteModel;
     }
 
     public boolean isNewNote() {
-        return getNoteId().isEmpty();
+        return noteModel == null;
     }
 
-    public int getPosition() {
-        return position;
+    public NoteModel getNoteModel() {
+        return noteModel;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public String getNewNoteText() {
+        return newNoteText;
     }
 }

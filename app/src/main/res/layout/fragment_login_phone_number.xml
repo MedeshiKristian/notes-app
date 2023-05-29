@@ -106,7 +106,7 @@
             android:id="@+id/edit_text_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corners_white_background"
+            android:background="@color/white"
             android:hint="Your phone number"
             android:inputType="phone"
             android:textColor="@color/black" />

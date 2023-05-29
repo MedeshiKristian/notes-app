@@ -3,6 +3,7 @@ package com.uzhnu.notesapp.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.uzhnu.notesapp.databinding.ItemNoteBinding;
 import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseUtil;
@@ -45,6 +47,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private static final String DATE_FORMAT = "MMMM/dd/yyyy - HH:mm:ss";
         private final ItemNoteBinding binding;
+        private static final String currentUserId = FirebaseUtil.getCurrentUserId();
 
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
             super(itemNoteBinding.getRoot());
@@ -56,16 +59,31 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             }
         }
 
+        @SuppressLint("SetTextI18n")
         private void bind(@NonNull NoteModel noteModel) {
             binding.textViewNoteTitle.setText(
                     StringUtils.abbreviate(
                             AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
                     )
             );
-            SimpleDateFormat simpleDateFormat
-                    = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
-            binding.textViewLastEdited.setText(simpleDateFormat.format(noteModel.getLastEdited()));
-
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
+            if (noteModel.getLastEditedBy().equals(currentUserId)) {
+                binding.textViewMetaData
+                        .setText(simpleDateFormat.format(noteModel.getLastEdited()) + " by You");
+            } else {
+                FirebaseUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        UserModel userModel = task.getResult().toObject(UserModel.class);
+                        if (userModel != null) {
+                            String userName = " by " + userModel.getUsername();
+                            binding.textViewMetaData
+                                    .setText(simpleDateFormat.format(noteModel.getLastEdited()) + userName);
+                        }
+                    } else {
+                        Log.e(Constants.TAG, "Failed to load username");
+                    }
+                });
+            }
             if (noteModel.isPined()) {
                 binding.imageViewPinned.setVisibility(View.VISIBLE);
             }
@@ -85,7 +103,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             binding.imageViewSelected.setVisibility(View.GONE);
             binding.layoutNote.setBackground(ContextCompat.getDrawable(
                             binding.layoutNote.getContext(),
-                            R.drawable.rounded_corners_white_background
+                            R.drawable.ripple_effect_grey_rounded_courners_background
                     )
             );
         }
@@ -123,9 +141,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             if (isMultiSelect()) {
                 view.performLongClick();
             } else {
-                Intent intent = new Intent(context, EditNoteActivity.class);
                 PreferencesManager.getInstance().put(Constants.KEY_NOTE, noteModels.get(position));
-                PreferencesManager.getInstance().put(Constants.KEY_POSITION, position);
+//                PreferencesManager.getInstance().put(Constants.KEY_POSITION, position);
+                Intent intent = new Intent(context, EditNoteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
@@ -241,7 +259,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                FirebaseUtil.updateUserNote(noteModels.get(i));
+                FirebaseUtil.updateNote(noteModels.get(i));
             }
         }
         selectedPositions.clear();
@@ -254,9 +272,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         notifyItemRemoved(position);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void restore(@NonNull NoteModel note, int position) {
         noteModels.add(position, note);
-        notifyItemInserted(position);
+        notifyDataSetChanged();
     }
 
     public void filter(String s, @NonNull List<NoteModel> allNotes) {

@@ -22,7 +22,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
     private String text;
     private Date lastEdited;
     private Date createdAt;
-    private String createdBy;
+    private String lastEditedBy;
     private Boolean isPined;
 
     public NoteModel() {
@@ -33,7 +33,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         this.isPined = false;
         this.createdAt = new Date();
         this.lastEdited = this.createdAt;
-        this.createdBy = FirebaseUtil.getCurrentUserId();
+        this.lastEditedBy = FirebaseUtil.getCurrentUserId();
     }
 
     public NoteModel(@NonNull Parcel in) throws ParseException {
@@ -86,6 +86,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void updateLastEdited() {
         this.lastEdited = new Date();
+        this.lastEditedBy = FirebaseUtil.getCurrentUserId();
     }
 
     public Date getCreatedAt() {
@@ -120,12 +121,12 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         this.documentId = documentId;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getLastEditedBy() {
+        return lastEditedBy;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setLastEditedBy(String lastEditedBy) {
+        this.lastEditedBy = lastEditedBy;
     }
 
     public Boolean isPined() {

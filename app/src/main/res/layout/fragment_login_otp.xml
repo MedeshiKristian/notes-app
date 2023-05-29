@@ -96,6 +96,7 @@
             android:background="@drawable/rounded_corners_white_background"
             android:elevation="@dimen/_3sdp"
             android:hint="OTP"
+            android:backgroundTint="@color/white"
             android:inputType="number"
             android:padding="@dimen/_10sdp"
             android:textColor="@color/black" />

@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -21,15 +24,11 @@
         android:theme="@style/Theme.NotesApp"
         tools:targetApi="31">
 
-        <provider
-            android:name=".GenericFileProvider"
-            android:authorities="com.uzhnu.notesapp.GenericFileProvider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:theme="@style/Theme.NotesApp.SlidrActivityTheme"
+            android:launchMode="singleInstance"
+            android:exported="false" />
 
         <activity
             android:name=".activities.FullscreenPhotoActivity"
@@ -42,9 +41,9 @@
         <activity
             android:name=".activities.EditNoteActivity"
             android:exported="false"
+            android:fitsSystemWindows="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:fitsSystemWindows="true"
             android:theme="@style/Theme.NotesApp.SlidrActivityTheme"
             android:windowSoftInputMode="adjustResize">
             <meta-data
@@ -78,12 +77,21 @@
             android:name=".activities.MainActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.NotesApp.TranslucentStatus"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.TranslucentStatus">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-    </application>
 
+        <provider
+            android:name=".GenericFileProvider"
+            android:authorities="com.uzhnu.notesapp.GenericFileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
 </manifest>

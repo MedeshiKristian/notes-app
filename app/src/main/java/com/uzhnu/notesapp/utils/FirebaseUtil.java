@@ -1,12 +1,12 @@
 package com.uzhnu.notesapp.utils;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.models.FolderModel;
@@ -41,13 +41,20 @@ public class FirebaseUtil {
     }
 
     @NonNull
+    public static Task<DocumentSnapshot> getUserName(@NonNull String userId) {
+        return getDatebase()
+                .collection(Constants.KEY_COLLECTION_USERS)
+                .document(userId).get();
+    }
+
+    @NonNull
     public static NoteModel getNoteFromDocument(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
         NoteModel noteModel = new NoteModel();
         noteModel.setText(queryDocumentSnapshot.getString(Constants.KEY_TEXT));
-        noteModel.setLastEdited(queryDocumentSnapshot.getDate(Constants.KEY_LAST_EDITED));
+        noteModel.setLastEdited(queryDocumentSnapshot.getDate(Constants.KEY_LAST_EDITED_AT));
         noteModel.setPined(queryDocumentSnapshot.getBoolean(Constants.KEY_PINNED));
         noteModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
-        noteModel.setCreatedBy(queryDocumentSnapshot.getString(Constants.KEY_CREATED_BY));
+        noteModel.setLastEditedBy(queryDocumentSnapshot.getString(Constants.KEY_LAST_EDITED_BY));
         noteModel.setDocumentId(queryDocumentSnapshot.getId());
         return noteModel;
     }
@@ -56,15 +63,15 @@ public class FirebaseUtil {
     public static Map<String, Object> getObjectFromNote(@NonNull NoteModel noteModel) {
         Map<String, Object> objectMap = new HashMap<>();
         objectMap.put(Constants.KEY_TEXT, noteModel.getText());
-        objectMap.put(Constants.KEY_LAST_EDITED, noteModel.getLastEdited());
+        objectMap.put(Constants.KEY_LAST_EDITED_AT, noteModel.getLastEdited());
         objectMap.put(Constants.KEY_PINNED, noteModel.isPined());
         objectMap.put(Constants.KEY_CREATED_AT, noteModel.getCreatedAt());
-        objectMap.put(Constants.KEY_CREATED_BY, noteModel.getCreatedBy());
+        objectMap.put(Constants.KEY_LAST_EDITED_BY, noteModel.getLastEditedBy());
         return objectMap;
     }
 
     @NonNull
-    public static Task<DocumentReference> addUserNoteToFolder(@NonNull NoteModel noteModel) {
+    public static Task<DocumentReference> addNoteToFolder(@NonNull NoteModel noteModel) {
         return FirebaseUtil.getCurrentFolderNotes()
                 .add(getObjectFromNote(noteModel));
     }
@@ -87,10 +94,11 @@ public class FirebaseUtil {
     }
 
     @NonNull
-    public static Task<Void> updateUserNote(@NonNull NoteModel noteModel) {
+    public static Task<Void> updateNote(@NonNull NoteModel noteModel) {
+        noteModel.updateLastEdited();
         return FirebaseUtil.getNoteFromFolder(noteModel.getDocumentId())
                 .update(Constants.KEY_TEXT, noteModel.getText(),
-                        Constants.KEY_LAST_EDITED, noteModel.getLastEdited(),
+                        Constants.KEY_LAST_EDITED_AT, noteModel.getLastEdited(),
                         Constants.KEY_PINNED, noteModel.isPined());
     }
 

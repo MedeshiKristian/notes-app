@@ -30,7 +30,8 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class LoginOtpFragment extends Fragment {
-    private static final Long timeoutSeconds = 30L;
+    private static final Long TIMEOUT_SECONDS = 30L;
+    private FirebaseAuth auth;
 
     private Long timeoutLeftSeconds;
 
@@ -38,10 +39,9 @@ public class LoginOtpFragment extends Fragment {
 
     private FragmentLoginOtpBinding binding;
 
-    private FirebaseAuth mAuth;
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks;
-    private String mVerificationId;
-    private PhoneAuthProvider.ForceResendingToken mResendToken;
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks;
+    private String verificationId;
+    private PhoneAuthProvider.ForceResendingToken resendToken;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,24 +66,18 @@ public class LoginOtpFragment extends Fragment {
         setIsProgress(false);
         setVariables();
 //        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
-        if (mResendToken == null) {
+        if (resendToken == null) {
             sendOtp();
         }
         setListeners();
     }
 
     private void setVariables() {
-        mAuth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance();
 
-        mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        callbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             @Override
             public void onVerificationCompleted(@NonNull PhoneAuthCredential credential) {
-                // This callback will be invoked in two situations:
-                // 1 - Instant verification. In some cases the phone number can be instantly
-                //     verified without needing to send or enter a verification code.
-                // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                //     detect the incoming verification SMS and perform verification without
-                //     user action.
                 Log.d(Constants.TAG, "onVerificationCompleted:" + credential);
 
                 AndroidUtil.showToast(getContext(),
@@ -94,38 +88,28 @@ public class LoginOtpFragment extends Fragment {
 
             @Override
             public void onVerificationFailed(@NonNull FirebaseException e) {
-                // This callback is invoked in an invalid request for verification is made,
-                // for instance if the the phone number format is not valid.
                 Log.w(Constants.TAG, "onVerificationFailed", e);
 
                 if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    // Invalid request
                     Log.w(Constants.TAG, "Invalid request", e);
                 } else if (e instanceof FirebaseTooManyRequestsException) {
-                    // The SMS quota for the project has been exceeded
                     Log.w(Constants.TAG, "The SMS quota for the project has been exceeded", e);
                 } else if (e instanceof FirebaseAuthMissingActivityForRecaptchaException) {
-                    // reCAPTCHA verification attempted with null Activity
                     Log.w(Constants.TAG, "reCAPTCHA verification attempted with null Activity", e);
                 }
 
-                // Show a message and update the UI
                 setIsProgress(false);
             }
 
             @Override
             public void onCodeSent(@NonNull String verificationId,
                                    @NonNull PhoneAuthProvider.ForceResendingToken token) {
-                // The SMS verification code has been sent to the provided phone number, we
-                // now need to ask the user to enter the code and then construct a credential
-                // by combining the code with a verification ID.
                 Log.d(Constants.TAG, "onCodeSent:" + verificationId);
 
                 super.onCodeSent(verificationId, token);
 
-                // Save verification ID and resending token so we can use them later
-                mVerificationId = verificationId;
-                mResendToken = token;
+                LoginOtpFragment.this.verificationId = verificationId;
+                resendToken = token;
 
                 AndroidUtil.showToast(getContext(), "OTP has been sent successfully");
 
@@ -143,7 +127,7 @@ public class LoginOtpFragment extends Fragment {
                 binding.editTextOtpCode.setError("Enter the 6-digit verification code");
             } else {
                 PhoneAuthCredential credential =
-                        PhoneAuthProvider.getCredential(mVerificationId, code);
+                        PhoneAuthProvider.getCredential(verificationId, code);
 
                 signInWithPhoneAuthCredential(credential);
             }
@@ -167,29 +151,25 @@ public class LoginOtpFragment extends Fragment {
         setIsProgress(true);
 
         PhoneAuthOptions.Builder builder =
-                PhoneAuthOptions.newBuilder(mAuth)
-                        .setPhoneNumber(getArgPhoneNumber)      // Phone number to verify
-                        .setTimeout(timeoutSeconds, TimeUnit.SECONDS) // Timeout and unit
-                        //.setActivity(getActivity()) // (optional) Activity for callback binding
-                        // If no activity is passed, reCAPTCHA verification can not be used.
-                        .setCallbacks(mCallbacks);          // OnVerificationStateChangedCallbacks
+                PhoneAuthOptions.newBuilder(auth)
+                        .setPhoneNumber(getArgPhoneNumber)
+                        .setTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                        .setActivity(requireActivity())
+                        .setCallbacks(callbacks);
 
+        builder.setActivity(requireActivity());
 
-        if (getActivity() != null) {
-            builder.setActivity(requireActivity());
-
-            if (mResendToken != null) {
-                builder.setForceResendingToken(mResendToken);
-            }
-
-            PhoneAuthProvider.verifyPhoneNumber(builder.build());
+        if (resendToken != null) {
+            builder.setForceResendingToken(resendToken);
         }
+
+        PhoneAuthProvider.verifyPhoneNumber(builder.build());
     }
 
     private void startResendTimer() {
         binding.textViewResendOtp.setEnabled(false);
         Timer timer = new Timer();
-        timeoutLeftSeconds = timeoutSeconds;
+        timeoutLeftSeconds = TIMEOUT_SECONDS;
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -220,7 +200,7 @@ public class LoginOtpFragment extends Fragment {
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         setIsProgress(true);
         if (getActivity() != null) {
-            mAuth.signInWithCredential(credential)
+            auth.signInWithCredential(credential)
                     .addOnCompleteListener(requireActivity(), task -> {
                         setIsProgress(false);
                         if (task.isSuccessful()) {
@@ -230,15 +210,11 @@ public class LoginOtpFragment extends Fragment {
                             AndroidUtil.showToast(getContext(),
                                     "OTP verification has been completed successfully");
 
-                            // FirebaseUser user = task.getResult().getUser();
-                            // Update UI
                             navigateToNextFragment();
                         } else {
-                            // Sign in failed, display a message and update the UI
                             Log.w(Constants.TAG, "signInWithCredential:failure", task.getException());
                             if (task.getException() instanceof
                                     FirebaseAuthInvalidCredentialsException) {
-                                // The verification code entered was invalid
                                 AndroidUtil.showToast(getContext(),
                                         "The verification code entered was invalid");
                             }

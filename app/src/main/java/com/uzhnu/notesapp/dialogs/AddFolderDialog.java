@@ -3,8 +3,6 @@ package com.uzhnu.notesapp.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,16 +10,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogAddFolderBinding;
 import com.uzhnu.notesapp.models.FolderModel;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 
 import java.util.List;
 
@@ -49,7 +44,7 @@ public class AddFolderDialog extends DialogFragment {
                     if (task.isSuccessful() && task.getResult() != null) {
                         boolean ok = true;
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            FolderModel folder = FirebaseUtil
+                            FolderModel folder = FirebaseStoreUtil
                                     .getFolderFromDocument(queryDocumentSnapshot);
                             if (folder.getName().equals(folderName)) {
                                 ok = false;
@@ -57,7 +52,7 @@ public class AddFolderDialog extends DialogFragment {
                         }
                         if (ok) {
                             FolderModel folder = new FolderModel(folderName);
-                            FirebaseUtil.addFolder(folder)
+                            FirebaseStoreUtil.addFolder(folder)
                                     .addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
                                             folder.setDocumentId(task1.getResult().getId());
@@ -68,7 +63,7 @@ public class AddFolderDialog extends DialogFragment {
                         }
                     }
                 };
-                FirebaseUtil.getFolders().get().addOnCompleteListener(onCompleteListener);
+                FirebaseStoreUtil.getFolders().get().addOnCompleteListener(onCompleteListener);
             }
 
             @Override

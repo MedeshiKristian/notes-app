@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp;
+package com.uzhnu.notesapp.providers;
 
 import androidx.core.content.FileProvider;
 

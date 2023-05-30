@@ -22,7 +22,7 @@ import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +47,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private static final String DATE_FORMAT = "MMMM/dd/yyyy - HH:mm:ss";
         private final ItemNoteBinding binding;
-        private static final String currentUserId = FirebaseUtil.getCurrentUserId();
+        private static final String currentUserId = FirebaseStoreUtil.getCurrentUserId();
 
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
             super(itemNoteBinding.getRoot());
@@ -71,7 +71,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 binding.textViewMetaData
                         .setText(simpleDateFormat.format(noteModel.getLastEdited()) + " by You");
             } else {
-                FirebaseUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
+                FirebaseStoreUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
                         if (userModel != null) {
@@ -238,7 +238,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         recyclerView.getRecycledViewPool().clear();
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                FirebaseUtil.deleteUserNote(noteModels.get(i));
+                FirebaseStoreUtil.deleteUserNote(noteModels.get(i));
             }
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
@@ -259,7 +259,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                FirebaseUtil.updateNote(noteModels.get(i));
+                FirebaseStoreUtil.updateNote(noteModels.get(i));
             }
         }
         selectedPositions.clear();
@@ -267,6 +267,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     }
 
     public void remove(int position) {
+        recyclerView.getRecycledViewPool().clear();
         layoutManager.removeViewAt(position);
         noteModels.remove(position);
         notifyItemRemoved(position);
@@ -274,6 +275,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @SuppressLint("NotifyDataSetChanged")
     public void restore(@NonNull NoteModel note, int position) {
+        recyclerView.getRecycledViewPool().clear();
         noteModels.add(position, note);
         notifyDataSetChanged();
     }

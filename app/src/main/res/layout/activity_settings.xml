@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
     android:id="@+id/coordinator_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="@color/primary"
@@ -32,16 +32,30 @@
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/image_view_user"
-            android:layout_width="@dimen/_120sdp"
-            android:layout_height="@dimen/_120sdp"
-            android:layout_gravity="center"
-            android:layout_marginTop="@dimen/_30sdp"
-            android:layout_marginBottom="@dimen/_5sdp"
-            android:contentDescription="User image"
-            android:scaleType="centerCrop"
-            app:riv_oval="true" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/image_view_user"
+                android:layout_width="@dimen/_120sdp"
+                android:layout_height="@dimen/_120sdp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/_30sdp"
+                android:layout_marginEnd="@dimen/_50sdp"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:contentDescription="User image"
+                android:scaleType="centerCrop"
+                app:riv_oval="true" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_theme"
+                android:layout_width="wrap_content"
+                android:layout_marginBottom="@dimen/_5sdp"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,14 +66,13 @@
             android:padding="@dimen/_5sdp">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_user_name"
+                android:id="@+id/edit_text_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/_10sdp"
                 android:background="@drawable/rounded_corners_white_background"
                 android:elevation="@dimen/_3sdp"
                 android:hint="Username"
-                android:textColorHint="@color/secondary_text"
                 android:inputType="text"
                 android:padding="@dimen/_10sdp"
                 android:textColor="@color/black" />
@@ -106,5 +119,68 @@
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Save"
             android:textColor="@color/primary_text" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_5sdp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="@dimen/_5sdp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_otp_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_10sdp"
+                android:background="@drawable/rounded_corners_white_background"
+                android:elevation="@dimen/_3sdp"
+                android:hint="OTP"
+                android:inputType="text"
+                android:padding="@dimen/_10sdp"
+                android:textColor="@color/black"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_otp_code"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingLeft="@dimen/_20sdp"
+            android:paddingRight="@dimen/_20sdp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_verify_otp_code"
+                android:layout_width="@dimen/_260sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:backgroundTint="@drawable/buttons_state_colors"
+                android:text="Verify"
+                android:textColor="@color/primary_text"
+                android:visibility="gone" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/text_view_resend_otp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/circular_progress_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:indeterminate="true"
+            android:progress="0"
+            app:indicatorColor="@color/primary_light"
+            app:indicatorSize="@dimen/_25sdp"
+            app:trackColor="@color/primary"
+            app:trackCornerRadius="8dp"
+            app:trackThickness="@dimen/_3sdp" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

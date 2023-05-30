@@ -15,7 +15,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -28,9 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
@@ -38,17 +34,17 @@ import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.callbacks.SwipeToDeleteCallback;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.dialogs.DeleteNotesDialog;
-import com.uzhnu.notesapp.dialogs.EditUsernameDialog;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
+import com.uzhnu.notesapp.listeners.ScrollLockTouchListener;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
@@ -84,12 +80,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setSupportActionBar(binding.toolbarInit);
+        setSupportActionBar(binding.toolbar);
 
         init();
+        setInitToolBar();
         loadUserDetails();
-        loadUserNotes();
-        loadUserFolders();
+        loadNotes();
+        loadFolders();
         setListeners();
     }
 
@@ -150,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
                         notesAdapter.deleteAllSelectedNotes();
-                        loadUserNotes();
+                        loadNotes();
                     }
 
                     @Override
@@ -162,10 +159,13 @@ public class MainActivity extends AppCompatActivity {
                 });
                 dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
+            case (R.id.option_manage_access):
+                Intent intent = new Intent(MainActivity.this, ManageFolderAccessActivity.class);
+                startActivity(intent);
             case (R.id.option_pin):
                 notesAdapter.togglePinOnSelectedNotes();
                 layoutManager.removeAllViews();
-                loadUserNotes();
+                loadNotes();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -185,39 +185,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
-        Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        initWindow();
 
-        int statusBarHeight = 0;
-        @SuppressLint("InternalInsetResource")
-        int resourceId = getResources().getIdentifier(
-                "status_bar_height",
-                "dimen",
-                "android"
-        );
-        if (resourceId > 0) {
-            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
-        }
-
-        ViewGroup.MarginLayoutParams params
-                = (ViewGroup.MarginLayoutParams) binding.toolbarInit.getLayoutParams();
-        params.setMargins(0, statusBarHeight, 0, 0);
-        binding.toolbarInit.setLayoutParams(params);
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.setStatusBarColor(Color.TRANSPARENT);
-
-//        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-//        window.getDecorView().setSystemUiVisibility(flags);
-
-
-        PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
-                Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+        FirebaseStoreUtil.setCurrentFolder(new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
+        PreferencesManager.getInstance().put(Constants.KEY_COLLECTION_FOLDER_DEFAULT, FirebaseStoreUtil.getCurrentFolder());
 
         PreferencesManager.getInstance().put(Constants.KEY_MAIN_ACTIVITY, this);
-
-        setInitToolBar();
 
 //        for (int i = 0; i < 20; i++) {
 //            FirebaseUtil.addNoteToFolder(new NoteModel("Note " + i));
@@ -243,12 +216,39 @@ public class MainActivity extends AppCompatActivity {
         binding.navigationStart.recyclerViewFolders.setAdapter(foldersAdapter);
     }
 
+    private void initWindow() {
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+        int statusBarHeight = 0;
+        @SuppressLint("InternalInsetResource")
+        int resourceId = getResources().getIdentifier(
+                "status_bar_height",
+                "dimen",
+                "android"
+        );
+        if (resourceId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+        }
+
+        ViewGroup.MarginLayoutParams params
+                = (ViewGroup.MarginLayoutParams) binding.toolbar.getLayoutParams();
+        params.setMargins(0, statusBarHeight, 0, 0);
+        binding.toolbar.setLayoutParams(params);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.setStatusBarColor(Color.TRANSPARENT);
+
+//        int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+//        window.getDecorView().setSystemUiVisibility(flags);
+    }
+
     private void setInitToolBar() {
-        binding.toolbarInit.setTitle(
-                (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER));
+        binding.toolbar.setTitle(FirebaseStoreUtil.getCurrentFolder().getName());
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                binding.drawerLayout, binding.toolbarInit,
+                binding.drawerLayout, binding.toolbar,
                 R.string.navigation_open, R.string.navigation_close) {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -262,18 +262,18 @@ public class MainActivity extends AppCompatActivity {
         binding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        binding.toolbarInit.setNavigationOnClickListener(view -> toggleNavigationView());
+        binding.toolbar.setNavigationOnClickListener(view -> toggleNavigationView());
         binding.navigationStart.navigationView.setVisibility(View.VISIBLE);
         binding.floatingActionButtonAddNote.setVisibility(View.VISIBLE);
     }
 
     private void setContextToolBar() {
-        binding.toolbarInit.setNavigationIcon(
+        binding.toolbar.setNavigationIcon(
                 ContextCompat.getDrawable(
                         getApplicationContext(), R.drawable.ic_baseline_close_24
                 )
         );
-        binding.toolbarInit.setNavigationOnClickListener(view -> onBackPressed());
+        binding.toolbar.setNavigationOnClickListener(view -> onBackPressed());
         binding.navigationStart.navigationView.setVisibility(View.GONE);
         binding.floatingActionButtonAddNote.setVisibility(View.GONE);
     }
@@ -285,9 +285,9 @@ public class MainActivity extends AppCompatActivity {
             setInitToolBar();
         } else {
             if (countSelectedNotes == 1) {
-                binding.toolbarInit.setTitle("1 item selected");
+                binding.toolbar.setTitle("1 item selected");
             } else {
-                binding.toolbarInit.setTitle(countSelectedNotes + " items selected");
+                binding.toolbar.setTitle(countSelectedNotes + " items selected");
             }
         }
     }
@@ -298,15 +298,15 @@ public class MainActivity extends AppCompatActivity {
         setProgressNotes(true);
         if (event.isNewNote()) {
             NoteModel noteModel = new NoteModel(event.getNewNoteText());
-            FirebaseUtil.addNoteToFolder(noteModel).addOnCompleteListener(task -> {
-                loadUserNotes();
+            FirebaseStoreUtil.addNoteToFolder(noteModel).addOnCompleteListener(task -> {
+                loadNotes();
                 setProgressNotes(false);
             });
         } else {
-            FirebaseUtil.updateNote(event.getNoteModel())
+            FirebaseStoreUtil.updateNote(event.getNoteModel())
                     .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    loadUserNotes();
+                                    loadNotes();
                                     setProgressNotes(false);
                                 }
                             }
@@ -318,10 +318,9 @@ public class MainActivity extends AppCompatActivity {
     public void onSelectFolderEvent(@NonNull SelectFolderEvent event) {
         toggleNavigationView();
         FolderModel folder = event.getFolder();
-        binding.toolbarInit.setTitle(folder.getName());
-        PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER,
-                folder.getCollectionName());
-        loadUserNotes();
+        binding.toolbar.setTitle(folder.getName());
+        PreferencesManager.getInstance().put(Constants.KEY_CURRENT_FOLDER, folder);
+        loadNotes();
     }
 
     @Subscribe
@@ -343,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
             this.toolBarMenu.findItem(R.id.option_delete).setVisible(multiselectShow);
             this.toolBarMenu.findItem(R.id.option_pin).setVisible(multiselectShow);
             this.toolBarMenu.findItem(R.id.option_search).setVisible(!multiselectShow);
-//            this.toolBarMenu.findItem(R.id.option_log_out).setVisible(!multiselectShow);
+            this.toolBarMenu.findItem(R.id.option_manage_access).setVisible(!multiselectShow);
         }
     }
 
@@ -354,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.navigationStart.layoutLogOut.setOnClickListener(view -> {
-            FirebaseUtil.signOut();
+            FirebaseStoreUtil.signOut();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -366,9 +365,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        binding.navigationStart.header.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
-
-        FirebaseUtil.getCurrentUserDetails()
+        FirebaseStoreUtil.getCurrentUserDetails()
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e(Constants.TAG, "Error occurred in change image listener");
@@ -382,24 +379,31 @@ public class MainActivity extends AppCompatActivity {
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
                         binding.navigationStart.header.textViewUsername
                                 .setText(userModel.getUsername());
-                        binding.navigationStart.header.textViewUsername
-                                .setText(userModel.getPhoneNumber());
+                        binding.navigationStart.header.textViewPhoneNumber.setText(
+                                PhoneNumberUtils.formatNumber(
+                                        Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber(),
+                                        Locale.getDefault().getCountry()
+                                )
+                        );
                     }
                 });
 
-        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadUserNotes);
+        ScrollLockTouchListener touchListener = new ScrollLockTouchListener();
+        binding.notesContent.recyclerViewNotes.addOnItemTouchListener(touchListener);
+
+        binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadNotes);
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this, notesAdapter) {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                touchListener.setScrollingEnabled(false);
                 final int position = viewHolder.getLayoutPosition();
                 final NoteModel note = notesAdapter.getDataSet().get(position);
-
                 String text = "Note was removed from the list";
                 Snackbar snackbar = Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG);
                 snackbar.setBackgroundTint(Color.WHITE);
                 snackbar.setTextColor(Color.BLACK);
                 snackbar.setAction("UNDO", view -> {
-                    FirebaseUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
+                    FirebaseStoreUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             notesAdapter.restore(note, position);
                         }
@@ -409,7 +413,8 @@ public class MainActivity extends AppCompatActivity {
                 snackbar.setActionTextColor(ContextCompat
                         .getColor(getApplicationContext(), R.color.primary));
 
-                FirebaseUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                FirebaseStoreUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                    touchListener.setScrollingEnabled(true);
                     if (task.isSuccessful()) {
                         notesAdapter.remove(position);
                         snackbar.show();
@@ -420,16 +425,27 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(binding.notesContent.recyclerViewNotes);
 
-        EditUsernameDialog editUsernameDialog =
-                new EditUsernameDialog(binding.navigationStart.header.textViewUsername);
+        binding.navigationStart.header.imageViewUser.setOnClickListener(view -> {
+            toggleNavigationView();
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
 
         binding.navigationStart.header.textViewUsername.setOnClickListener(view -> {
-            editUsernameDialog.show(getSupportFragmentManager(), "Update username");
+            toggleNavigationView();
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        });
+
+        binding.navigationStart.header.textViewPhoneNumber.setOnClickListener(view -> {
+            toggleNavigationView();
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
         });
     }
 
     private void loadUserDetails() {
-        FirebaseUtil.getCurrentUserDetails().get()
+        FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
@@ -449,14 +465,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void loadUserNotes() {
+    private void loadNotes() {
         setProgressNotes(true);
-        FirebaseUtil.getCurrentFolderNotes().get()
+        FirebaseStoreUtil.getCurrentFolderNotes().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         noteModels.clear();
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            noteModels.add(FirebaseUtil.getNoteFromDocument(queryDocumentSnapshot));
+                            noteModels.add(FirebaseStoreUtil.getNoteFromDocument(queryDocumentSnapshot));
                         }
                         Collections.sort(noteModels);
                         notesAdapter.setDataSet(noteModels);
@@ -469,15 +485,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void loadUserFolders() {
+    private void loadFolders() {
         setProgressFolders(true);
-        FirebaseUtil.getFolders().get()
+        FirebaseStoreUtil.getFolders().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
                         folderModels.clear();
-                        folderModels.add(new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
+                        folderModels.add((FolderModel) PreferencesManager.getInstance().get(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
                         for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                            folderModels.add(FirebaseUtil.getFolderFromDocument(queryDocumentSnapshot));
+                            folderModels.add(FirebaseStoreUtil.getFolderFromDocument(queryDocumentSnapshot));
                         }
                         Collections.sort(folderModels);
                         foldersAdapter.notifyDataSetChanged();
@@ -533,6 +549,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(Constants.TAG, "stop");
         EventBus.getDefault().unregister(notesAdapter);
         EventBus.getDefault().unregister(foldersAdapter);
         isRunning = false;

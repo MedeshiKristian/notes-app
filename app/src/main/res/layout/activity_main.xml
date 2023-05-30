@@ -20,7 +20,7 @@
             android:foregroundTint="@color/primary_text">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar_init"
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_marginBottom="0px"
@@ -35,7 +35,7 @@
 
         <include
             android:id="@+id/notes_content"
-            layout="@layout/notes_recycler_view" />
+            layout="@layout/recycler_view_notes" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator_notes"

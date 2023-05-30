@@ -16,6 +16,7 @@ import com.uzhnu.notesapp.dialogs.EditFolderDialog;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -98,7 +99,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             FolderModel folder = folderModels.get(position);
             holder.setData(folder);
 
-            String currentFolderName = (String) PreferencesManager.getInstance().get(Constants.KEY_CURRENT_FOLDER);
+            String currentFolderName = FirebaseStoreUtil.getCurrentFolder().getName();
             if (folder.getName().equals(currentFolderName)) {
                 setCurrentFolderHolder(holder);
             }

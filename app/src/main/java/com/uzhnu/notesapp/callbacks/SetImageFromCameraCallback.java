@@ -12,7 +12,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.annotation.NonNull;
 
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
@@ -37,7 +37,7 @@ public class SetImageFromCameraCallback implements ActivityResultCallback<Activi
                 assert bitmap != null;
                 imageView.setImageBitmap(bitmap);
                 String encodedImage = ImageUtil.encodeImage(bitmap);
-                FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_IMAGE, encodedImage);
+                FirebaseStoreUtil.getCurrentUserDetails().update(Constants.KEY_IMAGE, encodedImage);
                 PreferencesManager.getInstance().put(Constants.KEY_IMAGE, encodedImage);
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();

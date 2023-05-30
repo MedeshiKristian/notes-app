@@ -4,6 +4,7 @@ import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -13,6 +14,7 @@ import android.os.Vibrator;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.WithHint;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +41,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         backgroundColor = ContextCompat.getColor(context, R.color.primary);
         clearPaint = new Paint();
         clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        clearPaint.setColor(Color.WHITE);
         deleteDrawable = ContextCompat.getDrawable(this.context, R.drawable.ic_outline_delete_24);
         assert deleteDrawable != null;
         intrinsicWidth = deleteDrawable.getIntrinsicWidth();

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--    <color name="primary">#229ED9</color>-->
+
+    <!-- Light theme -->
     <color name="primary">@color/md_blue_500</color>
     <color name="primary_light">@color/md_cyan_300</color>
     <color name="primary_dark">@color/md_cyan_A700</color>
@@ -15,6 +16,14 @@
     <color name="recieved_note_background">#090D16</color>
 
     <color name="greyColor">@color/md_blue_grey_100</color>
+
+    <!-- Night theme -->
+    <color name="primary_night">#2B2C37</color>
+    <color name="primary_light_night">@color/md_cyan_300</color>
+    <color name="primary_dark_night">@color/md_cyan_A700</color>
+
+    <color name="secondary_night">#20212C</color>
+    <!--    <color name="secondary_light">@color/md_cyan_300</color>-->
 
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>

@@ -62,7 +62,7 @@ public class ImageUtil {
 
     public static Uri getUri(@NonNull Context context) {
         return FileProvider.getUriForFile(context,
-                "com.uzhnu.notesapp.GenericFileProvider",
+                "com.uzhnu.notesapp.providers.GenericFileProvider",
                 new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
                         "image"));
     }

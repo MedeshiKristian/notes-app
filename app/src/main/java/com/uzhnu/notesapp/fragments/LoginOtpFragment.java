@@ -63,7 +63,7 @@ public class LoginOtpFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Log.d(Constants.TAG, getArgPhoneNumber);
-        setIsProgress(false);
+        setProgress(false);
         setVariables();
 //        mAuth.getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
         if (resendToken == null) {
@@ -98,7 +98,7 @@ public class LoginOtpFragment extends Fragment {
                     Log.w(Constants.TAG, "reCAPTCHA verification attempted with null Activity", e);
                 }
 
-                setIsProgress(false);
+                setProgress(false);
             }
 
             @Override
@@ -114,7 +114,7 @@ public class LoginOtpFragment extends Fragment {
                 AndroidUtil.showToast(getContext(), "OTP has been sent successfully");
 
                 startResendTimer();
-                setIsProgress(false);
+                setProgress(false);
             }
         };
     }
@@ -136,7 +136,7 @@ public class LoginOtpFragment extends Fragment {
         binding.textViewResendOtp.setOnClickListener(view1 -> sendOtp());
     }
 
-    private void setIsProgress(boolean show) {
+    private void setProgress(boolean show) {
         if (show) {
             binding.buttonVerifyOtpCode.setEnabled(false);
             binding.circularProgressIndicator.show();
@@ -148,7 +148,7 @@ public class LoginOtpFragment extends Fragment {
     }
 
     private void sendOtp() {
-        setIsProgress(true);
+        setProgress(true);
 
         PhoneAuthOptions.Builder builder =
                 PhoneAuthOptions.newBuilder(auth)
@@ -156,8 +156,6 @@ public class LoginOtpFragment extends Fragment {
                         .setTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
                         .setActivity(requireActivity())
                         .setCallbacks(callbacks);
-
-        builder.setActivity(requireActivity());
 
         if (resendToken != null) {
             builder.setForceResendingToken(resendToken);
@@ -198,11 +196,11 @@ public class LoginOtpFragment extends Fragment {
     }
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
-        setIsProgress(true);
+        setProgress(true);
         if (getActivity() != null) {
             auth.signInWithCredential(credential)
                     .addOnCompleteListener(requireActivity(), task -> {
-                        setIsProgress(false);
+                        setProgress(false);
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(Constants.TAG, "signInWithCredential:success");
@@ -224,7 +222,7 @@ public class LoginOtpFragment extends Fragment {
     }
 
     private void navigateToNextFragment() {
-        setIsProgress(false);
+        setProgress(false);
         Bundle bundle = new Bundle();
         bundle.putString(Constants.KEY_PHONE_NUMBER, getArgPhoneNumber);
         NavHostFragment.findNavController(LoginOtpFragment.this)

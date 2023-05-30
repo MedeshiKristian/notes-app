@@ -20,4 +20,9 @@
         android:visible="true"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always" />
+
+    <item android:id="@+id/option_manage_access"
+        android:title="Manage folder access"
+        android:icon="@drawable/outline_edit_24"
+        app:showAsAction="always"/>
 </menu>

@@ -3,7 +3,7 @@ package com.uzhnu.notesapp.models;
 import androidx.annotation.NonNull;
 
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 
 import java.util.Date;
 
@@ -21,7 +21,7 @@ public class FolderModel implements Comparable<FolderModel> {
         this.name = name;
         this.collectionName = name;
         this.createdAt = new Date();
-        this.createdBy = FirebaseUtil.getCurrentUserId();
+        this.createdBy = FirebaseStoreUtil.getCurrentUserId();
     }
 
     public String getName() {

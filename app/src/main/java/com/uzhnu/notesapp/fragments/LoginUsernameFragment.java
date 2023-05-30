@@ -22,7 +22,7 @@ import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
@@ -99,7 +99,7 @@ public class LoginUsernameFragment extends Fragment {
 
     private void getUser() {
         setIsProgress(true);
-        FirebaseUtil.getCurrentUserDetails().get()
+        FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
@@ -142,7 +142,7 @@ public class LoginUsernameFragment extends Fragment {
             userModel = new UserModel(username, getArgPhoneNumber, encodedImage);
         }
 
-        FirebaseUtil.getCurrentUserDetails().set(userModel)
+        FirebaseStoreUtil.getCurrentUserDetails().set(userModel)
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {

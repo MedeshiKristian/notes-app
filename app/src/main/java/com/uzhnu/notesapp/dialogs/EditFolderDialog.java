@@ -3,6 +3,7 @@ package com.uzhnu.notesapp.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,8 +13,12 @@ import androidx.fragment.app.DialogFragment;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogRenameBinding;
+import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.AndroidUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
@@ -47,12 +52,20 @@ public class EditFolderDialog extends DialogFragment {
             public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
                 folder.setName(folderName);
                 adapter.notifyItemChanged(holder.getLayoutPosition());
-                FirebaseUtil.updateFolder(folder);
+                FirebaseStoreUtil.updateFolder(folder)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                AndroidUtil.showToast(getContext(), "Folder renamed successfully");
+                                EventBus.getDefault().post(new SelectFolderEvent(folder, holder));
+                            } else {
+                                AndroidUtil.showToast(getContext(), "Failed to rename folder");
+                            }
+                        });
             }
 
             @Override
             public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
-                FirebaseUtil.deleteFolder(folder);
+                FirebaseStoreUtil.deleteFolder(folder);
                 folderModels.remove(holder.getLayoutPosition());
                 adapter.notifyItemRemoved(holder.getLayoutPosition());
             }

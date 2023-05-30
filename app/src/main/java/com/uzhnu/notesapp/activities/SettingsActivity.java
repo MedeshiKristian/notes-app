@@ -1,39 +1,37 @@
 package com.uzhnu.notesapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.media.Image;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Switch;
+
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.r0adkll.slidr.Slidr;
-import com.r0adkll.slidr.model.SlidrConfig;
-import com.r0adkll.slidr.model.SlidrInterface;
-import com.r0adkll.slidr.model.SlidrListener;
-import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivitySettingsBinding;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseUtil;
+import com.uzhnu.notesapp.utils.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Function;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends SlidrActivity {
     private ActivitySettingsBinding binding;
 
-    private AppCompatActivity activity;
-    private SlidrInterface slidrInterface;
-
-    private View backgroundView;
-
     private ImageUtil imageUtil;
+
+    private FirebaseAuthUtil authUtil;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private boolean nightMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,71 +45,90 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void init() {
-        activity = (AppCompatActivity) PreferencesManager
-                .getInstance().get(Constants.KEY_MAIN_ACTIVITY);
-        if (activity != null) {
-            backgroundView = activity.findViewById(R.id.coordinatorContent);
-        }
+        authUtil = new FirebaseAuthUtil(SettingsActivity.this,
+                getApplicationContext(), binding.textViewResendOtp, setProgress);
 
         binding.countryCodePicker.registerCarrierNumberEditText(binding.editTextPhoneNumber);
 
         binding.toolbar.setNavigationOnClickListener(view -> onBackPressed());
 
         imageUtil = new ImageUtil(SettingsActivity.this, binding.imageViewUser);
+
+        sharedPreferences = getSharedPreferences("MODE", MODE_PRIVATE);
+        nightMode = sharedPreferences.getBoolean(Constants.KEY_NIGHT_THEME, false);
+
+        if (nightMode) {
+            binding.switchTheme.setChecked(true);
+        }
+
+        binding.switchTheme.setOnClickListener(view -> {
+            editor = sharedPreferences.edit();
+            if (nightMode) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                editor.putBoolean(Constants.KEY_NIGHT_THEME, false);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                editor.putBoolean(Constants.KEY_NIGHT_THEME, true);
+            }
+            editor.apply();
+        });
+
+        setProgress.apply(false);
     }
 
-    private void setListeners() {
-        attachSlidr();
 
+    private void setListeners() {
         binding.imageViewUser.setOnClickListener(view -> {
             imageUtil.showBottomSheetPickImage();
         });
-    }
-
-    private void attachSlidr() {
-        SlidrConfig config = new SlidrConfig.Builder()
-                .listener(new SlidrListener() {
-                    @Override
-                    public void onSlideStateChanged(int state) {
-                    }
-
-                    @Override
-                    public void onSlideChange(float percent) {
-                        float coefficient = 0.25f;
-                        float moveFactor = binding.coordinatorContent.getWidth()
-                                * percent * coefficient;
-                        if (backgroundView != null) {
-                            backgroundView.setTranslationX(-moveFactor);
-                        }
-                    }
-
-                    @Override
-                    public void onSlideOpened() {
-                    }
-
-                    @Override
-                    public boolean onSlideClosed() {
-                        return false;
-                    }
-                })
-                .build();
-
-        slidrInterface = Slidr.attach(SettingsActivity.this, config);
-
         binding.buttonSave.setOnClickListener(view -> {
-            FirebaseUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, binding.editTextUserName)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            AndroidUtil.showToast(getApplicationContext(), "Changes successfully saved");
-                        } else {
-                            AndroidUtil.showToast(getApplicationContext(), "Failed to save changes");
-                        }
-                    });
+            saveUsername();
+            savePhoneNumber();
+        });
+
+        binding.textViewResendOtp.setOnClickListener(view1 -> {
+            authUtil.sendOtp(getPhoneNumber());
+        });
+
+        binding.buttonVerifyOtpCode.setOnClickListener(view -> {
+            String code = Objects.requireNonNull(binding.editTextOtpCode.getText()).toString();
+            authUtil.updatePhoneNumber(code);
         });
     }
 
+    private String getPhoneNumber() {
+        return binding.countryCodePicker.getFullNumberWithPlus();
+    }
+
+    private void saveUsername() {
+        setProgress.apply(true);
+        String newUsername = Objects.requireNonNull(binding.editTextUsername.getText()).toString();
+        FirebaseStoreUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        binding.editTextUsername.setText(newUsername);
+                        setProgress.apply(false);
+                    }
+                });
+    }
+
+    private void savePhoneNumber() {
+        setProgress.apply(true);
+        String newPhoneNumber = getPhoneNumber();
+        if (newPhoneNumber.equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber())) {
+            return;
+        }
+        binding.editTextOtpCode.setVisibility(View.VISIBLE);
+        binding.buttonVerifyOtpCode.setVisibility(View.VISIBLE);
+        authUtil.changePhoneNumber(newPhoneNumber);
+        binding.textViewResendOtp.setVisibility(View.VISIBLE);
+        binding.editTextOtpCode.setVisibility(View.VISIBLE);
+        binding.buttonVerifyOtpCode.setVisibility(View.VISIBLE);
+    }
+
+
     private void loadUserDetails() {
-        FirebaseUtil.getCurrentUserDetails().get()
+        FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
@@ -119,7 +136,7 @@ public class SettingsActivity extends AppCompatActivity {
                         PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
                         binding.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
-                        binding.editTextUserName.setText(userModel.getUsername());
+                        binding.editTextUsername.setText(userModel.getUsername());
                         String phoneNumber = PhoneNumberUtils.formatNumber(
                                 Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber(),
                                 Locale.getDefault().getCountry()
@@ -131,4 +148,23 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    private Function<Boolean, Void> setProgress = (show) -> {
+        if (binding == null) return null;
+        binding.imageViewUser.setEnabled(!show);
+        binding.editTextUsername.setEnabled(!show);
+        binding.editTextPhoneNumber.setEnabled(!show);
+        binding.editTextOtpCode.setEnabled(!show);
+        binding.buttonSave.setEnabled(!show);
+        binding.buttonVerifyOtpCode.setEnabled(!show);
+        if (show) {
+            binding.layoutOtpCode.setVisibility(View.GONE);
+            binding.circularProgressIndicator.show();
+            binding.circularProgressIndicator.setProgress(100, true);
+        } else {
+            binding.circularProgressIndicator.hide();
+            binding.layoutOtpCode.setVisibility(View.VISIBLE);
+        }
+        return null;
+    };
 }

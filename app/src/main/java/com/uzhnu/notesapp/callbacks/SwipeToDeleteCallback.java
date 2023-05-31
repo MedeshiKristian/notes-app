@@ -3,6 +3,7 @@ package com.uzhnu.notesapp.callbacks;
 import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,8 +12,10 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
+import android.util.TypedValue;
 import android.view.View;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.WithHint;
 import androidx.core.content.ContextCompat;
@@ -21,13 +24,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
+import com.uzhnu.notesapp.utils.ThemeUtil;
 
 abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     private static final float SWIPE_THRESHOLD = 0.45f;
     private Context context;
     private Paint clearPaint;
     private ColorDrawable backgroundDrawable;
-    private int backgroundColor;
+    @ColorInt private int backgroundColor;
     private boolean vibrated;
     private Drawable deleteDrawable;
     private int intrinsicWidth;
@@ -38,7 +42,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         this.context = context;
         this.adapter = adapter;
         backgroundDrawable = new ColorDrawable();
-        backgroundColor = ContextCompat.getColor(context, R.color.primary);
+        backgroundColor = ThemeUtil.getPrimary(context);
         clearPaint = new Paint();
         clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         clearPaint.setColor(Color.WHITE);
@@ -97,7 +101,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
                 vibrated = false;
                 vibrateOnce();
             }
-            backgroundColor = ContextCompat.getColor(context, R.color.primary);
+            backgroundColor = ThemeUtil.getPrimary(context);
         }
 
         backgroundDrawable.setColor(backgroundColor);

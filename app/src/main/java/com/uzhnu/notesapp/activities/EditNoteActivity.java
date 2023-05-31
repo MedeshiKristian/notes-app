@@ -123,6 +123,7 @@ public class EditNoteActivity extends SlidrActivity {
             }
         });
 
+
         setActionButtons();
         setTextColorButtons();
         setTextBackgroundColorButtons();

@@ -2,6 +2,8 @@ package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
@@ -17,6 +19,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -39,6 +42,7 @@ import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
+import com.uzhnu.notesapp.events.UnlockSlidrEvent;
 import com.uzhnu.notesapp.listeners.ScrollLockTouchListener;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
@@ -47,6 +51,7 @@ import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.ImageUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utils.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         binding.coordinatorContent.setTranslationX(0);
+        initTheme();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -181,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         }
         EventBus.getDefault().register(notesAdapter);
         EventBus.getDefault().register(foldersAdapter);
-
+        EventBus.getDefault().post(new UnlockSlidrEvent());
     }
 
     private void init() {
@@ -196,9 +202,8 @@ public class MainActivity extends AppCompatActivity {
 //            FirebaseUtil.addNoteToFolder(new NoteModel("Note " + i));
 //        }
 
-        binding.notesContent.swipeRefreshNotes.setColorSchemeColors(
-                ContextCompat.getColor(getApplicationContext(), R.color.primary)
-        );
+        binding.notesContent.swipeRefreshNotes.setColorSchemeColors(ThemeUtil.getTextColor(this));
+        binding.notesContent.swipeRefreshNotes.setProgressBackgroundColorSchemeColor(ThemeUtil.getPrimary(this));
 
         imageUtil = new ImageUtil(this, binding.navigationStart.header.imageViewUser);
 
@@ -244,6 +249,15 @@ public class MainActivity extends AppCompatActivity {
 //        window.getDecorView().setSystemUiVisibility(flags);
     }
 
+    private void initTheme() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MODE", MODE_PRIVATE);
+        boolean nightMode = sharedPreferences.getBoolean(Constants.KEY_NIGHT_THEME, false);
+
+        if (nightMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
+    }
+
     private void setInitToolBar() {
         binding.toolbar.setTitle(FirebaseStoreUtil.getCurrentFolder().getName());
 
@@ -273,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
                         getApplicationContext(), R.drawable.ic_baseline_close_24
                 )
         );
+        binding.toolbar.setNavigationIconTint(ThemeUtil.getTextColor(this));
         binding.toolbar.setNavigationOnClickListener(view -> onBackPressed());
         binding.navigationStart.navigationView.setVisibility(View.GONE);
         binding.floatingActionButtonAddNote.setVisibility(View.GONE);
@@ -400,8 +415,8 @@ public class MainActivity extends AppCompatActivity {
                 final NoteModel note = notesAdapter.getDataSet().get(position);
                 String text = "Note was removed from the list";
                 Snackbar snackbar = Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG);
-                snackbar.setBackgroundTint(Color.WHITE);
-                snackbar.setTextColor(Color.BLACK);
+                snackbar.setBackgroundTint(ThemeUtil.getTextColor(getApplicationContext()));
+                snackbar.setTextColor(ThemeUtil.getPrimary(getApplicationContext()));
                 snackbar.setAction("UNDO", view -> {
                     FirebaseStoreUtil.restoreNoteToFolder(note).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
@@ -410,8 +425,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                     binding.notesContent.recyclerViewNotes.scrollToPosition(position);
                 });
-                snackbar.setActionTextColor(ContextCompat
-                        .getColor(getApplicationContext(), R.color.primary));
+
+                snackbar.setActionTextColor(Color.WHITE);
 
                 FirebaseStoreUtil.deleteUserNote(note).addOnCompleteListener(task -> {
                     touchListener.setScrollingEnabled(true);

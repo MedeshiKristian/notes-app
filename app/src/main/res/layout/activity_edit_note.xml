@@ -4,33 +4,30 @@
     android:id="@+id/coordinatorContent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/secondary"
+    android:background="?attr/myPrimary"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:foregroundTint="@color/primary_text">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="@color/primary"
+            android:backgroundTint="?attr/colorPrimary"
             app:menu="@menu/menu_edit_note"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             app:title="Edit note"
             app:titleMargin="0dp"
-            app:titleTextColor="@color/primary_text" />
+            app:titleTextColor="?attr/myTextColor" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/_5sdp"
-        android:layout_marginTop="@dimen/_10sdp"
-        android:layout_marginEnd="@dimen/_5sdp"
+        android:padding="@dimen/_10sdp"
         android:layout_marginBottom="@dimen/_48sdp"
         android:fitsSystemWindows="true"
         android:orientation="vertical"
@@ -51,9 +48,9 @@
         android:layout_gravity="center"
         android:indeterminate="true"
         android:progress="0"
-        app:indicatorColor="@color/primary_light"
+        app:indicatorColor="?attr/mySecondary"
         app:indicatorSize="@dimen/_30sdp"
-        app:trackColor="@color/primary"
+        app:trackColor="?attr/colorPrimary"
         app:trackCornerRadius="8dp"
         app:trackThickness="@dimen/_4sdp" />
 
@@ -61,6 +58,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="bottom"
+
         android:orientation="vertical">
 
         <include

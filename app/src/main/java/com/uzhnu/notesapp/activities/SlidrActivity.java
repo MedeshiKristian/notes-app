@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
@@ -13,8 +15,10 @@ import com.r0adkll.slidr.model.SlidrInterface;
 import com.r0adkll.slidr.model.SlidrListener;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.events.LockSlidrEvent;
+import com.uzhnu.notesapp.events.UnlockSlidrEvent;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utils.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -68,11 +72,16 @@ public class SlidrActivity extends AppCompatActivity {
         EventBus.getDefault().register(this);
     }
 
-    @SuppressLint("ResourceAsColor")
     @Subscribe
     public void onLockSlidrEvent(LockSlidrEvent event) {
-        getWindow().setStatusBarColor(R.color.primary);
-        slidrInterface.lock();
+//        getWindow().setStatusBarColor(ThemeUtil.getPrimary(getApplicationContext()));
+//        slidrInterface.lock();
+    }
+
+    @Subscribe
+    public void onUnLockSlidrEvent(UnlockSlidrEvent event) {
+//        getWindow().setStatusBarColor(Color.TRANSPARENT);
+//        slidrInterface.unlock();
     }
 
     @Override

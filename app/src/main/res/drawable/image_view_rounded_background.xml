@@ -2,7 +2,9 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <stroke android:width="@dimen/_1sdp" android:color="@color/white"/>
-    <corners android:radius="@dimen/_5sdp"/>
-    <solid android:color="@color/secondary"/>
+    <stroke
+        android:width="@dimen/_1sdp"
+        android:color="@color/white" />
+    <corners android:radius="@dimen/_5sdp" />
+    <solid android:color="?attr/mySecondary" />
 </shape>

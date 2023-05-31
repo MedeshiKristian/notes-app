@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,7 +16,7 @@ import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utils.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -43,7 +42,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             binding = itemFolderBinding;
         }
 
-        private void setData(@NonNull FolderModel folderModel) {
+        private void bind(@NonNull FolderModel folderModel) {
             binding.textViewFolderName.setText(folderModel.getName());
         }
 
@@ -97,7 +96,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             });
         } else {
             FolderModel folder = folderModels.get(position);
-            holder.setData(folder);
+            holder.bind(folder);
 
             String currentFolderName = FirebaseStoreUtil.getCurrentFolder().getName();
             if (folder.getName().equals(currentFolderName)) {
@@ -149,11 +148,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
 
     private void addSelection(@NonNull FoldersViewHolder holder) {
         holder.binding.getRoot()
-                .setBackgroundColor(ContextCompat.getColor(
-                                holder.binding.getRoot().getContext(),
-                                R.color.md_grey_300
-                        )
-                );
+                .setBackgroundColor(ThemeUtil.getPrimary(holder.binding.getRoot().getContext()));
     }
 
     private void removeSelection(@NonNull FoldersViewHolder holder) {

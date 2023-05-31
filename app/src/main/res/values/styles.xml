@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="buttonBarNegativeButtonStyle">@style/DialogStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/DialogStyle</item>
+        <item name="android:windowTitleStyle">@style/DialogStyle</item>
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+        <item name="android:windowTitleSize">@dimen/_20ssp</item>
+    </style>
 
-    <style name="richEditNavigationStyle">
-        <item name="android:layout_width">@dimen/_48sdp</item>
-        <item name="android:layout_height">@dimen/_48sdp</item>
-        <item name="showAsAction">always</item>
+    <style name="DialogStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">?attr/myTextColor</item>
     </style>
 </resources>

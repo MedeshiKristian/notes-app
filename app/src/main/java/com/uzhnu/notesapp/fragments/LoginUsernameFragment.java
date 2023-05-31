@@ -14,6 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.callbacks.SetImageFromCameraCallback;
 import com.uzhnu.notesapp.callbacks.SetImageFromGalleryCallback;
@@ -99,12 +102,19 @@ public class LoginUsernameFragment extends Fragment {
 
     private void getUser() {
         setIsProgress(true);
+        userModel = new UserModel();
         FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
-                        userModel = task.getResult().toObject(UserModel.class);
-                        if (userModel != null) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        userModel.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
+                        userModel.setUsername(documentSnapshot.getString(Constants.KEY_USERNAME));
+                        userModel.setPhoneNumber(documentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
+                        userModel.setCreatedAt(documentSnapshot.getDate(Constants.KEY_CREATED_AT));
+                        userModel.setUserId(documentSnapshot.getId());
+                        if (userModel.getImage() != null) {
+                            AndroidUtil.showToast(getContext(), "Load user details successfully");
                             Log.i(Constants.TAG,
                                     "Account with this number has already been created");
                             encodedImage = userModel.getImage();
@@ -116,6 +126,8 @@ public class LoginUsernameFragment extends Fragment {
                             Log.i(Constants.TAG,
                                     "Account with this number has not been created yet");
                         }
+                    } else {
+                        AndroidUtil.showToast(getContext(), "Failed to load user details");
                     }
                 });
     }

@@ -27,12 +27,12 @@
             android:name=".activities.ManageFolderAccessActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.NotesApp.SlidrActivityTheme"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.SettingsActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.NotesApp.SlidrActivityTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.FullscreenPhotoActivity"
             android:exported="false"
@@ -47,7 +47,6 @@
             android:fitsSystemWindows="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.NotesApp.SlidrActivityTheme"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
@@ -80,8 +79,7 @@
             android:name=".activities.MainActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.NotesApp.TranslucentStatus">
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />

@@ -11,8 +11,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.auth.User;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.models.UserModel;
+
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +52,22 @@ public class FirebaseStoreUtil {
         return getDatebase()
                 .collection(Constants.KEY_COLLECTION_USERS)
                 .document(userId).get();
+    }
+
+    @NonNull
+    public static UserModel getUserFromDocument(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+        UserModel userModel = new UserModel();
+        userModel.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
+        userModel.setUsername(queryDocumentSnapshot.getString(Constants.KEY_USERNAME));
+        userModel.setPhoneNumber(queryDocumentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
+        userModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        userModel.setUserId(queryDocumentSnapshot.getId());
+        return userModel;
+    }
+
+    @NonNull
+    public static CollectionReference getUsers() {
+        return FirebaseStoreUtil.getDatebase().collection(Constants.KEY_COLLECTION_USERS);
     }
 
     @NonNull
@@ -173,5 +193,15 @@ public class FirebaseStoreUtil {
                 .collection(folderModel.getCreatedBy())
                 .document(folderModel.getDocumentId())
                 .delete();
+    }
+
+    @NonNull
+    public static Task<DocumentReference> addAccessToCurrentFolder(@NonNull UserModel userModel) {
+        FolderModel currentFolder = getCurrentFolder();
+        return FirebaseStoreUtil.getDatebase()
+                .collection(Constants.KEY_COLLECTION_USERS)
+                .document(userModel.getUserId())
+                .collection(Constants.KEY_COLLECTION_FOLDERS)
+                .add(getObjectFromFolder(currentFolder));
     }
 }

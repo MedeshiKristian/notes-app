@@ -2,12 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/option_pin"
-        android:icon="@drawable/outline_push_pin_24"
-        android:visible="false"
-        app:showAsAction="always" />
-
-    <item
         android:id="@+id/option_delete"
         android:icon="@drawable/ic_outline_delete_24"
         android:visible="false"
@@ -18,11 +12,20 @@
         android:icon="@drawable/ic_baseline_search_24"
         android:title="Search"
         android:visible="true"
+        android:iconTint="?attr/myTextColor"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always" />
 
-    <item android:id="@+id/option_manage_access"
-        android:title="Manage folder access"
+    <item
+        android:id="@+id/option_pin"
+        android:icon="@drawable/outline_push_pin_24"
+        android:title="Pin"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/option_manage_access"
         android:icon="@drawable/outline_edit_24"
-        app:showAsAction="always"/>
+        android:title="Manage folder access"
+        app:showAsAction="always" />
 </menu>

@@ -9,6 +9,7 @@ public class UserModel {
     private String phoneNumber;
     private String image;
     private Date createdAt;
+    private String userId;
 
     public UserModel() {
     }
@@ -20,51 +21,44 @@ public class UserModel {
         this.createdAt = new Date();
     }
 
-    @NonNull
     public String getUsername() throws NullPointerException {
-        if (username == null) {
-            throw new NullPointerException("Username is null");
-        }
         return username;
     }
 
-    public void setUsername(@NonNull String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-    @NonNull
     public String getPhoneNumber() throws NullPointerException {
-        if (phoneNumber == null) {
-            throw new NullPointerException("UserModel phone number is null");
-        }
         return phoneNumber;
     }
 
-    public void setPhoneNumber(@NonNull String phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    @NonNull
     public String getImage() throws NullPointerException {
-        if (image == null) {
-            throw new NullPointerException("UserModel image is null");
-        }
         return image;
     }
 
-    public void setImage(@NonNull String image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
     public Date getCreatedAt() throws NullPointerException {
-        if (this.createdAt == null) {
-            throw new NullPointerException("UserModel timestamp is null");
-        }
         return createdAt;
     }
 
-    public void setCreatedAt(@NonNull Date createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
 

@@ -1,46 +1,30 @@
 <resources>
-    <!-- Base application theme. -->
     <style name="Theme.NotesApp" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="myPrimary">#FF2B2C37</item>
+        <item name="mySecondary">#FF20212C</item>
+        <item name="myTextColor">#FFFFFFFF</item>
+
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#2B2C37</item>
-
-        <item name="colorPrimaryVariant">@color/primary</item>
-        <!--        <item name="colorOnPrimary">@color/primary</item>-->
-        <!--        <item name="colorOnPrimarySurface">@color/white</item>-->
-        <!--        <item name="colorOnPrimaryContainer">@color/white</item>-->
-        <item name="colorSurface">@color/white</item>
-
-        <!-- Top bar icons color-->
-        <item name="colorControlNormal">@color/white</item>
-
-        <!--        <item name="chipSurfaceColor">@color/white</item>-->
-
-        <!--        <item name="colorOnSurfaceVariant">@color/white</item>-->
+        <item name="colorPrimary">?myPrimary</item>
+        <item name="colorPrimaryVariant">?attr/colorPrimary</item>
+        <item name="colorPrimaryContainer">?attr/colorPrimary</item>
+<!--        <item name="colorSurface">?attr/colorPrimary</item>-->
 
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondaryContainer">@color/white</item>
+        <item name="colorSecondary">?attr/mySecondary</item>
+        <item name="colorSecondaryVariant">?attr/colorSecondary</item>
+        <item name="colorOnSecondaryContainer">?attr/colorSecondary</item>
+
+        <!-- Top bar icons color-->
+        <item name="colorControlNormal">?attr/myTextColor</item>
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="android:windowLightStatusBar">false</item>
 
-        <!--        <item name="android:windowTranslucentNavigation">true</item>-->
-        <!--        <item name="android:windowLightStatusBar">true</item>-->
-
-        <!-- Customize your theme here. -->
-        <item name="android:editTextColor">@android:color/white</item>
         <item name="android:textColorHint">@color/greyColor</item>
-    </style>
 
-    <style name="Theme.NotesApp.TranslucentStatus">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <!--        <item name="android:windowTranslucentStatus">true</item>-->
-    </style>
-
-    <style name="Theme.NotesApp.SlidrActivityTheme">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="alertDialogTheme">@style/AlertDialogTheme</item>
+        <item name="android:windowTitleStyle">@style/DialogStyle</item>
     </style>
 </resources>

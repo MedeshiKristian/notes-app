@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/secondary"
+        android:background="?attr/mySecondary"
         android:orientation="vertical">
 
         <include
@@ -24,7 +24,7 @@
             android:layout_marginTop="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_10sdp"
             android:text="Folders"
-            android:textColor="@color/secondary_text"
+            android:textColor="?attr/myTextColor"
             android:textSize="@dimen/_14ssp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -35,8 +35,7 @@
             android:orientation="vertical"
             android:overScrollMode="never"
             android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <include layout="@layout/divider" />
 
@@ -60,10 +59,10 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:gravity="center"
                 android:text="@string/settings"
-                android:textColor="@color/secondary_text"
+                android:textColor="?attr/myTextColor"
                 android:textSize="@dimen/_16ssp"
                 app:drawableLeftCompat="@drawable/outline_settings_24"
-                app:drawableTint="@color/primary" />
+                app:drawableTint="?attr/myTextColor" />
 
         </LinearLayout>
 
@@ -86,10 +85,10 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:gravity="center"
                 android:text="@string/log_out"
-                android:textColor="@color/secondary_text"
+                android:textColor="?attr/myTextColor"
                 android:textSize="@dimen/_16ssp"
                 app:drawableLeftCompat="@drawable/outline_logout_24"
-                app:drawableTint="@color/primary" />
+                app:drawableTint="?attr/myTextColor" />
 
         </LinearLayout>
 
@@ -101,9 +100,9 @@
             android:layout_marginTop="@dimen/_30sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="@color/primary_light"
+            app:indicatorColor="?attr/mySecondary"
             app:indicatorSize="@dimen/_25sdp"
-            app:trackColor="@color/primary"
+            app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="10dp"
             app:trackThickness="@dimen/_4sdp" />
     </LinearLayout>

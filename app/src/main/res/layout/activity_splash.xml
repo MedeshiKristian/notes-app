@@ -12,17 +12,17 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foregroundTint="@color/primary_text">
+        android:foregroundTint="?attr/myTextColor">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="0px"
-            android:backgroundTint="@color/primary"
+            android:backgroundTint="?attr/colorPrimary"
             app:title="@string/app_name"
             app:titleMargin="0dp"
-            app:titleTextColor="@color/primary_text" />
+            app:titleTextColor="?attr/myTextColor"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,14 +33,4 @@
         android:contentDescription="AppImage"
         android:foregroundGravity="center"
         android:src="@drawable/ic_launcher" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_15sdp"
-        android:fontFamily="monospace"
-        android:text="@string/app_name"
-        android:textColor="@color/primary_text"
-        android:textSize="@dimen/_40ssp"
-        android:textStyle="bold" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -20,14 +20,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/primary_light">
+            android:backgroundTint="?attr/mySecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="1"
-                android:textColor="@color/primary_text"
+                android:textColor="?attr/myTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -36,14 +36,14 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_margin="@dimen/_10sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/primary">
+            android:backgroundTint="?attr/colorPrimary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="2"
-                android:textColor="@color/primary_text"
+                android:textColor="?attr/myTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -51,14 +51,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="@color/primary_light">
+            android:backgroundTint="?attr/mySecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="3"
-                android:textColor="@color/primary_text"
+                android:textColor="?attr/myTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -70,14 +70,14 @@
         android:layout_margin="@dimen/_10sdp"
         android:contentDescription="Enter otp code"
         android:src="@drawable/ic_baseline_otp_code_24"
-        app:tint="@color/primary" />
+        app:tint="?attr/myTextColor" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter OTP sent to your phone"
-        android:textColor="@color/secondary_text"
+        android:textColor="?attr/myTextColor"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -117,7 +117,7 @@
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Verify"
-            android:textColor="@color/primary_text" />
+            android:textColor="?attr/myTextColor" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator"
@@ -127,9 +127,9 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="@color/primary_light"
+            app:indicatorColor="?attr/mySecondary"
             app:indicatorSize="@dimen/_25sdp"
-            app:trackColor="@color/primary"
+            app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="8dp"
             app:trackThickness="@dimen/_3sdp" />
 

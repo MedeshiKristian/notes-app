@@ -7,6 +7,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
+    android:background="?attr/myPrimary"
     tools:context=".fragments.LoginPhoneNumberFragment">
 
     <LinearLayout

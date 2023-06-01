@@ -45,7 +45,7 @@
             android:progress="0"
             app:indicatorColor="?attr/mySecondary"
             app:indicatorSize="@dimen/_30sdp"
-            app:trackColor="?myPrimary"
+            app:trackColor="?attr/myPrimary"
             app:trackCornerRadius="8dp"
             app:trackThickness="@dimen/_4sdp" />
 
@@ -56,8 +56,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="Add note button"
-            android:tint="@color/white"
-            app:backgroundTint="?attr/myPrimary"
+            app:background="?attr/myPrimary"
             app:srcCompat="@drawable/ic_baseline_add_24"
             app:tint="?attr/myTextColor" />
 

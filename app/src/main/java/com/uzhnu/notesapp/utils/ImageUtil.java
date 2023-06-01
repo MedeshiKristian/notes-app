@@ -60,13 +60,6 @@ public class ImageUtil {
         );
     }
 
-    public static Uri getUri(@NonNull Context context) {
-        return FileProvider.getUriForFile(context,
-                "com.uzhnu.notesapp.providers.GenericFileProvider",
-                new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                        "image"));
-    }
-
     public ImageUtil(@NonNull FragmentActivity activity,
                      @NonNull ActivityResultLauncher<Intent> pickImageFromGallery,
                      @NonNull ActivityResultLauncher<Intent> pickImageFromCamera,
@@ -77,6 +70,13 @@ public class ImageUtil {
         this.pickImageFromCamera = pickImageFromCamera;
         this.requestCameraPermissions = requestCameraPermissions;
         this.cameraUri = cameraUri;
+    }
+
+    public static Uri getUri(@NonNull Context context) {
+        return FileProvider.getUriForFile(context,
+                "com.uzhnu.notesapp.providers.CustomFileProvider",
+                new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                        "image"));
     }
 
     public void checkPermissionsAndLaunchCamera() {

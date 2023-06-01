@@ -46,7 +46,7 @@ public class SplashActivity extends AppCompatActivity {
                     if (task.getResult().toObject(UserModel.class) == null) {
                         // Lack of user details in database
                         FirebaseStoreUtil.signOut();
-                        Log.i(Constants.TAG, "UserModel logged in but has not set picture or username yet");
+                        Log.i(Constants.TAG, "User logged in but has not set picture or username yet");
                         Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_CLEAR_TASK);

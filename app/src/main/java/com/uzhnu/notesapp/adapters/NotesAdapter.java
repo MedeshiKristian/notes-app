@@ -24,16 +24,15 @@ import com.uzhnu.notesapp.utils.AndroidUtil;
 import com.uzhnu.notesapp.utils.Constants;
 import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utils.ThemeUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
@@ -45,7 +44,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     private final Set<Integer> selectedPositions;
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
-        private static final String DATE_FORMAT = "MMMM/dd/yyyy - HH:mm:ss";
         private final ItemNoteBinding binding;
         private static final String currentUserId = FirebaseStoreUtil.getCurrentUserId();
 
@@ -66,10 +64,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                             AndroidUtil.getPlainTextFromHtmlp(noteModel.getText()), TEXT_LIMIT
                     )
             );
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
             if (noteModel.getLastEditedBy().equals(currentUserId)) {
                 binding.textViewMetaData
-                        .setText(simpleDateFormat.format(noteModel.getLastEdited()) + " by You");
+                        .setText(AndroidUtil.formatDate(noteModel.getLastEdited()) + " by You");
             } else {
                 FirebaseStoreUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -77,7 +74,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                         if (userModel != null) {
                             String userName = " by " + userModel.getUsername();
                             binding.textViewMetaData
-                                    .setText(simpleDateFormat.format(noteModel.getLastEdited()) + userName);
+                                    .setText(AndroidUtil.formatDate(noteModel.getLastEdited()) + userName);
                         }
                     } else {
                         Log.e(Constants.TAG, "Failed to load username");
@@ -91,11 +88,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
         private void addSelection() {
             binding.layoutNote
-                    .setBackgroundColor(ContextCompat.getColor(
-                                    binding.layoutNote.getContext(),
-                                    R.color.md_grey_200
-                            )
-                    );
+                    .setBackgroundColor(ThemeUtil.getSelectionColor(itemView.getContext()));
             binding.imageViewSelected.setVisibility(View.VISIBLE);
         }
 

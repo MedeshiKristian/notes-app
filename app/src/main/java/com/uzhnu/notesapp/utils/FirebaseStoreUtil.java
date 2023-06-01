@@ -1,8 +1,12 @@
 package com.uzhnu.notesapp.utils;
 
+import android.annotation.SuppressLint;
 import android.icu.text.CaseMap;
+import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -12,17 +16,86 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.auth.User;
+import com.uzhnu.notesapp.adapters.FoldersAdapter;
+import com.uzhnu.notesapp.adapters.NotesAdapter;
+import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
 
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class FirebaseStoreUtil {
+    public static void loadUserDetails(ActivityMainBinding binding) {
+        FirebaseStoreUtil.getCurrentUserDetails().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        UserModel userModel = task.getResult().toObject(UserModel.class);
+                        assert userModel != null;
+                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
+                        binding.navigationStart.header.imageViewUser
+                                .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
+                        binding.navigationStart.header.textViewUsername.setText(userModel.getUsername());
+                        binding.navigationStart.header.textViewPhoneNumber.setText(PhoneNumberUtils.formatNumber(
+                                Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber(),
+                                Locale.getDefault().getCountry()
+                        ));
+                    } else {
+                        Log.e(Constants.TAG, "Task for getting user image failed");
+                    }
+                });
+    }
+    public static void loadNotes(List<NoteModel> noteModels,
+                                 NotesAdapter notesAdapter,
+                                 ActivityMainBinding binding,
+                                 @NonNull Consumer<Boolean> setProgress) {
+        setProgress.accept(true);
+        FirebaseStoreUtil.getCurrentFolderNotes().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        noteModels.clear();
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            noteModels.add(FirebaseStoreUtil.getNoteFromDocument(queryDocumentSnapshot));
+                        }
+                        Collections.sort(noteModels);
+                        notesAdapter.setDataSet(noteModels);
+                        binding.notesContent.recyclerViewNotes.smoothScrollToPosition(0);
+                        binding.notesContent.swipeRefreshNotes.setRefreshing(false);
+                    }
+                    setProgress.accept(false);
+                });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public static void loadFolders(List<FolderModel> folderModels,
+                                   FoldersAdapter foldersAdapter,
+                                   ActivityMainBinding binding,
+                                   @NonNull Consumer<Boolean> setProgress) {
+        setProgress.accept(true);
+        FirebaseStoreUtil.getFolders().get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        folderModels.clear();
+                        folderModels.add((FolderModel) PreferencesManager.getInstance().get(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
+                        for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
+                            folderModels.add(FirebaseStoreUtil.getFolderFromDocument(queryDocumentSnapshot));
+                        }
+                        Collections.sort(folderModels);
+                        foldersAdapter.notifyDataSetChanged();
+                        binding.navigationStart.recyclerViewFolders.smoothScrollToPosition(0);
+                    }
+                    setProgress.accept(false);
+                });
+    }
+
     @NonNull
     public static FirebaseFirestore getDatebase() {
         return FirebaseFirestore.getInstance();

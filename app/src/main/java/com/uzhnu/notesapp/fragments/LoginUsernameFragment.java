@@ -140,6 +140,8 @@ public class LoginUsernameFragment extends Fragment {
             return;
         }
 
+        encodedImage = (String) PreferencesManager.getInstance().get(Constants.KEY_IMAGE);
+
         if (encodedImage == null) {
             AndroidUtil.showToast(getContext(), "Please choose your profile image.");
             return;
@@ -147,7 +149,7 @@ public class LoginUsernameFragment extends Fragment {
 
         setIsProgress(true);
 
-        if (userModel != null) {
+        if (userModel.getImage() != null) {
             userModel.setImage(encodedImage);
             userModel.setUsername(username);
         } else {

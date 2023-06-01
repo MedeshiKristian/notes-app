@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PhoneNumber"
-            android:textColor="@color/greyColor"
+            android:textColor="?attr/myTextColor"
             android:textSize="@dimen/_10sdp" />
 
     </LinearLayout>

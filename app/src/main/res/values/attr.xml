@@ -2,5 +2,6 @@
 <resources>
     <attr name="myPrimary" format="color" />
     <attr name="mySecondary" format="color" />
-    <attr name="myTextColor" format="color"/>
+    <attr name="myTextColor" format="color" />
+    <attr name="mySelectionColor" format="color" />
 </resources>

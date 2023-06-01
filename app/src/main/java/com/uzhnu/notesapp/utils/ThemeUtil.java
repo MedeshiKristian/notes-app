@@ -31,4 +31,9 @@ public class ThemeUtil {
     public static int getTextColor(@NonNull Context context) {
         return getColor(context, R.attr.myTextColor);
     }
+
+    @ColorInt
+    public static int getSelectionColor(@NonNull Context context) {
+        return getColor(context, R.attr.mySelectionColor);
+    }
 }

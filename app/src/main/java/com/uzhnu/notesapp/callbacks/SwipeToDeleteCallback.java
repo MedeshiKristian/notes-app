@@ -12,6 +12,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -123,7 +124,10 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         Vibrator vibrator = (Vibrator) getSystemService(context, Vibrator.class);
         assert vibrator != null;
         if (vibrator.hasVibrator()) {
+            Log.v("Can Vibrate", "YES");
             vibrator.vibrate(vibrationDuration);
+        } else {
+            Log.v("Can Vibrate", "No");
         }
     }
 

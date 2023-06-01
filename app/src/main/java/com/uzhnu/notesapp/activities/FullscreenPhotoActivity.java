@@ -1,8 +1,8 @@
 package com.uzhnu.notesapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.uzhnu.notesapp.databinding.ActivityFullscreenPhotoBinding;
 import com.uzhnu.notesapp.utils.Constants;
@@ -19,7 +19,10 @@ public class FullscreenPhotoActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         String encodedImage = (String) PreferencesManager.getInstance().get(Constants.KEY_IMAGE);
-        assert encodedImage != null;
+        if (encodedImage == null) {
+            finish();
+            return;
+        }
         binding.photoViewFullscreen.setImageBitmap(ImageUtil.decodeImage(encodedImage));
     }
 }

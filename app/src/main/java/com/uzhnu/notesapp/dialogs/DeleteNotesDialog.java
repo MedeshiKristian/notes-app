@@ -10,6 +10,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.adapters.NotesAdapter;
+import com.uzhnu.notesapp.events.MultiSelectEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.function.Consumer;
 
 public class DeleteNotesDialog extends DialogFragment {
     private DeleteNotesListener listener;
@@ -25,6 +31,23 @@ public class DeleteNotesDialog extends DialogFragment {
 
     public DeleteNotesDialog(DeleteNotesListener listener) {
         this.listener = listener;
+    }
+
+    public DeleteNotesDialog(NotesAdapter notesAdapter, Consumer<Void> loadNotes) {
+        this.listener = new DeleteNotesListener() {
+            @Override
+            public void onDialogPositiveClick(@NonNull DialogFragment dialog) {
+                notesAdapter.deleteAllSelectedNotes();
+                loadNotes.accept(null);
+            }
+
+            @Override
+            public void onDialogCancelClick(@NonNull DialogFragment dialog) {
+                assert dialog.getDialog() != null;
+                dialog.getDialog().cancel();
+                EventBus.getDefault().post(new MultiSelectEvent(true));
+            }
+        };
     }
 
     @NonNull

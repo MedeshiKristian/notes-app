@@ -98,6 +98,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             FolderModel folder = folderModels.get(position);
             holder.bind(folder);
 
+            // TODO
             String currentFolderName = FirebaseStoreUtil.getCurrentFolder().getName();
             if (folder.getName().equals(currentFolderName)) {
                 setCurrentFolderHolder(holder);

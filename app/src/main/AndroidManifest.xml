@@ -19,7 +19,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.NotesApp"
         tools:targetApi="31">
@@ -27,16 +27,19 @@
             android:name=".activities.ManageFolderAccessActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.Slidr" />
         <activity
             android:name=".activities.SettingsActivity"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.Slidr" />
         <activity
             android:name=".activities.FullscreenPhotoActivity"
             android:exported="false"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -47,6 +50,7 @@
             android:fitsSystemWindows="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.Slidr"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.app.lib_name"
@@ -55,7 +59,8 @@
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.NotesApp.Slidr">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
@@ -86,8 +91,8 @@
         </activity>
 
         <provider
-            android:name=".providers.GenericFileProvider"
-            android:authorities="com.uzhnu.notesapp.providers.GenericFileProvider"
+            android:name=".providers.CustomFileProvider"
+            android:authorities="com.uzhnu.notesapp.providers.CustomFileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

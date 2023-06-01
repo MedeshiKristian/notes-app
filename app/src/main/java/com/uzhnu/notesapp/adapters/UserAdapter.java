@@ -2,14 +2,11 @@ package com.uzhnu.notesapp.adapters;
 
 import android.telephony.PhoneNumberUtils;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.auth.User;
 import com.uzhnu.notesapp.databinding.ItemUserBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.UserModel;
@@ -19,7 +16,6 @@ import com.uzhnu.notesapp.utils.ImageUtil;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private List<UserModel> userModels;

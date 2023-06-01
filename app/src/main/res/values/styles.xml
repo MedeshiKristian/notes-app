@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.NotesApp.Slidr">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
     <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="buttonBarNegativeButtonStyle">@style/DialogStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/DialogStyle</item>
         <item name="buttonBarNeutralButtonStyle">@style/DialogStyle</item>
         <item name="android:windowTitleStyle">@style/DialogStyle</item>
         <item name="android:windowBackground">@drawable/dialog_background</item>
-        <item name="android:windowTitleSize">@dimen/_20ssp</item>
     </style>
 
     <style name="DialogStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">

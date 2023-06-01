@@ -1,13 +1,18 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.NotesApp" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="myPrimary">#FFFFFFFF</item>
-        <item name="mySecondary">#FFF4F7FD</item>
-        <item name="myTextColor">#FF000000</item>
+    <style name="Theme.NotesApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!--        <item name="myPrimary">#FFFFFF</item>-->
+        <!--        <item name="mySecondary">#F4F7FD</item>-->
 
+        <item name="myPrimary">#F4F7FD</item>
+        <item name="mySecondary">#FFFFFF</item>
+
+        <item name="myTextColor">#000000</item>
+        <item name="mySelectionColor">@color/md_grey_200</item>
+
+        <!-- Primary brand color. -->
         <item name="colorPrimary">?myPrimary</item>
         <item name="colorPrimaryVariant">?attr/colorPrimary</item>
+        <item name="colorPrimaryContainer">?attr/colorPrimary</item>
         <item name="colorSurface">?attr/colorPrimary</item>
 
         <!-- Secondary brand color. -->
@@ -18,8 +23,11 @@
         <!-- Top bar icons color-->
         <item name="colorControlNormal">?attr/myTextColor</item>
 
+        <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <item name="android:windowLightStatusBar">true</item>
+
+        <item name="android:textColorHint">@color/greyColor</item>
 
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
     </style>

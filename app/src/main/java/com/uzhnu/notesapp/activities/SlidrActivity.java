@@ -1,13 +1,12 @@
 package com.uzhnu.notesapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
@@ -36,6 +35,9 @@ public class SlidrActivity extends AppCompatActivity {
         if (activity != null) {
             backgroundView = activity.findViewById(R.id.coordinatorContent);
         }
+        Window window = getWindow();
+        window.setStatusBarColor(Color.TRANSPARENT);
+
         SlidrConfig config = new SlidrConfig.Builder()
                 .listener(new SlidrListener() {
                     @Override
@@ -45,8 +47,7 @@ public class SlidrActivity extends AppCompatActivity {
                     @Override
                     public void onSlideChange(float percent) {
                         float coefficient = 0.25f;
-                        float moveFactor = backgroundView.getWidth()
-                                * percent * coefficient;
+                        float moveFactor = backgroundView.getWidth() * percent * coefficient;
                         if (backgroundView != null) {
                             backgroundView.setTranslationX(-moveFactor);
                         }
@@ -64,6 +65,7 @@ public class SlidrActivity extends AppCompatActivity {
                 .build();
 
         slidrInterface = Slidr.attach(SlidrActivity.this, config);
+
     }
 
     @Override
@@ -74,14 +76,14 @@ public class SlidrActivity extends AppCompatActivity {
 
     @Subscribe
     public void onLockSlidrEvent(LockSlidrEvent event) {
-//        getWindow().setStatusBarColor(ThemeUtil.getPrimary(getApplicationContext()));
-//        slidrInterface.lock();
+        getWindow().setStatusBarColor(ThemeUtil.getPrimary(getApplicationContext()));
+        slidrInterface.lock();
     }
 
     @Subscribe
     public void onUnLockSlidrEvent(UnlockSlidrEvent event) {
-//        getWindow().setStatusBarColor(Color.TRANSPARENT);
-//        slidrInterface.unlock();
+        getWindow().setStatusBarColor(Color.TRANSPARENT);
+        slidrInterface.unlock();
     }
 
     @Override

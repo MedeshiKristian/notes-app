@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="?attr/myPrimary"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".activities.SettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -61,8 +63,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:backgroundTint="@color/black"
-                    android:background="@drawable/outline_light_mode_24" />
+                    android:background="@drawable/outline_light_mode_24"
+                    android:backgroundTint="?attr/myTextColor" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switch_theme"
@@ -77,8 +79,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:backgroundTint="@color/white"
-                    android:background="@drawable/outline_dark_mode_24" />
+                    android:background="@drawable/outline_dark_mode_24"
+                    android:backgroundTint="?attr/myTextColor" />
             </LinearLayout>
         </LinearLayout>
 

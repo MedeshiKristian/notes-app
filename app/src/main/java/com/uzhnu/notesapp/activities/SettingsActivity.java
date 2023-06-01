@@ -2,11 +2,9 @@ package com.uzhnu.notesapp.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatDelegate;
 

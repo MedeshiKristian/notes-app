@@ -29,12 +29,18 @@ public class ManageFolderAccessActivity extends SlidrActivity {
         setSupportActionBar(binding.toolbar);
         init();
         loadUsers();
+
+        setListeners();
     }
 
     private void init() {
         userModels = new ArrayList<>();
         userAdapter = new UserAdapter(userModels);
         binding.recyclerViewUsers.setAdapter(userAdapter);
+    }
+
+    private void setListeners() {
+        binding.toolbar.setNavigationOnClickListener(view -> onBackPressed());
     }
 
     @SuppressLint("NotifyDataSetChanged")

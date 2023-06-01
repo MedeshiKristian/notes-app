@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:weightSum="100"
+    tools:context=".fragments.LoginPhoneNumberFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:background="@drawable/text_view_circular_background"
+            android:backgroundTint="?attr/mySecondary">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="1"
+                android:textColor="?attr/myTextColor"
+                android:textSize="@dimen/_18sdp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/text_view_circular_background"
+            android:backgroundTint="?attr/mySecondary">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="2"
+                android:textColor="?attr/myTextColor"
+                android:textSize="@dimen/_18sdp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="@dimen/_32sdp"
+            android:layout_height="@dimen/_32sdp"
+            android:background="@drawable/text_view_circular_background"
+            android:backgroundTint="?attr/colorPrimary">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="3"
+                android:textColor="?attr/myTextColor"
+                android:textSize="@dimen/_18sdp" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/image_view_user"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@drawable/text_view_circular_background"
+        android:backgroundTint="?attr/mySecondary"
+        android:contentDescription="User image"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_baseline_username_48"
+        android:tint="?attr/myTextColor"
+        app:riv_oval="true" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:text="Enter your username"
+        android:textColor="?attr/myTextColor"
+        android:textSize="@dimen/_20sdp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_5sdp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="@dimen/_5sdp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/text_input_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/rounded_corners_white_background"
+            android:elevation="@dimen/_3sdp"
+            android:hint="Username"
+            android:textColorHint="@color/white"
+            android:inputType="text"
+            android:padding="@dimen/_10sdp"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/_20sdp"
+        android:paddingRight="@dimen/_20sdp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_sign_in"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_45sdp"
+            android:backgroundTint="@drawable/buttons_state_colors"
+            android:text="Sign in"
+            android:textColor="?attr/myTextColor" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/circular_progress_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_20sdp"
+            android:indeterminate="true"
+            android:progress="0"
+            app:indicatorColor="?attr/mySecondary"
+            app:indicatorSize="@dimen/_25sdp"
+            app:trackColor="?attr/colorPrimary"
+            app:trackCornerRadius="8dp"
+            app:trackThickness="@dimen/_3sdp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -2,21 +2,16 @@ package com.uzhnu.notesapp.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.customview.widget.ViewDragHelper;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.uzhnu.notesapp.utils.Constants;
-
-import org.apache.commons.lang3.ObjectUtils;
-
 import java.lang.reflect.Field;
 
 public class CustomDrawerLayout extends DrawerLayout {
-    private static final int EDGE_SIZE_MULTIPLY = 3;
+    private static final int EDGE_SIZE_MULTIPLY = 4;
 
     public CustomDrawerLayout(@NonNull Context context) {
         super(context);

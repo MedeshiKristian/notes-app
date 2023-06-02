@@ -23,9 +23,9 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
 import com.uzhnu.notesapp.events.EditNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -354,7 +354,7 @@ public class EditNoteActivity extends SlidrActivity {
                 if (backgroundView != null) {
                     backgroundView.setTranslationX(0);
                 }
-                finish();
+                onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

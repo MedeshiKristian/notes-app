@@ -5,9 +5,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.uzhnu.notesapp.databinding.ActivityFullscreenPhotoBinding;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.ImageUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.ImageUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 
 public class FullscreenPhotoActivity extends AppCompatActivity {
     private ActivityFullscreenPhotoBinding binding;

@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp.utils;
+package com.uzhnu.notesapp.utilities;
 
 public class Constants {
     public static final String TAG = "myLogs";

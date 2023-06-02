@@ -20,11 +20,12 @@ import com.uzhnu.notesapp.events.MultiSelectEvent;
 import com.uzhnu.notesapp.events.SelectNoteEvent;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
-import com.uzhnu.notesapp.utils.ThemeUtil;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
+import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -45,7 +46,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private final ItemNoteBinding binding;
-        private static final String currentUserId = FirebaseStoreUtil.getCurrentUserId();
+        private static final String currentUserId = FirebaseAuthUtil.getCurrentUserId();
 
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
             super(itemNoteBinding.getRoot());
@@ -70,11 +71,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             } else {
                 FirebaseStoreUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        UserModel userModel = task.getResult().toObject(UserModel.class);
-                        if (userModel != null) {
+                        UserModel userModel = FirebaseStoreUtil.getUserFromDocument(task.getResult());
+                        if (userModel.getUsername() != null) {
                             String userName = " by " + userModel.getUsername();
                             binding.textViewMetaData
                                     .setText(AndroidUtil.formatDate(noteModel.getLastEdited()) + userName);
+                        } else {
+                            binding.textViewMetaData.setText("Author has deleted account");
                         }
                     } else {
                         Log.e(Constants.TAG, "Failed to load username");

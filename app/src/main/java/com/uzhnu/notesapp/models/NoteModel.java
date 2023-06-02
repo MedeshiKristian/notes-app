@@ -6,7 +6,8 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 
 import org.jetbrains.annotations.Contract;
 
@@ -33,7 +34,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         this.isPined = false;
         this.createdAt = new Date();
         this.lastEdited = this.createdAt;
-        this.lastEditedBy = FirebaseStoreUtil.getCurrentUserId();
+        this.lastEditedBy = FirebaseAuthUtil.getCurrentUserId();
     }
 
     public NoteModel(@NonNull Parcel in) throws ParseException {
@@ -86,7 +87,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void updateLastEdited() {
         this.lastEdited = new Date();
-        this.lastEditedBy = FirebaseStoreUtil.getCurrentUserId();
+        this.lastEditedBy = FirebaseAuthUtil.getCurrentUserId();
     }
 
     public Date getCreatedAt() {

@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp.utils;
+package com.uzhnu.notesapp.utilities;
 
 import androidx.annotation.NonNull;
 

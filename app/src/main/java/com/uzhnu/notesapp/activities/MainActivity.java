@@ -22,13 +22,14 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
@@ -45,11 +46,13 @@ import com.uzhnu.notesapp.listeners.ScrollLockTouchListener;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ImageUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
-import com.uzhnu.notesapp.utils.ThemeUtil;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ImageUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
+import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -184,23 +187,50 @@ public class MainActivity extends AppCompatActivity {
         PreferencesManager.getInstance().put(Constants.KEY_MAIN_ACTIVITY, this);
 
 //        for (int i = 0; i < 20; i++) {
-//            FirebaseUtil.addNoteToFolder(new NoteModel("Note " + i));
+//            FirebaseStoreUtil.addNoteToFolder(new NoteModel("Note " + i));
 //        }
+
+        final String topic = "notes";
+
+        FirebaseMessaging.getInstance().subscribeToTopic(topic)
+                .addOnCompleteListener(task -> {
+                    String msg = "Subscribed";
+                    if (!task.isSuccessful()) {
+                        msg = "Subscribe failed";
+                    } else {
+                        RemoteMessage message = new RemoteMessage.Builder(topic)
+                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.ENABLE_NOTIFICATION, "1")
+                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.TITLE, "notification title")
+                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.BODY, "body")
+                                .build();
+
+                        // Send a message to the devices subscribed to the provided topic.
+                        FirebaseMessaging.getInstance().send(message);
+                    }
+                    Log.d(Constants.TAG, msg);
+                    AndroidUtil.showToast(this, msg);
+                });
 
         binding.notesContent.swipeRefreshNotes.setColorSchemeColors(ThemeUtil.getTextColor(this));
         binding.notesContent.swipeRefreshNotes.setProgressBackgroundColorSchemeColor(ThemeUtil.getPrimary(this));
 
         layoutManager
-                = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL,
+                = new
+
+                LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL,
                 false);
 
         noteModels = new ArrayList<>();
-        notesAdapter = new NotesAdapter(noteModels, layoutManager, getApplicationContext());
+        notesAdapter = new
+
+                NotesAdapter(noteModels, layoutManager, getApplicationContext());
         binding.notesContent.recyclerViewNotes.setLayoutManager(layoutManager);
         binding.notesContent.recyclerViewNotes.setAdapter(notesAdapter);
 
         folderModels = new ArrayList<>();
-        foldersAdapter = new FoldersAdapter(this, folderModels);
+        foldersAdapter = new
+
+                FoldersAdapter(this, folderModels);
         binding.navigationStart.recyclerViewFolders.setAdapter(foldersAdapter);
     }
 
@@ -351,10 +381,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.navigationStart.layoutLogOut.setOnClickListener(view -> {
-            FirebaseStoreUtil.signOut();
+            FirebaseAuthUtil.signOut();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
         });
 
         binding.navigationStart.layoutSettings.setOnClickListener(view -> {
@@ -390,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
         binding.notesContent.recyclerViewNotes.addOnItemTouchListener(touchListener);
 
         binding.notesContent.swipeRefreshNotes.setOnRefreshListener(this::loadNotes);
-        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this, notesAdapter) {
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this) {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 touchListener.setScrollingEnabled(false);

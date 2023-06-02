@@ -11,10 +11,10 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.annotation.NonNull;
 
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ImageUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ImageUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 
 import java.io.FileNotFoundException;
 

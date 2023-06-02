@@ -11,15 +11,14 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.uzhnu.notesapp.databinding.ActivitySettingsBinding;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ImageUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ImageUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Function;
 
 public class SettingsActivity extends SlidrActivity {
     private ActivitySettingsBinding binding;
@@ -44,7 +43,7 @@ public class SettingsActivity extends SlidrActivity {
 
     private void init() {
         authUtil = new FirebaseAuthUtil(SettingsActivity.this,
-                getApplicationContext(), binding.textViewResendOtp, setProgress);
+                getApplicationContext(), binding.textViewResendOtp, this::setProgress);
 
         binding.countryCodePicker.registerCarrierNumberEditText(binding.editTextPhoneNumber);
 
@@ -71,7 +70,7 @@ public class SettingsActivity extends SlidrActivity {
             editor.apply();
         });
 
-        setProgress.apply(false);
+        setProgress(false);
     }
 
 
@@ -99,19 +98,19 @@ public class SettingsActivity extends SlidrActivity {
     }
 
     private void saveUsername() {
-        setProgress.apply(true);
+        setProgress(true);
         String newUsername = Objects.requireNonNull(binding.editTextUsername.getText()).toString();
         FirebaseStoreUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         binding.editTextUsername.setText(newUsername);
-                        setProgress.apply(false);
+                        setProgress(false);
                     }
                 });
     }
 
     private void savePhoneNumber() {
-        setProgress.apply(true);
+        setProgress(true);
         String newPhoneNumber = getPhoneNumber();
         if (newPhoneNumber.equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber())) {
             return;
@@ -147,8 +146,8 @@ public class SettingsActivity extends SlidrActivity {
                 });
     }
 
-    private Function<Boolean, Void> setProgress = (show) -> {
-        if (binding == null) return null;
+    private void setProgress(boolean show) {
+        if (binding == null) return;
         binding.imageViewUser.setEnabled(!show);
         binding.editTextUsername.setEnabled(!show);
         binding.editTextPhoneNumber.setEnabled(!show);
@@ -163,6 +162,5 @@ public class SettingsActivity extends SlidrActivity {
             binding.circularProgressIndicator.hide();
             binding.layoutOtpCode.setVisibility(View.VISIBLE);
         }
-        return null;
-    };
+    }
 }

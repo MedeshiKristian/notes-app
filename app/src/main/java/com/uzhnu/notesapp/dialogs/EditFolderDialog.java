@@ -14,8 +14,8 @@ import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogRenameBinding;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 
 import org.greenrobot.eventbus.EventBus;
 

@@ -15,9 +15,9 @@ import com.r0adkll.slidr.model.SlidrListener;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.events.LockSlidrEvent;
 import com.uzhnu.notesapp.events.UnlockSlidrEvent;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.PreferencesManager;
-import com.uzhnu.notesapp.utils.ThemeUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
+import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

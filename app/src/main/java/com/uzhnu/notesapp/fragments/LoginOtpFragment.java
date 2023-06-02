@@ -1,5 +1,6 @@
 package com.uzhnu.notesapp.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,7 +10,6 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
@@ -19,10 +19,10 @@ import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
-import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.activities.LoginProfileActivity;
 import com.uzhnu.notesapp.databinding.FragmentLoginOtpBinding;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
 
 import java.util.Objects;
 import java.util.Timer;
@@ -165,30 +165,41 @@ public class LoginOtpFragment extends Fragment {
     }
 
     private void startResendTimer() {
-        binding.textViewResendOtp.setEnabled(false);
+        try {
+            binding.textViewResendOtp.setEnabled(false);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         Timer timer = new Timer();
         timeoutLeftSeconds = TIMEOUT_SECONDS;
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (getActivity() != null) {
-                    timeoutLeftSeconds -= 1;
-                    requireActivity().runOnUiThread(() -> {
-                        if (binding != null) {
+                timeoutLeftSeconds -= 1;
+                try {
+                    getActivity().runOnUiThread(() -> {
+                        try {
                             binding.textViewResendOtp
                                     .setText("Resent otp code in " + timeoutLeftSeconds + " seconds");
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
                         }
                     });
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
                 }
                 if (timeoutLeftSeconds == 0) {
                     timer.cancel();
-                    if (getActivity() != null) {
-                        requireActivity().runOnUiThread(() -> {
-                            if (binding != null) {
-                                binding.textViewResendOtp
-                                        .setEnabled(true);
+                    try {
+                        getActivity().runOnUiThread(() -> {
+                            try {
+                                binding.textViewResendOtp.setEnabled(true);
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
                             }
                         });
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -197,36 +208,37 @@ public class LoginOtpFragment extends Fragment {
 
     private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
         setProgress(true);
-        if (getActivity() != null) {
-            auth.signInWithCredential(credential)
-                    .addOnCompleteListener(requireActivity(), task -> {
-                        setProgress(false);
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(Constants.TAG, "signInWithCredential:success");
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(requireActivity(), task -> {
+                    setProgress(false);
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(Constants.TAG, "signInWithCredential:success");
 
+                        AndroidUtil.showToast(getContext(),
+                                "OTP verification has been completed successfully");
+
+                        navigateToNext();
+                    } else {
+                        Log.w(Constants.TAG, "signInWithCredential:failure", task.getException());
+                        if (task.getException() instanceof
+                                FirebaseAuthInvalidCredentialsException) {
                             AndroidUtil.showToast(getContext(),
-                                    "OTP verification has been completed successfully");
-
-                            navigateToNextFragment();
-                        } else {
-                            Log.w(Constants.TAG, "signInWithCredential:failure", task.getException());
-                            if (task.getException() instanceof
-                                    FirebaseAuthInvalidCredentialsException) {
-                                AndroidUtil.showToast(getContext(),
-                                        "The verification code entered was invalid");
-                            }
+                                    "The verification code entered was invalid");
                         }
-                    });
-        }
+                    }
+                });
     }
 
-    private void navigateToNextFragment() {
+    private void navigateToNext() {
         setProgress(false);
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.KEY_PHONE_NUMBER, getArgPhoneNumber);
-        NavHostFragment.findNavController(LoginOtpFragment.this)
-                .navigate(R.id.action_loginOtpFragment_to_loginUsernameFragment, bundle);
+        Intent intent = new Intent(requireActivity(), LoginProfileActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+//        Bundle bundle = new Bundle();
+//        bundle.putString(Constants.KEY_PHONE_NUMBER, getArgPhoneNumber);
+//        NavHostFragment.findNavController(LoginOtpFragment.this)
+//                .navigate(R.id.action_loginOtpFragment_to_loginUsernameFragment, bundle);
     }
 
     @Override

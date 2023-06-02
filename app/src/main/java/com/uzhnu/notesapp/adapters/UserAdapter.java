@@ -10,9 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.uzhnu.notesapp.databinding.ItemUserBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ImageUtil;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ImageUtil;
 
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +63,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         UserModel userModel = userModels.get(position);
         holder.bind(userModel);
 
-        if (currentFolder.getCreatedBy().equals(FirebaseStoreUtil.getCurrentUserId())) {
+        if (currentFolder.getCreatedBy().equals(FirebaseAuthUtil.getCurrentUserId())) {
             holder.itemView.setOnClickListener(view -> {
                 FirebaseStoreUtil.addAccessToCurrentFolder(userModel)
                         .addOnCompleteListener(task -> {

@@ -1,12 +1,10 @@
-package com.uzhnu.notesapp.utils;
+package com.uzhnu.notesapp.utilities;
 
 import android.annotation.SuppressLint;
-import android.icu.text.CaseMap;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -15,15 +13,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
 import com.uzhnu.notesapp.databinding.ActivityMainBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
-
-import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,14 +96,6 @@ public class FirebaseStoreUtil {
         return FirebaseFirestore.getInstance();
     }
 
-    public static String getCurrentUserId() {
-        return FirebaseAuth.getInstance().getUid();
-    }
-
-    public static boolean isLoggedIn() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null;
-    }
-
     public static void signOut() {
         FirebaseAuth.getInstance().signOut();
     }
@@ -117,7 +104,7 @@ public class FirebaseStoreUtil {
     public static DocumentReference getCurrentUserDetails() {
         return getDatebase()
                 .collection(Constants.KEY_COLLECTION_USERS)
-                .document(getCurrentUserId());
+                .document(FirebaseAuthUtil.getCurrentUserId());
     }
 
     @NonNull
@@ -135,6 +122,17 @@ public class FirebaseStoreUtil {
         userModel.setPhoneNumber(queryDocumentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
         userModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
         userModel.setUserId(queryDocumentSnapshot.getId());
+        return userModel;
+    }
+
+    @NonNull
+    public static UserModel getUserFromDocument(@NonNull DocumentSnapshot documentSnapshot) {
+        UserModel userModel = new UserModel();
+        userModel.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
+        userModel.setUsername(documentSnapshot.getString(Constants.KEY_USERNAME));
+        userModel.setPhoneNumber(documentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
+        userModel.setCreatedAt(documentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        userModel.setUserId(documentSnapshot.getId());
         return userModel;
     }
 

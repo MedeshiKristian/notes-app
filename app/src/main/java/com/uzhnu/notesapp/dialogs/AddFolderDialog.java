@@ -16,7 +16,7 @@ import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.databinding.DialogAddFolderBinding;
 import com.uzhnu.notesapp.models.FolderModel;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 
 import java.util.List;
 

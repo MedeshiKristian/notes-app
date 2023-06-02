@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp.utils;
+package com.uzhnu.notesapp.utilities;
 
 import android.content.Context;
 import android.content.res.Resources;

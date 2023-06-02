@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/mySecondary"
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
-    android:background="?attr/myPrimary"
     tools:context=".fragments.LoginPhoneNumberFragment">
 
     <LinearLayout
@@ -21,7 +21,7 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/colorPrimary">
+            android:backgroundTint="?attr/myPrimary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
@@ -100,6 +100,7 @@
             app:ccpDialog_cornerRadius="@dimen/_3sdp"
             app:ccp_autoDetectCountry="true"
             app:ccp_autoFormatNumber="true"
+            app:ccp_contentColor="?attr/myTextColor"
             app:ccp_showFlag="false"
             app:ccp_showNameCode="false" />
 
@@ -107,10 +108,10 @@
             android:id="@+id/edit_text_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:background="?attr/myPrimary"
             android:hint="Your phone number"
             android:inputType="phone"
-            android:textColor="@color/black" />
+            android:textColor="?attr/myTextColor" />
     </LinearLayout>
 
     <LinearLayout

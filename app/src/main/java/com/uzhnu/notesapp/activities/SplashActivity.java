@@ -2,15 +2,17 @@ package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.uzhnu.notesapp.databinding.ActivitySplashBinding;
-import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
@@ -22,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        if (!FirebaseStoreUtil.isLoggedIn()) {
+        if (!FirebaseAuthUtil.isLoggedIn()) {
             Log.i(Constants.TAG, "User is not logged in");
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -31,10 +33,12 @@ public class SplashActivity extends AppCompatActivity {
             return;
         }
 
+        Log.d(Constants.TAG, "User is logged in");
+
         FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
-                        FirebaseStoreUtil.signOut();
+                        FirebaseAuthUtil.signOut();
                         Log.w(Constants.TAG, "Task for getting user details failed");
                         Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
@@ -43,11 +47,10 @@ public class SplashActivity extends AppCompatActivity {
                         finish();
                         return;
                     }
-                    if (task.getResult().toObject(UserModel.class) == null) {
+                    if (task.getResult().getString(Constants.KEY_IMAGE) == null) {
                         // Lack of user details in database
-                        FirebaseStoreUtil.signOut();
-                        Log.i(Constants.TAG, "User logged in but has not set picture or username yet");
-                        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                        Log.i(Constants.TAG, "Lack of user details in database");
+                        Intent intent = new Intent(SplashActivity.this, LoginProfileActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                 Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);

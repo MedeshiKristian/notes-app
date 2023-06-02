@@ -23,11 +23,11 @@ import com.uzhnu.notesapp.callbacks.SetImageFromGalleryCallback;
 import com.uzhnu.notesapp.callbacks.RequestCameraPermissionCallback;
 import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ImageUtil;
-import com.uzhnu.notesapp.utils.PreferencesManager;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ImageUtil;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 
 public class LoginUsernameFragment extends Fragment {
     private FragmentLoginUsernameBinding binding;
@@ -64,12 +64,12 @@ public class LoginUsernameFragment extends Fragment {
                 new ActivityResultContracts.StartActivityForResult(),
                 new SetImageFromCameraCallback(getContext(), binding.imageViewUser, cameraUri)
         );
+        imageUtil = new ImageUtil(requireActivity(), pickImageFromGallery,
+                pickImageFromCamera, requestCameraPermission, cameraUri);
         requestCameraPermission = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 new RequestCameraPermissionCallback(imageUtil)
         );
-        imageUtil = new ImageUtil(requireActivity(), pickImageFromGallery,
-                pickImageFromCamera, requestCameraPermission, cameraUri);
         return binding.getRoot();
     }
 
@@ -102,17 +102,12 @@ public class LoginUsernameFragment extends Fragment {
 
     private void getUser() {
         setIsProgress(true);
-        userModel = new UserModel();
         FirebaseStoreUtil.getCurrentUserDetails().get()
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
                         DocumentSnapshot documentSnapshot = task.getResult();
-                        userModel.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
-                        userModel.setUsername(documentSnapshot.getString(Constants.KEY_USERNAME));
-                        userModel.setPhoneNumber(documentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
-                        userModel.setCreatedAt(documentSnapshot.getDate(Constants.KEY_CREATED_AT));
-                        userModel.setUserId(documentSnapshot.getId());
+                        userModel = FirebaseStoreUtil.getUserFromDocument(documentSnapshot);
                         if (userModel.getImage() != null) {
                             AndroidUtil.showToast(getContext(), "Load user details successfully");
                             Log.i(Constants.TAG,

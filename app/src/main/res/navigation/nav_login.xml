@@ -20,13 +20,5 @@
         android:name="com.uzhnu.notesapp.fragments.LoginOtpFragment"
         android:label="fragment_login_otp"
         tools:layout="@layout/fragment_login_otp" >
-        <action
-            android:id="@+id/action_loginOtpFragment_to_loginUsernameFragment"
-            app:destination="@id/loginUsernameFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/loginUsernameFragment"
-        android:name="com.uzhnu.notesapp.fragments.LoginUsernameFragment"
-        android:label="fragment_login_username"
-        tools:layout="@layout/fragment_login_username" />
 </navigation>

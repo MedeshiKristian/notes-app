@@ -12,7 +12,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.FragmentLoginPhoneNumberBinding;
-import com.uzhnu.notesapp.utils.Constants;
+import com.uzhnu.notesapp.utilities.Constants;
 
 public class LoginPhoneNumberFragment extends Fragment {
     private FragmentLoginPhoneNumberBinding binding;

@@ -2,15 +2,17 @@ package com.uzhnu.notesapp.activities;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.UserAdapter;
 import com.uzhnu.notesapp.databinding.ActivityManageFolderAccessBinding;
 import com.uzhnu.notesapp.models.UserModel;
-import com.uzhnu.notesapp.utils.AndroidUtil;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +53,11 @@ public class ManageFolderAccessActivity extends SlidrActivity {
                 userModels.clear();
                 assert task.getResult() != null;
                 for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
-                    userModels.add(FirebaseStoreUtil.getUserFromDocument(queryDocumentSnapshot));
+                    if (!queryDocumentSnapshot.getString(Constants.KEY_PHONE_NUMBER).equals(
+                            FirebaseAuthUtil.getUserPhoneNumber())) {
+                        Log.i(Constants.TAG, FirebaseAuthUtil.getUserPhoneNumber());
+                        userModels.add(FirebaseStoreUtil.getUserFromDocument(queryDocumentSnapshot));
+                    }
                 }
                 userAdapter.notifyDataSetChanged();
             } else {

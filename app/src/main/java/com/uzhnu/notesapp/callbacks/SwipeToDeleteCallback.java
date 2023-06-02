@@ -3,7 +3,6 @@ package com.uzhnu.notesapp.callbacks;
 import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,19 +12,18 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.WithHint;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
-import com.uzhnu.notesapp.utils.ThemeUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     private static final float SWIPE_THRESHOLD = 0.45f;
@@ -37,16 +35,13 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     private Drawable deleteDrawable;
     private int intrinsicWidth;
     private int intrinsicHeight;
-    private NotesAdapter adapter;
 
-    public SwipeToDeleteCallback(Context context, NotesAdapter adapter) {
+    public SwipeToDeleteCallback(Context context) {
         this.context = context;
-        this.adapter = adapter;
         backgroundDrawable = new ColorDrawable();
         backgroundColor = ThemeUtil.getPrimary(context);
         clearPaint = new Paint();
         clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        clearPaint.setColor(Color.WHITE);
         deleteDrawable = ContextCompat.getDrawable(this.context, R.drawable.ic_outline_delete_24);
         assert deleteDrawable != null;
         intrinsicWidth = deleteDrawable.getIntrinsicWidth();
@@ -72,6 +67,10 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
                             @NonNull RecyclerView recyclerView,
                             @NonNull RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
+        if (viewHolder.getAbsoluteAdapterPosition() == -1) {
+            return;
+        }
+
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
         View itemView = viewHolder.itemView;
@@ -83,7 +82,6 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         int top = itemView.getTop();
         int right = itemView.getRight();
         int bottom = itemView.getBottom();
-
         if (isCancelled) {
             clearCanvas(c, (float) left + dX, (float) top, (float) right, (float) bottom);
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
@@ -97,7 +95,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
                 vibrateOnce();
             }
             backgroundColor = ContextCompat.getColor(context, R.color.greyColor);
-        } else if (Math.abs(dX) < swipeThreshold) {
+        } else {
             if (vibrated) {
                 vibrated = false;
                 vibrateOnce();
@@ -117,6 +115,8 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
 
         deleteDrawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
         deleteDrawable.draw(c);
+
+        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
     private void vibrateOnce() {
@@ -131,7 +131,7 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
         }
     }
 
-    private void clearCanvas(@NonNull Canvas c, Float left, Float top, Float right, Float bottom) {
+    protected void clearCanvas(@NonNull Canvas c, Float left, Float top, Float right, Float bottom) {
         c.drawRect(left, top, right, bottom, clearPaint);
     }
 

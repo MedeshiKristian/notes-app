@@ -14,9 +14,9 @@ import com.uzhnu.notesapp.dialogs.AddFolderDialog;
 import com.uzhnu.notesapp.dialogs.EditFolderDialog;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
-import com.uzhnu.notesapp.utils.Constants;
-import com.uzhnu.notesapp.utils.FirebaseStoreUtil;
-import com.uzhnu.notesapp.utils.ThemeUtil;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

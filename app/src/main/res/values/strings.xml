@@ -21,6 +21,8 @@
     <string name="string_cancel">Cancel</string>
     <string name="settings">Settings</string>
     <string name="log_out">Log out</string>
+    <string name="loading">Loading…</string>
+    <string name="default_notification_channel_id">notificationChannelId</string>
 
     <!--    <string name="default_folder">Notes</string>-->
 </resources>

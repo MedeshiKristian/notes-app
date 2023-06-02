@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp.utils;
+package com.uzhnu.notesapp.utilities;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,14 +12,17 @@ import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class FirebaseAuthUtil {
@@ -28,14 +31,14 @@ public class FirebaseAuthUtil {
     private FragmentActivity activity;
     private Context context;
     private TextView textViewLeftSeconds;
-    private Function<Boolean, Void> setProgress;
+    private Consumer<Boolean> setProgress;
     private FirebaseAuth auth;
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks;
     private String verificationId;
     private PhoneAuthProvider.ForceResendingToken resendToken;
 
     public FirebaseAuthUtil(FragmentActivity activity, Context context, TextView textView,
-                            Function<Boolean, Void> setProgress) {
+                            Consumer<Boolean> setProgress) {
         this.activity = activity;
         this.context = context;
         this.textViewLeftSeconds = textView;
@@ -67,7 +70,7 @@ public class FirebaseAuthUtil {
                     Log.w(Constants.TAG, "reCAPTCHA verification attempted with null Activity", e);
                 }
 
-                setProgress.apply(false);
+                setProgress.accept(false);
             }
 
             @Override
@@ -84,7 +87,7 @@ public class FirebaseAuthUtil {
 
                 startResendTimer(textViewLeftSeconds);
 
-                setProgress.apply(false);
+                setProgress.accept(false);
             }
         };
     }
@@ -171,5 +174,23 @@ public class FirebaseAuthUtil {
                 }
             }
         }, 0, 1000);
+    }
+
+    public static String getCurrentUserId() {
+        return FirebaseAuth.getInstance().getUid();
+    }
+
+    public static String getUserPhoneNumber() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        assert user != null;
+        return user.getPhoneNumber();
+    }
+
+    public static boolean isLoggedIn() {
+        return FirebaseAuth.getInstance().getCurrentUser() != null;
+    }
+
+    public static void signOut() {
+        FirebaseAuth.getInstance().signOut();
     }
 }

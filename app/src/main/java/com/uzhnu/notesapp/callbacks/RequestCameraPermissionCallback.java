@@ -13,8 +13,8 @@ public class RequestCameraPermissionCallback implements ActivityResultCallback<B
     }
 
     @Override
-    public void onActivityResult(@NonNull Boolean result) {
-        if (result) {
+    public void onActivityResult(@NonNull Boolean isGranted) {
+        if (isGranted) {
             imageUtil.launchCamera();
         }
     }

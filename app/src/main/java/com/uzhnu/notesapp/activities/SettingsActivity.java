@@ -12,8 +12,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.uzhnu.notesapp.databinding.ActivitySettingsBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 import com.uzhnu.notesapp.utilities.PreferencesManager;
 
@@ -25,7 +25,7 @@ public class SettingsActivity extends SlidrActivity {
 
     private ImageUtil imageUtil;
 
-    private FirebaseAuthUtil authUtil;
+    private AuthUtil authUtil;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private boolean nightMode;
@@ -42,7 +42,7 @@ public class SettingsActivity extends SlidrActivity {
     }
 
     private void init() {
-        authUtil = new FirebaseAuthUtil(SettingsActivity.this,
+        authUtil = new AuthUtil(SettingsActivity.this,
                 getApplicationContext(), binding.textViewResendOtp, this::setProgress);
 
         binding.countryCodePicker.registerCarrierNumberEditText(binding.editTextPhoneNumber);
@@ -100,7 +100,7 @@ public class SettingsActivity extends SlidrActivity {
     private void saveUsername() {
         setProgress(true);
         String newUsername = Objects.requireNonNull(binding.editTextUsername.getText()).toString();
-        FirebaseStoreUtil.getCurrentUserDetails().update(Constants.KEY_USERNAME, newUsername)
+        StoreUtil.getCurrentUser().update(Constants.KEY_USERNAME, newUsername)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         binding.editTextUsername.setText(newUsername);
@@ -125,7 +125,7 @@ public class SettingsActivity extends SlidrActivity {
 
 
     private void loadUserDetails() {
-        FirebaseStoreUtil.getCurrentUserDetails().get()
+        StoreUtil.getCurrentUser().get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);

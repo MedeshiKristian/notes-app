@@ -6,15 +6,18 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
 
 import org.jetbrains.annotations.Contract;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class NoteModel implements Comparable<NoteModel>, Parcelable {
     public static final String DATE_FORMAT = "dd MMMM yyyy HH:mm:ss";
@@ -34,7 +37,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         this.isPined = false;
         this.createdAt = new Date();
         this.lastEdited = this.createdAt;
-        this.lastEditedBy = FirebaseAuthUtil.getCurrentUserId();
+        this.lastEditedBy = AuthUtil.getCurrentUserId();
     }
 
     public NoteModel(@NonNull Parcel in) throws ParseException {
@@ -87,7 +90,7 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void updateLastEdited() {
         this.lastEdited = new Date();
-        this.lastEditedBy = FirebaseAuthUtil.getCurrentUserId();
+        this.lastEditedBy = AuthUtil.getCurrentUserId();
     }
 
     public Date getCreatedAt() {
@@ -140,5 +143,28 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
 
     public void togglePin() {
         setPined(!isPined());
+    }
+
+    @NonNull
+    public static NoteModel toNote(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+        NoteModel noteModel = new NoteModel();
+        noteModel.setText(queryDocumentSnapshot.getString(Constants.KEY_TEXT));
+        noteModel.setLastEdited(queryDocumentSnapshot.getDate(Constants.KEY_LAST_EDITED_AT));
+        noteModel.setPined(queryDocumentSnapshot.getBoolean(Constants.KEY_PINNED));
+        noteModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        noteModel.setLastEditedBy(queryDocumentSnapshot.getString(Constants.KEY_LAST_EDITED_BY));
+        noteModel.setDocumentId(queryDocumentSnapshot.getId());
+        return noteModel;
+    }
+
+    @NonNull
+    public static Map<String, Object> toMap(@NonNull NoteModel noteModel) {
+        Map<String, Object> objectMap = new HashMap<>();
+        objectMap.put(Constants.KEY_TEXT, noteModel.getText());
+        objectMap.put(Constants.KEY_LAST_EDITED_AT, noteModel.getLastEdited());
+        objectMap.put(Constants.KEY_PINNED, noteModel.isPined());
+        objectMap.put(Constants.KEY_CREATED_AT, noteModel.getCreatedAt());
+        objectMap.put(Constants.KEY_LAST_EDITED_BY, noteModel.getLastEditedBy());
+        return objectMap;
     }
 }

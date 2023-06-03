@@ -11,62 +11,38 @@ import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
-import com.google.api.LogDescriptor;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.activities.MainActivity;
+import com.uzhnu.notesapp.models.NotificationModel;
 import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.MessagingUtil;
 
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
+public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(Constants.TAG, "From: " + remoteMessage.getFrom());
+        Log.d(Constants.TAG, "Message data" + remoteMessage.getData());
 
-        /*if (remoteMessage.getData().size() > 0) {
-            Log.d(Constants.TAG, "Message data payload: " + remoteMessage.getData());
-
-            if (*//* Check if data needs to be processed by long running job *//* true) {
-                scheduleJob();
-            } else {
-                handleNow();
-            }
-
-        }*/
-
-        if (remoteMessage.getNotification() != null) {
-            Log.d(Constants.TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            String notificationBody = remoteMessage.getNotification().getBody();
-            if (remoteMessage.getNotification().getBody() != null) {
-                sendNotification(notificationBody);
-            }
-        }
+        NotificationModel notificationModel
+                = NotificationModel.toNotification(remoteMessage);
+//        if (!notificationModel.getSenderPhoneNumber().equals(AuthUtil.getUserPhoneNumber())) {
+            sendNotification(notificationModel);
+//        }
     }
+
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         Log.d(Constants.TAG, "Refreshed token: " + token);
-
-        // sendRegistrationToServer(token);
-    }
-    private void scheduleJob() {
-        OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(MyWorker.class).build();
-        WorkManager.getInstance(this).beginWith(work).enqueue();
-    }
-    private void handleNow() {
-        Log.d(Constants.TAG, "Short lived task is done.");
     }
 
-    /*private void sendRegistrationToServer(@NonNull String token) {
-        // TODO: Implement this method to send token to your app server.
-    }*/
-
-    private void sendNotification(String messageBody) {
+    private void sendNotification(@NonNull NotificationModel notificationModel) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
@@ -77,8 +53,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.outline_notifications_24)
-                        .setContentTitle("Content Title")
-                        .setContentText(messageBody)
+                        .setContentTitle(notificationModel.getTitle())
+                        .setContentText(notificationModel.getText())
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
@@ -93,6 +69,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify(notificationModel.getId(), notificationBuilder.build());
     }
 }

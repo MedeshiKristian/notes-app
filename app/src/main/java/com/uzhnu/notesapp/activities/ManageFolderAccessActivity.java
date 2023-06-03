@@ -11,8 +11,8 @@ import com.uzhnu.notesapp.databinding.ActivityManageFolderAccessBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +48,15 @@ public class ManageFolderAccessActivity extends SlidrActivity {
     @SuppressLint("NotifyDataSetChanged")
     private void loadUsers() {
         setProgress(true);
-        FirebaseStoreUtil.getUsers().get().addOnCompleteListener(task -> {
+        StoreUtil.getUsers().get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 userModels.clear();
                 assert task.getResult() != null;
                 for (QueryDocumentSnapshot queryDocumentSnapshot : task.getResult()) {
                     if (!queryDocumentSnapshot.getString(Constants.KEY_PHONE_NUMBER).equals(
-                            FirebaseAuthUtil.getUserPhoneNumber())) {
-                        Log.i(Constants.TAG, FirebaseAuthUtil.getUserPhoneNumber());
-                        userModels.add(FirebaseStoreUtil.getUserFromDocument(queryDocumentSnapshot));
+                            AuthUtil.getUserPhoneNumber())) {
+                        Log.i(Constants.TAG, AuthUtil.getUserPhoneNumber());
+                        userModels.add(UserModel.toUser(queryDocumentSnapshot));
                     }
                 }
                 userAdapter.notifyDataSetChanged();

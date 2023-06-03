@@ -15,7 +15,7 @@ import com.uzhnu.notesapp.databinding.DialogRenameBinding;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -51,20 +51,12 @@ public class EditFolderDialog extends DialogFragment {
             public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
                 folder.setName(folderName);
                 adapter.notifyItemChanged(holder.getLayoutPosition());
-                FirebaseStoreUtil.updateFolder(folder)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                AndroidUtil.showToast(getContext(), "Folder renamed successfully");
-                                EventBus.getDefault().post(new SelectFolderEvent(folder, holder));
-                            } else {
-                                AndroidUtil.showToast(getContext(), "Failed to rename folder");
-                            }
-                        });
+//                StoreUtil.updateFolder(folder);
             }
 
             @Override
             public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
-                FirebaseStoreUtil.deleteFolder(folder);
+//                StoreUtil.deleteFolder(folder);
                 folderModels.remove(holder.getLayoutPosition());
                 adapter.notifyItemRemoved(holder.getLayoutPosition());
             }

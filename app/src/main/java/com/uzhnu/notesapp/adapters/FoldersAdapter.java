@@ -1,13 +1,16 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.rpc.context.AttributeContext;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ItemFolderBinding;
 import com.uzhnu.notesapp.dialogs.AddFolderDialog;
@@ -15,13 +18,15 @@ import com.uzhnu.notesapp.dialogs.EditFolderDialog;
 import com.uzhnu.notesapp.events.SelectFolderEvent;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersViewHolder> {
     private static final int SPECIAL = 0;
@@ -33,6 +38,18 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
     private final List<FolderModel> folderModels;
 
     private FoldersViewHolder currentFolderHolder;
+
+    public FragmentActivity getActivity() {
+        return activity;
+    }
+
+    public List<FolderModel> getFolderModels() {
+        return folderModels;
+    }
+
+    public FoldersViewHolder getCurrentFolderHolder() {
+        return currentFolderHolder;
+    }
 
     public static class FoldersViewHolder extends RecyclerView.ViewHolder {
         private final ItemFolderBinding binding;
@@ -99,7 +116,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             holder.bind(folder);
 
             // TODO
-            String currentFolderName = FirebaseStoreUtil.getCurrentFolder().getName();
+            String currentFolderName = StoreUtil.getCurrentFolder().getName();
             if (folder.getName().equals(currentFolderName)) {
                 setCurrentFolderHolder(holder);
             }

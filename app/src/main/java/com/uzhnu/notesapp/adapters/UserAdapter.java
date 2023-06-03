@@ -11,8 +11,8 @@ import com.uzhnu.notesapp.databinding.ItemUserBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 
 import java.util.List;
@@ -59,22 +59,25 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        FolderModel currentFolder = FirebaseStoreUtil.getCurrentFolder();
+        FolderModel currentFolder = StoreUtil.getCurrentFolder();
         UserModel userModel = userModels.get(position);
         holder.bind(userModel);
 
-        if (currentFolder.getCreatedBy().equals(FirebaseAuthUtil.getCurrentUserId())) {
-            holder.itemView.setOnClickListener(view -> {
-                FirebaseStoreUtil.addAccessToCurrentFolder(userModel)
+        holder.itemView.setOnClickListener(view -> {
+            if (currentFolder.getCreatedBy().equals(AuthUtil.getCurrentUserId())) {
+                StoreUtil.updateFolderEditors(currentFolder, userModel)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
-                                AndroidUtil.showToast(view.getContext(), "User successfully given access to folder");
+                                AndroidUtil.showToast(view.getContext(), "Successfully gave access to folder");
                             } else {
-                                AndroidUtil.showToast(view.getContext(), "Failed to give access to folder");
+                                AndroidUtil.showToast(view.getContext(), "Failed to access folder");
                             }
                         });
-            });
-        }
+            } else {
+                AndroidUtil.showToast(view.getContext(),
+                        "You do not have the right to manage this folder access");
+            }
+        });
     }
 
     @Override

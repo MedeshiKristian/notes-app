@@ -1,4 +1,4 @@
-package com.uzhnu.notesapp.utilities;
+package com.uzhnu.notesapp.utilities.firebase;
 
 import android.content.Context;
 import android.util.Log;
@@ -16,16 +16,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
-import com.google.firebase.firestore.auth.User;
+import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
 
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class FirebaseAuthUtil {
+public class AuthUtil {
     private static final Long TIMEOUT_SECONDS = 30L;
     private Long timeoutLeftSeconds;
     private FragmentActivity activity;
@@ -37,8 +37,8 @@ public class FirebaseAuthUtil {
     private String verificationId;
     private PhoneAuthProvider.ForceResendingToken resendToken;
 
-    public FirebaseAuthUtil(FragmentActivity activity, Context context, TextView textView,
-                            Consumer<Boolean> setProgress) {
+    public AuthUtil(FragmentActivity activity, Context context, TextView textView,
+                    Consumer<Boolean> setProgress) {
         this.activity = activity;
         this.context = context;
         this.textViewLeftSeconds = textView;
@@ -80,7 +80,7 @@ public class FirebaseAuthUtil {
 
                 super.onCodeSent(verificationId, token);
 
-                FirebaseAuthUtil.this.verificationId = verificationId;
+                AuthUtil.this.verificationId = verificationId;
                 resendToken = token;
 
                 AndroidUtil.showToast(context, "OTP has been sent successfully");
@@ -139,7 +139,7 @@ public class FirebaseAuthUtil {
 
                         AndroidUtil.showToast(context,
                                 "OTP verification has been completed successfully");
-                        FirebaseStoreUtil.getCurrentUserDetails().update(Constants.KEY_PHONE_NUMBER,
+                        StoreUtil.getCurrentUser().update(Constants.KEY_PHONE_NUMBER,
                                 Objects.requireNonNull(auth.getCurrentUser()).getPhoneNumber());
                     } else {
                         Log.w(Constants.TAG, "signInWithCredential:failure", task.getException());

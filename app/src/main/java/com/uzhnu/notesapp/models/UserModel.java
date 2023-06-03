@@ -2,6 +2,10 @@ package com.uzhnu.notesapp.models;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.uzhnu.notesapp.utilities.Constants;
+
 import java.util.Date;
 
 public class UserModel {
@@ -21,7 +25,7 @@ public class UserModel {
         this.createdAt = new Date();
     }
 
-    public String getUsername() throws NullPointerException {
+    public String getUsername() {
         return username;
     }
 
@@ -29,7 +33,7 @@ public class UserModel {
         this.username = username;
     }
 
-    public String getPhoneNumber() throws NullPointerException {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
@@ -37,7 +41,7 @@ public class UserModel {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getImage() throws NullPointerException {
+    public String getImage() {
         return image;
     }
 
@@ -45,7 +49,7 @@ public class UserModel {
         this.image = image;
     }
 
-    public Date getCreatedAt() throws NullPointerException {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
@@ -53,12 +57,34 @@ public class UserModel {
         this.createdAt = createdAt;
     }
 
-    public String getUserId() {
+    public String getId() {
         return userId;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @NonNull
+    public static UserModel toUser(@NonNull QueryDocumentSnapshot queryDocumentSnapshot) {
+        UserModel userModel = new UserModel();
+        userModel.setImage(queryDocumentSnapshot.getString(Constants.KEY_IMAGE));
+        userModel.setUsername(queryDocumentSnapshot.getString(Constants.KEY_USERNAME));
+        userModel.setPhoneNumber(queryDocumentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
+        userModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        userModel.setUserId(queryDocumentSnapshot.getId());
+        return userModel;
+    }
+
+    @NonNull
+    public static UserModel toUser(@NonNull DocumentSnapshot documentSnapshot) {
+        UserModel userModel = new UserModel();
+        userModel.setImage(documentSnapshot.getString(Constants.KEY_IMAGE));
+        userModel.setUsername(documentSnapshot.getString(Constants.KEY_USERNAME));
+        userModel.setPhoneNumber(documentSnapshot.getString(Constants.KEY_PHONE_NUMBER));
+        userModel.setCreatedAt(documentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        userModel.setUserId(documentSnapshot.getId());
+        return userModel;
     }
 }
 

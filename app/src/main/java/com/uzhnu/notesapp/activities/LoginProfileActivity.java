@@ -11,8 +11,8 @@ import com.uzhnu.notesapp.databinding.ActivityProfileBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 import com.uzhnu.notesapp.utilities.PreferencesManager;
 
@@ -36,7 +36,7 @@ public class LoginProfileActivity extends AppCompatActivity {
     }
 
     private void init() {
-        phoneNumber = FirebaseAuthUtil.getUserPhoneNumber();
+        phoneNumber = AuthUtil.getUserPhoneNumber();
         imageUtil = new ImageUtil(LoginProfileActivity.this, binding.imageViewUser);
     }
 
@@ -48,12 +48,12 @@ public class LoginProfileActivity extends AppCompatActivity {
 
     private void getUser() {
         setProgress(true);
-        FirebaseStoreUtil.getCurrentUserDetails().get()
+        StoreUtil.getCurrentUser().get()
                 .addOnCompleteListener(task -> {
                     setProgress(false);
                     if (task.isSuccessful()) {
                         DocumentSnapshot documentSnapshot = task.getResult();
-                        userModel = FirebaseStoreUtil.getUserFromDocument(documentSnapshot);
+                        userModel = UserModel.toUser(documentSnapshot);
                         if (userModel.getImage() != null) {
                             AndroidUtil.showToast(this, "Load user details successfully");
                             Log.i(Constants.TAG,
@@ -97,9 +97,9 @@ public class LoginProfileActivity extends AppCompatActivity {
             userModel = new UserModel(username, phoneNumber, encodedImage);
         }
 
-        userModel.setUserId(FirebaseAuthUtil.getCurrentUserId());
+        userModel.setUserId(AuthUtil.getCurrentUserId());
 
-        FirebaseStoreUtil.getCurrentUserDetails().set(userModel)
+        StoreUtil.getCurrentUser().set(userModel)
                 .addOnCompleteListener(task -> {
                     setProgress(false);
                     if (task.isSuccessful()) {

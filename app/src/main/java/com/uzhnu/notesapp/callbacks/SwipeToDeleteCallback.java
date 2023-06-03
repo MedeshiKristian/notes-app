@@ -27,6 +27,7 @@ import com.uzhnu.notesapp.utilities.ThemeUtil;
 
 abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
     private static final float SWIPE_THRESHOLD = 0.45f;
+    private static final long VIBRATION_DURATION = 75;
     private Context context;
     private Paint clearPaint;
     private ColorDrawable backgroundDrawable;
@@ -115,19 +116,13 @@ abstract public class SwipeToDeleteCallback extends ItemTouchHelper.Callback {
 
         deleteDrawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
         deleteDrawable.draw(c);
-
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 
     private void vibrateOnce() {
-        long vibrationDuration = 75;
-        Vibrator vibrator = (Vibrator) getSystemService(context, Vibrator.class);
+        Vibrator vibrator = getSystemService(context, Vibrator.class);
         assert vibrator != null;
         if (vibrator.hasVibrator()) {
-            Log.v("Can Vibrate", "YES");
-            vibrator.vibrate(vibrationDuration);
-        } else {
-            Log.v("Can Vibrate", "No");
+            vibrator.vibrate(VIBRATION_DURATION);
         }
     }
 

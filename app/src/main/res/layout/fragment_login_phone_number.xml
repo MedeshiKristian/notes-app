@@ -102,6 +102,7 @@
             app:ccp_autoFormatNumber="true"
             app:ccp_contentColor="?attr/myTextColor"
             app:ccp_showFlag="false"
+            app:ccpDialog_textColor="?attr/myTextColor"
             app:ccp_showNameCode="false" />
 
         <com.google.android.material.textfield.TextInputEditText

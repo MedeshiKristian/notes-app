@@ -28,8 +28,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.adapters.FoldersAdapter;
 import com.uzhnu.notesapp.adapters.NotesAdapter;
@@ -45,20 +43,23 @@ import com.uzhnu.notesapp.events.UnlockSlidrEvent;
 import com.uzhnu.notesapp.listeners.ScrollLockTouchListener;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.NoteModel;
+import com.uzhnu.notesapp.models.NotificationModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 import com.uzhnu.notesapp.utilities.PreferencesManager;
 import com.uzhnu.notesapp.utilities.ThemeUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.MessagingUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -163,9 +164,14 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
             case (R.id.option_manage_access):
-                Intent intent = new Intent(MainActivity.this,
-                        ManageFolderAccessActivity.class);
-                startActivity(intent);
+                FolderModel folderModel = StoreUtil.getCurrentFolder();
+                if (folderModel.getCollectionName().equals(Constants.KEY_COLLECTION_FOLDER_DEFAULT)) {
+                    AndroidUtil.showToast(getApplicationContext(), "You can't share you default folder");
+                } else {
+                    Intent intent = new Intent(MainActivity.this,
+                            ManageFolderAccessActivity.class);
+                    startActivity(intent);
+                }
             case (R.id.option_pin):
                 notesAdapter.togglePinOnSelectedNotes();
                 layoutManager.removeAllViews();
@@ -179,37 +185,17 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
 //        initWindow();
         initTheme();
-
-        FirebaseStoreUtil.setCurrentFolder(new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT));
+        FolderModel defaultFolder = new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+        defaultFolder.setName(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
+        StoreUtil.setCurrentFolder(defaultFolder);
         PreferencesManager.getInstance().put(Constants.KEY_COLLECTION_FOLDER_DEFAULT,
-                FirebaseStoreUtil.getCurrentFolder());
+                StoreUtil.getCurrentFolder());
 
         PreferencesManager.getInstance().put(Constants.KEY_MAIN_ACTIVITY, this);
 
 //        for (int i = 0; i < 20; i++) {
-//            FirebaseStoreUtil.addNoteToFolder(new NoteModel("Note " + i));
+//            StoreUtil.addNoteToFolder(new NoteModel("Note " + i));
 //        }
-
-        final String topic = "notes";
-
-        FirebaseMessaging.getInstance().subscribeToTopic(topic)
-                .addOnCompleteListener(task -> {
-                    String msg = "Subscribed";
-                    if (!task.isSuccessful()) {
-                        msg = "Subscribe failed";
-                    } else {
-                        RemoteMessage message = new RemoteMessage.Builder(topic)
-                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.ENABLE_NOTIFICATION, "1")
-                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.TITLE, "notification title")
-                                .addData(com.google.firebase.messaging.Constants.MessageNotificationKeys.BODY, "body")
-                                .build();
-
-                        // Send a message to the devices subscribed to the provided topic.
-                        FirebaseMessaging.getInstance().send(message);
-                    }
-                    Log.d(Constants.TAG, msg);
-                    AndroidUtil.showToast(this, msg);
-                });
 
         binding.notesContent.swipeRefreshNotes.setColorSchemeColors(ThemeUtil.getTextColor(this));
         binding.notesContent.swipeRefreshNotes.setProgressBackgroundColorSchemeColor(ThemeUtil.getPrimary(this));
@@ -274,8 +260,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setInitToolBar() {
-        binding.toolbar.setTitle(FirebaseStoreUtil.getCurrentFolder().getName());
-
+        binding.toolbar.setTitle(StoreUtil.getCurrentFolder().getName());
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
                 binding.drawerLayout, binding.toolbar,
                 R.string.navigation_open, R.string.navigation_close) {
@@ -324,14 +309,21 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void onEditNoteEvent(@NonNull EditNoteEvent event) {
         setProgressNotes(true);
+        UserModel userModel = (UserModel) PreferencesManager.getInstance().get(Constants.KEY_USER);
+        assert userModel != null;
+        FolderModel folderModel = StoreUtil.getCurrentFolder();
+        NotificationModel notificationModel = new NotificationModel();
+        notificationModel.setTitle(folderModel.getName());
+        notificationModel.setId((int) new Date().getTime() / 1000);
         if (event.isNewNote()) {
             NoteModel noteModel = new NoteModel(event.getNewNoteText());
-            FirebaseStoreUtil.addNoteToFolder(noteModel).addOnCompleteListener(task -> {
+            StoreUtil.addNoteToFolder(noteModel).addOnCompleteListener(task -> {
                 loadNotes();
                 setProgressNotes(false);
             });
+            notificationModel.setText(userModel.getUsername() + " created a note");
         } else {
-            FirebaseStoreUtil.updateNote(event.getNoteModel())
+            StoreUtil.updateNote(event.getNoteModel())
                     .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     loadNotes();
@@ -339,7 +331,9 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                     );
+            notificationModel.setText(userModel.getUsername() + " edited a note");
         }
+        MessagingUtil.sendMessage(MessagingUtil.getTopic(folderModel), notificationModel);
     }
 
     @Subscribe
@@ -381,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         binding.navigationStart.layoutLogOut.setOnClickListener(view -> {
-            FirebaseAuthUtil.signOut();
+            AuthUtil.signOut();
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -394,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        FirebaseStoreUtil.getCurrentUserDetails()
+        StoreUtil.getCurrentUser()
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e(Constants.TAG, "Error occurred in change image listener");
@@ -431,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar snackbar =
                         Snackbar.make(binding.getRoot(), text, Snackbar.LENGTH_LONG)
                                 .setAction("UNDO", view -> {
-                                    FirebaseStoreUtil.restoreNoteToFolder(note)
+                                    StoreUtil.restoreNoteToFolder(note)
                                             .addOnCompleteListener(task1 -> {
                                                 if (task1.isSuccessful()) {
                                                     notesAdapter.restore(note, position);
@@ -441,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
                                             .scrollToPosition(position);
                                 });
 
-                FirebaseStoreUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                StoreUtil.deleteUserNote(note).addOnCompleteListener(task -> {
                     touchListener.setScrollingEnabled(true);
                     if (task.isSuccessful()) {
                         notesAdapter.remove(position);
@@ -473,12 +467,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUserDetails() {
-        FirebaseStoreUtil.loadUserDetails(binding);
+        StoreUtil.loadUserDetails(binding);
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadNotes() {
-        FirebaseStoreUtil.loadNotes(noteModels, notesAdapter, binding, this::setProgressNotes);
+        StoreUtil.loadNotes(noteModels, notesAdapter, binding, this::setProgressNotes);
     }
 
     private void loadNotes(Void unused) {
@@ -487,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadFolders() {
-        FirebaseStoreUtil.loadFolders(folderModels, foldersAdapter, binding,
+        StoreUtil.loadFolders(folderModels, foldersAdapter, binding,
                 this::setProgressFolders);
     }
 

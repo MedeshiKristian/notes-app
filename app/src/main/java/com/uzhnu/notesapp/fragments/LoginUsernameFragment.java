@@ -14,9 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.activities.MainActivity;
 import com.uzhnu.notesapp.callbacks.SetImageFromCameraCallback;
 import com.uzhnu.notesapp.callbacks.SetImageFromGalleryCallback;
@@ -25,7 +23,7 @@ import com.uzhnu.notesapp.databinding.FragmentLoginUsernameBinding;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 import com.uzhnu.notesapp.utilities.PreferencesManager;
 
@@ -102,12 +100,12 @@ public class LoginUsernameFragment extends Fragment {
 
     private void getUser() {
         setIsProgress(true);
-        FirebaseStoreUtil.getCurrentUserDetails().get()
+        StoreUtil.getCurrentUser().get()
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {
                         DocumentSnapshot documentSnapshot = task.getResult();
-                        userModel = FirebaseStoreUtil.getUserFromDocument(documentSnapshot);
+                        userModel = UserModel.toUser(documentSnapshot);
                         if (userModel.getImage() != null) {
                             AndroidUtil.showToast(getContext(), "Load user details successfully");
                             Log.i(Constants.TAG,
@@ -151,7 +149,7 @@ public class LoginUsernameFragment extends Fragment {
             userModel = new UserModel(username, getArgPhoneNumber, encodedImage);
         }
 
-        FirebaseStoreUtil.getCurrentUserDetails().set(userModel)
+        StoreUtil.getCurrentUser().set(userModel)
                 .addOnCompleteListener(task -> {
                     setIsProgress(false);
                     if (task.isSuccessful()) {

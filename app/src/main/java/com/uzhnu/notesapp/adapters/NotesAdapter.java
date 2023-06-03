@@ -22,8 +22,8 @@ import com.uzhnu.notesapp.models.NoteModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
 import com.uzhnu.notesapp.utilities.Constants;
-import com.uzhnu.notesapp.utilities.FirebaseAuthUtil;
-import com.uzhnu.notesapp.utilities.FirebaseStoreUtil;
+import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
+import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.PreferencesManager;
 import com.uzhnu.notesapp.utilities.ThemeUtil;
 
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
-    private static final int TEXT_LIMIT = 45;
+    private static final int TEXT_LIMIT = 40;
     private final Context context;
     private List<NoteModel> noteModels;
     private RecyclerView recyclerView;
@@ -46,7 +46,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     public static class NotesViewHolder extends RecyclerView.ViewHolder {
         private final ItemNoteBinding binding;
-        private static final String currentUserId = FirebaseAuthUtil.getCurrentUserId();
+        private static final String currentUserId = AuthUtil.getCurrentUserId();
 
         public NotesViewHolder(@NonNull ItemNoteBinding itemNoteBinding, boolean selected) {
             super(itemNoteBinding.getRoot());
@@ -69,9 +69,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
                 binding.textViewMetaData
                         .setText(AndroidUtil.formatDate(noteModel.getLastEdited()) + " by You");
             } else {
-                FirebaseStoreUtil.getUserName(noteModel.getLastEditedBy()).addOnCompleteListener(task -> {
+                StoreUtil.getUser(noteModel.getLastEditedBy()).get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        UserModel userModel = FirebaseStoreUtil.getUserFromDocument(task.getResult());
+                        UserModel userModel = UserModel.toUser(task.getResult());
                         if (userModel.getUsername() != null) {
                             String userName = " by " + userModel.getUsername();
                             binding.textViewMetaData
@@ -234,7 +234,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         recyclerView.getRecycledViewPool().clear();
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                FirebaseStoreUtil.deleteUserNote(noteModels.get(i));
+                StoreUtil.deleteUserNote(noteModels.get(i));
             }
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
@@ -255,7 +255,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                FirebaseStoreUtil.updateNote(noteModels.get(i));
+                StoreUtil.updateNote(noteModels.get(i));
             }
         }
         selectedPositions.clear();

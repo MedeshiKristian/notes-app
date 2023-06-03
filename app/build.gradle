@@ -41,10 +41,19 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.navigation:navigation-fragment:2.5.3'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation "androidx.work:work-runtime:2.8.1"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    // Firebase libraries
+    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-messaging'
 
     // Scalable dp and sp units
     implementation 'com.intuit.sdp:sdp-android:1.0.6'
@@ -57,7 +66,7 @@ dependencies {
     implementation 'com.hbb20:ccp:2.7.2'
 
     // String Utils
-    implementation  'org.apache.commons:commons-lang3:3.7'
+    implementation 'org.apache.commons:commons-lang3:3.7'
 
     // Scalable photo view
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
@@ -68,31 +77,10 @@ dependencies {
     // Rich Editor
     implementation 'jp.wasabeef:richeditor-android:2.0.0'
 
-    // SwipeRefreshLayout
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-
     // Slidr library
     implementation 'com.r0adkll:slidableactivity:2.1.0'
 
-    // Import the Firebase BoM
-    // Add the dependencies for any other desired Firebase products
-    // https://firebase.google.com/docs/android/setup#available-libraries
-    implementation platform('com.google.firebase:firebase-bom:32.0.0')
-
-    // TODO: Add the dependencies for Firebase products you want to use
-    // When using the BoM, don't specify versions in Firebase dependencies
-    implementation 'com.google.firebase:firebase-analytics'
-
-    // Add the dependency for the Firebase Authentication library
-    implementation 'com.google.firebase:firebase-auth'
-
-    // Declare the dependency for the Cloud Firestore library
-    implementation 'com.google.firebase:firebase-firestore'
-
-    // Add the dependency for the Cloud Storage library
-    implementation 'com.google.firebase:firebase-storage'
-
-    // Add the dependency for the Cloud Messaging library
-    implementation 'com.google.firebase:firebase-messaging'
-
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
 }

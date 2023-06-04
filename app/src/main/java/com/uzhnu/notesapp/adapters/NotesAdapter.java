@@ -234,7 +234,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         recyclerView.getRecycledViewPool().clear();
         for (int i = noteModels.size() - 1; i >= 0; i--) {
             if (isSelected(i)) {
-                StoreUtil.deleteUserNote(noteModels.get(i));
+                StoreUtil.deleteNote(noteModels.get(i));
             }
         }
         for (int i = noteModels.size() - 1; i >= 0; i--) {

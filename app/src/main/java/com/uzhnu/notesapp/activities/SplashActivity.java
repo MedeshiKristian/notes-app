@@ -35,18 +35,8 @@ public class SplashActivity extends AppCompatActivity {
         Log.d(Constants.TAG, "User is logged in");
 
         StoreUtil.getCurrentUser().get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        AuthUtil.signOut();
-                        Log.w(Constants.TAG, "Task for getting user details failed");
-                        Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                        return;
-                    }
-                    UserModel userModel = UserModel.toUser(task.getResult());
+                .addOnSuccessListener(documentSnapshot -> {
+                    UserModel userModel = UserModel.toUser(documentSnapshot);
                     if (userModel.getImage() == null) {
                         // Lack of user details in database
                         Log.i(Constants.TAG, "Lack of user details in database");
@@ -61,7 +51,15 @@ public class SplashActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                     finish();
-
+                })
+                .addOnFailureListener(documentSnapshot -> {
+                    AuthUtil.signOut();
+                    Log.w(Constants.TAG, "Task for getting user details failed");
+                    Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
                 });
     }
 }

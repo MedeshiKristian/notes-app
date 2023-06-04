@@ -23,7 +23,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotesApp"
         tools:targetApi="31">
-
         <service
             android:name=".services.MessagingService"
             android:exported="false">
@@ -42,6 +41,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <activity
+            android:name=".activities.ShowNoteActivity"
+            android:exported="false" />
         <activity
             android:name=".activities.ManageFolderAccessActivity"
             android:exported="false"
@@ -86,8 +88,8 @@
         </activity>
         <activity
             android:name=".activities.LoginProfileActivity"
-            android:screenOrientation="portrait"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false"
@@ -111,7 +113,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

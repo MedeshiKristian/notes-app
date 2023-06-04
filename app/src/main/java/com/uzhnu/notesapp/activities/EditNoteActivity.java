@@ -67,7 +67,7 @@ public class EditNoteActivity extends SlidrActivity {
         setContentView(binding.getRoot());
         setSupportActionBar(binding.toolbar);
 
-        setIsProgress(true);
+        setProgress(true);
         init();
         uploadImageFile = uploadFile("image/", url -> {
             binding.editor.insertImage(url, "dachshund", 320);
@@ -98,7 +98,7 @@ public class EditNoteActivity extends SlidrActivity {
 
         binding.editor.setOnInitialLoadListener(isReady -> {
             if (isReady) {
-                setIsProgress(false);
+                setProgress(false);
             }
         });
 
@@ -361,7 +361,7 @@ public class EditNoteActivity extends SlidrActivity {
         }
     }
 
-    private void setIsProgress(boolean show) {
+    private void setProgress(boolean show) {
         if (binding == null) return;
         if (show) {
             binding.editor.setVisibility(View.GONE);
@@ -381,7 +381,7 @@ public class EditNoteActivity extends SlidrActivity {
         return registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    setIsProgress(true);
+                    setProgress(true);
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
                         String[] typeInfo = getContentResolver().getType(uri).split("/");
@@ -396,7 +396,7 @@ public class EditNoteActivity extends SlidrActivity {
                             }
                         });
                     } else {
-                        setIsProgress(false);
+                        setProgress(false);
                         AndroidUtil.showToast(getApplicationContext(), "Failed to upload");
                     }
                 }
@@ -415,6 +415,6 @@ public class EditNoteActivity extends SlidrActivity {
         } else {
             Log.e(Constants.TAG, "Failed to get url");
         }
-        setIsProgress(false);
+        setProgress(false);
     }
 }

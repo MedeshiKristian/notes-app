@@ -17,9 +17,12 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.uzhnu.notesapp.R;
+import com.uzhnu.notesapp.activities.EditNoteActivity;
 import com.uzhnu.notesapp.activities.MainActivity;
+import com.uzhnu.notesapp.activities.ShowNoteActivity;
 import com.uzhnu.notesapp.models.NotificationModel;
 import com.uzhnu.notesapp.utilities.Constants;
+import com.uzhnu.notesapp.utilities.PreferencesManager;
 import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
 import com.uzhnu.notesapp.utilities.firebase.MessagingUtil;
 
@@ -28,13 +31,14 @@ public class MessagingService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         Log.d(Constants.TAG, "From: " + remoteMessage.getFrom());
-        Log.d(Constants.TAG, "Message data" + remoteMessage.getData());
+        Log.d(Constants.TAG, "Data: " + remoteMessage.getData());
 
-        NotificationModel notificationModel
+        NotificationModel notification
                 = NotificationModel.toNotification(remoteMessage);
-//        if (!notificationModel.getSenderPhoneNumber().equals(AuthUtil.getUserPhoneNumber())) {
-            sendNotification(notificationModel);
-//        }
+
+        if (!notification.getSenderPhoneNumber().equals(AuthUtil.getUserPhoneNumber())) {
+            sendNotification(notification);
+        }
     }
 
     public void onNewToken(@NonNull String token) {
@@ -42,19 +46,25 @@ public class MessagingService extends FirebaseMessagingService {
         Log.d(Constants.TAG, "Refreshed token: " + token);
     }
 
-    private void sendNotification(@NonNull NotificationModel notificationModel) {
-        Intent intent = new Intent(this, MainActivity.class);
+    private void sendNotification(@NonNull NotificationModel notification) {
+        Log.d(Constants.TAG, "Send the path: " + notification.getNotePath());
+        Intent intent = new Intent(this, ShowNoteActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_IMMUTABLE);
+        intent.putExtra(Constants.KEY_NOTE_PATH, notification.getNotePath());
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        notification.getId(),
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE);
 
         String channelId = getString(R.string.default_notification_channel_id);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.outline_notifications_24)
-                        .setContentTitle(notificationModel.getTitle())
-                        .setContentText(notificationModel.getText())
+                        .setContentTitle(notification.getTitle())
+                        .setContentText(notification.getText())
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
                         .setContentIntent(pendingIntent);
@@ -64,11 +74,11 @@ public class MessagingService extends FirebaseMessagingService {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",
+                    "Notes",
                     NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(notificationModel.getId(), notificationBuilder.build());
+        notificationManager.notify(notification.getId(), notificationBuilder.build());
     }
 }

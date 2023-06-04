@@ -20,6 +20,7 @@ import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+import java.util.Objects;
 
 public class EditFolderDialog extends DialogFragment {
     private EditFolderListener listener;
@@ -49,16 +50,24 @@ public class EditFolderDialog extends DialogFragment {
         this.listener = new EditFolderListener() {
             @Override
             public void onDialogPositiveClick(@NonNull DialogFragment dialog, String folderName) {
-                folder.setName(folderName);
-                adapter.notifyItemChanged(holder.getLayoutPosition());
-//                StoreUtil.updateFolder(folder);
+                if (!Objects.equals(folder.getName(), folderName)) {
+                    folder.setName(folderName);
+                    adapter.notifyItemChanged(holder.getLayoutPosition());
+                    StoreUtil.updateFolder(folder)
+                            .addOnSuccessListener(documentSnapshot -> {
+                                folder.setName(folderName);
+                                adapter.notifyItemChanged(holder.getLayoutPosition());
+                            });
+                }
             }
 
             @Override
             public void onDialogNegativeClick(@NonNull DialogFragment dialog) {
-//                StoreUtil.deleteFolder(folder);
-                folderModels.remove(holder.getLayoutPosition());
-                adapter.notifyItemRemoved(holder.getLayoutPosition());
+                StoreUtil.deleteFolder(folder)
+                        .addOnSuccessListener(documentSnapshot -> {
+                            folderModels.remove(holder.getLayoutPosition());
+                            adapter.notifyItemRemoved(holder.getLayoutPosition());
+                        });
             }
 
             @Override

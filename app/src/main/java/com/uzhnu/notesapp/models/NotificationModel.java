@@ -1,7 +1,5 @@
 package com.uzhnu.notesapp.models;
 
-import android.content.Intent;
-
 import androidx.annotation.NonNull;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -19,6 +17,7 @@ public class NotificationModel {
     private String text;
     private String senderPhoneNumber;
     private int id;
+    private String notePath;
     public NotificationModel() {
     }
 
@@ -54,6 +53,14 @@ public class NotificationModel {
         this.id = id;
     }
 
+    public void setNotePath(String notePath) {
+        this.notePath = notePath;
+    }
+
+    public String getNotePath() {
+        return notePath;
+    }
+
     @NonNull
     public static NotificationModel toNotification(@NonNull RemoteMessage remoteMessage) {
         NotificationModel notificationModel = new NotificationModel();
@@ -61,7 +68,8 @@ public class NotificationModel {
         notificationModel.setSenderPhoneNumber(data.get(Constants.KEY_PHONE_NUMBER));
         notificationModel.setTitle(data.get(Constants.KEY_CONTENT_TITLE));
         notificationModel.setText(data.get(Constants.KEY_CONTENT_TEXT));
-        notificationModel.setId(Integer.parseInt(Objects.requireNonNull(data.get(Constants.KEY_ID))));
+        notificationModel.setNotePath(data.get(Constants.KEY_NOTE_PATH));
+        notificationModel.setId(Integer.parseInt(Objects.requireNonNull(data.get(Constants.KEY_NOTIFICATION_ID))));
         return notificationModel;
     }
 
@@ -72,7 +80,8 @@ public class NotificationModel {
         data.put(Constants.KEY_PHONE_NUMBER, AuthUtil.getUserPhoneNumber());
         data.put(Constants.KEY_CONTENT_TITLE, notificationModel.getTitle());
         data.put(Constants.KEY_CONTENT_TEXT, notificationModel.getText());
-        data.put(Constants.KEY_ID, notificationModel.getId());
+        data.put(Constants.KEY_NOTE_PATH, notificationModel.getNotePath());
+        data.put(Constants.KEY_NOTIFICATION_ID, notificationModel.getId());
         return data;
     }
 }

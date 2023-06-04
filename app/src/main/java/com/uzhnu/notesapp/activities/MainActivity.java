@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
     private FoldersAdapter foldersAdapter;
 
     private Menu toolBarMenu;
-    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initTheme();
         super.onCreate(savedInstanceState);
         Log.d(Constants.TAG, "create");
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
             setOptionsVisibility(show);
         }
 
-        searchView = (SearchView) menu.findItem(R.id.option_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.option_search).getActionView();
         searchView.setIconifiedByDefault(true);
         searchView.setPadding(0, 0, 0, 5);
         searchView.setOnSearchClickListener(view -> {
@@ -164,9 +164,11 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show(getSupportFragmentManager(), "Delete notes dialog");
                 return true;
             case (R.id.option_manage_access):
-                FolderModel folderModel = StoreUtil.getCurrentFolder();
-                if (folderModel.getCollectionName().equals(Constants.KEY_COLLECTION_FOLDER_DEFAULT)) {
+                FolderModel currentFolder = StoreUtil.getCurrentFolder();
+                if (currentFolder.getCollectionName().equals(Constants.KEY_COLLECTION_FOLDER_DEFAULT)) {
                     AndroidUtil.showToast(getApplicationContext(), "You can't share you default folder");
+                } else if (!currentFolder.getCreatedBy().equals(AuthUtil.getCurrentUserId())) {
+                    AndroidUtil.showToast(getApplicationContext(), "You are not owner of this folder");
                 } else {
                     Intent intent = new Intent(MainActivity.this,
                             ManageFolderAccessActivity.class);
@@ -184,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void init() {
 //        initWindow();
-        initTheme();
         FolderModel defaultFolder = new FolderModel(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
         defaultFolder.setName(Constants.KEY_COLLECTION_FOLDER_DEFAULT);
         StoreUtil.setCurrentFolder(defaultFolder);
@@ -197,8 +198,10 @@ public class MainActivity extends AppCompatActivity {
 //            StoreUtil.addNoteToFolder(new NoteModel("Note " + i));
 //        }
 
-        binding.notesContent.swipeRefreshNotes.setColorSchemeColors(ThemeUtil.getTextColor(this));
-        binding.notesContent.swipeRefreshNotes.setProgressBackgroundColorSchemeColor(ThemeUtil.getPrimary(this));
+        binding.notesContent.swipeRefreshNotes
+                .setColorSchemeColors(ThemeUtil.getTextColor(this));
+        binding.notesContent.swipeRefreshNotes
+                .setProgressBackgroundColorSchemeColor(ThemeUtil.getPrimary(this));
 
         layoutManager
                 = new
@@ -311,28 +314,37 @@ public class MainActivity extends AppCompatActivity {
         setProgressNotes(true);
         UserModel userModel = (UserModel) PreferencesManager.getInstance().get(Constants.KEY_USER);
         assert userModel != null;
-        FolderModel folderModel = StoreUtil.getCurrentFolder();
+        FolderModel currentFolder = StoreUtil.getCurrentFolder();
         NotificationModel notificationModel = new NotificationModel();
-        notificationModel.setTitle(folderModel.getName());
+        notificationModel.setTitle(currentFolder.getName());
         notificationModel.setId((int) new Date().getTime() / 1000);
         if (event.isNewNote()) {
             NoteModel noteModel = new NoteModel(event.getNewNoteText());
-            StoreUtil.addNoteToFolder(noteModel).addOnCompleteListener(task -> {
+            StoreUtil.addNoteToFolder(noteModel).addOnSuccessListener(documentReference -> {
                 loadNotes();
-                setProgressNotes(false);
+                notificationModel.setText(userModel.getUsername() +
+                        " created a note");
+                notificationModel.setNotePath(documentReference.getPath());
+                sendMessage(currentFolder, notificationModel);
             });
-            notificationModel.setText(userModel.getUsername() + " created a note");
         } else {
+            notificationModel.setNotePath(
+                    StoreUtil.getCurrentFolderNotes()
+                            .document(event.getNoteModel().getDocumentId()).getPath()
+            );
             StoreUtil.updateNote(event.getNoteModel())
-                    .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    loadNotes();
-                                    setProgressNotes(false);
-                                }
+                    .addOnSuccessListener(unused -> {
+                                loadNotes();
+                                notificationModel.setText(userModel.getUsername() +
+                                        " edited a note");
+                                sendMessage(currentFolder, notificationModel);
                             }
                     );
-            notificationModel.setText(userModel.getUsername() + " edited a note");
         }
+    }
+
+    private void sendMessage(@NonNull FolderModel folderModel,
+                             @NonNull NotificationModel notificationModel) {
         MessagingUtil.sendMessage(MessagingUtil.getTopic(folderModel), notificationModel);
     }
 
@@ -404,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setText(userModel.getUsername());
                         binding.navigationStart.header.textViewPhoneNumber.setText(
                                 PhoneNumberUtils.formatNumber(
-                                        Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber(),
+                                        FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber(),
                                         Locale.getDefault().getCountry()
                                 )
                         );
@@ -435,7 +447,7 @@ public class MainActivity extends AppCompatActivity {
                                             .scrollToPosition(position);
                                 });
 
-                StoreUtil.deleteUserNote(note).addOnCompleteListener(task -> {
+                StoreUtil.deleteNote(note).addOnCompleteListener(task -> {
                     touchListener.setScrollingEnabled(true);
                     if (task.isSuccessful()) {
                         notesAdapter.remove(position);

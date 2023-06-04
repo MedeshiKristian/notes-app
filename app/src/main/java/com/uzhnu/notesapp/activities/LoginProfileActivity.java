@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.uzhnu.notesapp.databinding.ActivityProfileBinding;
 import com.uzhnu.notesapp.models.UserModel;
@@ -41,9 +42,17 @@ public class LoginProfileActivity extends AppCompatActivity {
     }
 
     private void setListeners() {
-        binding.buttonSignIn.setOnClickListener(view1 -> setUser());
+        binding.buttonSignIn.setOnClickListener(view -> setUser());
 
-        binding.imageViewUser.setOnClickListener(view1 -> imageUtil.showBottomSheetPickImage());
+        binding.imageViewUser.setOnClickListener(view -> imageUtil.showBottomSheetPickImage());
+
+        binding.buttonLogOut.setOnClickListener(view -> {
+            AuthUtil.signOut();
+            PreferencesManager.getInstance().clear();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void getUser() {

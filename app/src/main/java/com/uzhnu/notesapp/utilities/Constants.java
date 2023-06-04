@@ -47,6 +47,6 @@ public class Constants {
     public static final String REMOTE_MSG_TO = "to";
     public static final String KEY_CONTENT_TITLE = "title";
     public static final String KEY_CONTENT_TEXT = "body";
-    public static final String KEY_ID = "id";
-
+    public static final String KEY_NOTIFICATION_ID = "id";
+    public static final String KEY_NOTE_PATH = "notePath";
 }

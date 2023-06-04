@@ -4,66 +4,78 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/mySecondary"
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
-    android:background="?attr/mySecondary"
     tools:context=".activities.LoginProfileActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/button_log_out"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="20"
+        android:layout_gravity="start|top"
+        android:backgroundTint="?attr/myPrimary"
+        android:drawableLeft="@drawable/outline_logout_24"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_marginStart="@dimen/_10sdp"
+        android:text="@string/log_out"
+        android:textColor="?attr/myTextColor" />
 
-        <RelativeLayout
-            android:layout_width="@dimen/_32sdp"
-            android:layout_height="@dimen/_32sdp"
-            android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_weight="20"-->
+<!--        android:gravity="center"-->
+<!--        android:orientation="horizontal">-->
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="1"
-                android:textColor="?attr/myTextColor"
-                android:textSize="@dimen/_18sdp" />
-        </RelativeLayout>
+<!--        <RelativeLayout-->
+<!--            android:layout_width="@dimen/_32sdp"-->
+<!--            android:layout_height="@dimen/_32sdp"-->
+<!--            android:background="@drawable/text_view_circular_background"-->
+<!--            android:backgroundTint="?attr/mySecondary">-->
 
-        <RelativeLayout
-            android:layout_width="@dimen/_32sdp"
-            android:layout_height="@dimen/_32sdp"
-            android:layout_margin="@dimen/_10sdp"
-            android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+<!--            <com.google.android.material.textview.MaterialTextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_centerInParent="true"-->
+<!--                android:text="1"-->
+<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textSize="@dimen/_18sdp" />-->
+<!--        </RelativeLayout>-->
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="2"
-                android:textColor="?attr/myTextColor"
-                android:textSize="@dimen/_18sdp" />
-        </RelativeLayout>
+<!--        <RelativeLayout-->
+<!--            android:layout_width="@dimen/_32sdp"-->
+<!--            android:layout_height="@dimen/_32sdp"-->
+<!--            android:layout_margin="@dimen/_10sdp"-->
+<!--            android:background="@drawable/text_view_circular_background"-->
+<!--            android:backgroundTint="?attr/mySecondary">-->
 
-        <RelativeLayout
-            android:layout_width="@dimen/_32sdp"
-            android:layout_height="@dimen/_32sdp"
-            android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/myPrimary">
+<!--            <com.google.android.material.textview.MaterialTextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_centerInParent="true"-->
+<!--                android:text="2"-->
+<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textSize="@dimen/_18sdp" />-->
+<!--        </RelativeLayout>-->
 
-            <com.google.android.material.textview.MaterialTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="3"
-                android:textColor="?attr/myTextColor"
-                android:textSize="@dimen/_18sdp" />
-        </RelativeLayout>
+<!--        <RelativeLayout-->
+<!--            android:layout_width="@dimen/_32sdp"-->
+<!--            android:layout_height="@dimen/_32sdp"-->
+<!--            android:background="@drawable/text_view_circular_background"-->
+<!--            android:backgroundTint="?attr/myPrimary">-->
 
-    </LinearLayout>
+<!--            <com.google.android.material.textview.MaterialTextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_centerInParent="true"-->
+<!--                android:text="3"-->
+<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textSize="@dimen/_18sdp" />-->
+<!--        </RelativeLayout>-->
+
+<!--    </LinearLayout>-->
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image_view_user"

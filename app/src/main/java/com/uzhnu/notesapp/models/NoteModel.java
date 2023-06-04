@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uzhnu.notesapp.utilities.Constants;
 import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
@@ -154,6 +155,18 @@ public class NoteModel implements Comparable<NoteModel>, Parcelable {
         noteModel.setCreatedAt(queryDocumentSnapshot.getDate(Constants.KEY_CREATED_AT));
         noteModel.setLastEditedBy(queryDocumentSnapshot.getString(Constants.KEY_LAST_EDITED_BY));
         noteModel.setDocumentId(queryDocumentSnapshot.getId());
+        return noteModel;
+    }
+
+    @NonNull
+    public static NoteModel toNote(@NonNull DocumentSnapshot documentSnapshot) {
+        NoteModel noteModel = new NoteModel();
+        noteModel.setText(documentSnapshot.getString(Constants.KEY_TEXT));
+        noteModel.setLastEdited(documentSnapshot.getDate(Constants.KEY_LAST_EDITED_AT));
+        noteModel.setPined(documentSnapshot.getBoolean(Constants.KEY_PINNED));
+        noteModel.setCreatedAt(documentSnapshot.getDate(Constants.KEY_CREATED_AT));
+        noteModel.setLastEditedBy(documentSnapshot.getString(Constants.KEY_LAST_EDITED_BY));
+        noteModel.setDocumentId(documentSnapshot.getId());
         return noteModel;
     }
 

@@ -30,11 +30,6 @@ public class SlidrActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = (AppCompatActivity) PreferencesManager
-                .getInstance().get(Constants.KEY_MAIN_ACTIVITY);
-        if (activity != null) {
-            backgroundView = activity.findViewById(R.id.coordinatorContent);
-        }
         Window window = getWindow();
         window.setStatusBarColor(Color.TRANSPARENT);
 
@@ -47,8 +42,11 @@ public class SlidrActivity extends AppCompatActivity {
                     @Override
                     public void onSlideChange(float percent) {
                         float coefficient = 0.25f;
-                        float moveFactor = backgroundView.getWidth() * percent * coefficient;
+                        if (MainActivity.isRunning && backgroundView == null) {
+                            getBackground();
+                        }
                         if (backgroundView != null) {
+                            float moveFactor = backgroundView.getWidth() * percent * coefficient;
                             backgroundView.setTranslationX(-moveFactor);
                         }
                     }
@@ -66,6 +64,14 @@ public class SlidrActivity extends AppCompatActivity {
 
         slidrInterface = Slidr.attach(SlidrActivity.this, config);
 
+    }
+
+    private void getBackground() {
+        activity = (AppCompatActivity) PreferencesManager
+                .getInstance().get(Constants.KEY_MAIN_ACTIVITY);
+        if (activity != null) {
+            backgroundView = activity.findViewById(R.id.coordinatorContent);
+        }
     }
 
     @Override

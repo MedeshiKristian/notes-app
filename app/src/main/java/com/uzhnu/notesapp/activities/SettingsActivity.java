@@ -112,7 +112,7 @@ public class SettingsActivity extends SlidrActivity {
     private void savePhoneNumber() {
         setProgress(true);
         String newPhoneNumber = getPhoneNumber();
-        if (newPhoneNumber.equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber())) {
+        if (newPhoneNumber.equals(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
             return;
         }
         binding.editTextOtpCode.setVisibility(View.VISIBLE);
@@ -130,12 +130,13 @@ public class SettingsActivity extends SlidrActivity {
                     if (task.isSuccessful()) {
                         UserModel userModel = task.getResult().toObject(UserModel.class);
                         assert userModel != null;
-                        PreferencesManager.getInstance().put(Constants.KEY_IMAGE, userModel.getImage());
+                        PreferencesManager.getInstance()
+                                .put(Constants.KEY_IMAGE, userModel.getImage());
                         binding.imageViewUser
                                 .setImageBitmap(ImageUtil.decodeImage(userModel.getImage()));
                         binding.editTextUsername.setText(userModel.getUsername());
                         String phoneNumber = PhoneNumberUtils.formatNumber(
-                                Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getPhoneNumber(),
+                                FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber(),
                                 Locale.getDefault().getCountry()
                         );
                         phoneNumber = phoneNumber.substring(phoneNumber.indexOf(" ") + 1);

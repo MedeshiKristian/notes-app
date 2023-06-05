@@ -6,7 +6,7 @@
     android:paddingBottom="@dimen/_20sdp"
     android:paddingTop="@dimen/_10sdp"
     android:paddingStart="@dimen/_10sdp"
-    android:background="?attr/mySecondary"
+    android:background="?attr/themeSecondary"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
     android:orientation="vertical">
 
@@ -22,14 +22,14 @@
             android:layout_height="@dimen/_24sdp"
             android:layout_margin="@dimen/_10sdp"
             android:src="@drawable/ic_outline_image_24"
-            app:tint="?attr/myTextColor" />
+            app:tint="?attr/themeTextColor" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
             android:text="View picture"
-            android:textColor="?attr/myTextColor"
+            android:textColor="?attr/themeTextColor"
             android:textSize="@dimen/_15sdp" />
     </LinearLayout>
 
@@ -45,14 +45,14 @@
             android:layout_height="@dimen/_24sdp"
             android:layout_margin="@dimen/_10sdp"
             android:src="@drawable/ic_outline_camera_alt_24"
-            app:tint="?attr/myTextColor" />
+            app:tint="?attr/themeTextColor" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
             android:text="Camera"
-            android:textColor="?attr/myTextColor"
+            android:textColor="?attr/themeTextColor"
             android:textSize="@dimen/_15sdp" />
     </LinearLayout>
 
@@ -68,14 +68,14 @@
             android:layout_height="@dimen/_24sdp"
             android:layout_margin="@dimen/_10sdp"
             android:src="@drawable/ic_outline_add_photo_alternate_24"
-            app:tint="?attr/myTextColor" />
+            app:tint="?attr/themeTextColor" />
 
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/_10sdp"
             android:text="Gallery"
-            android:textColor="?attr/myTextColor"
+            android:textColor="?attr/themeTextColor"
             android:textSize="@dimen/_15sdp" />
     </LinearLayout>
 

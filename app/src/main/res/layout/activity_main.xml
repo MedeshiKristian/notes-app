@@ -5,7 +5,7 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     tools:context=".activities.MainActivity"
     tools:openDrawer="start">
 
@@ -17,7 +17,7 @@
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:foregroundTint="?myPrimary">
+            android:foregroundTint="?attr/themePrimary">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -28,7 +28,7 @@
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
                 app:title="@string/page_title"
                 app:titleMargin="0dp"
-                app:titleTextColor="?attr/myTextColor" />
+                app:titleTextColor="?attr/themeTextColor" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -43,9 +43,9 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_30sdp"
-            app:trackColor="?attr/myPrimary"
+            app:trackColor="?attr/themePrimary"
             app:trackCornerRadius="8dp"
             app:trackThickness="@dimen/_4sdp" />
 
@@ -56,9 +56,9 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:contentDescription="Add note button"
-            app:background="?attr/myPrimary"
+            app:background="?attr/themePrimary"
             app:srcCompat="@drawable/ic_baseline_add_24"
-            app:tint="?attr/myTextColor" />
+            app:tint="?attr/themeTextColor" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

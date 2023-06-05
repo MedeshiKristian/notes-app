@@ -4,16 +4,16 @@
     android:id="@+id/swipe_refresh_notes"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     android:orientation="horizontal"
     app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-    app:swipeRefreshLayoutProgressSpinnerBackgroundColor="?attr/myPrimary">
+    app:swipeRefreshLayoutProgressSpinnerBackgroundColor="?attr/themePrimary">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_notes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/mySecondary"
+        android:background="?attr/themeSecondary"
         android:clipToPadding="false"
         android:orientation="vertical"
         android:overScrollMode="never"

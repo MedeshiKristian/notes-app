@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     android:orientation="vertical"
     tools:context=".activities.SettingsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foregroundTint="?attr/myTextColor">
+        android:foregroundTint="?attr/themeTextColor">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -21,17 +21,17 @@
             android:layout_height="?attr/actionBarSize"
             android:backgroundTint="?attr/colorPrimary"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-            app:navigationIconTint="?attr/myTextColor"
+            app:navigationIconTint="?attr/themeTextColor"
             app:title="Settings"
             app:titleMargin="0dp"
-            app:titleTextColor="?attr/myTextColor" />
+            app:titleTextColor="?attr/themeTextColor" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/mySecondary"
+        android:background="?attr/themeSecondary"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
@@ -71,9 +71,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:drawableTint="?myTextColor"
-                    app:thumbTint="?myTextColor"
-                    app:trackTint="?attr/myPrimary" />
+                    android:drawableTint="?attr/themeTextColor"
+                    app:thumbTint="?attr/themeTextColor"
+                    app:trackTint="?attr/themePrimary" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -102,7 +102,7 @@
                 android:hint="Username"
                 android:inputType="text"
                 android:padding="@dimen/_10sdp"
-                android:textColor="?attr/myTextColor" />
+                android:textColor="?attr/themeTextColor" />
         </LinearLayout>
 
         <LinearLayout
@@ -124,7 +124,7 @@
                 app:ccpDialog_cornerRadius="@dimen/_3sdp"
                 app:ccp_autoDetectCountry="true"
                 app:ccp_autoFormatNumber="true"
-                app:ccp_contentColor="?attr/myTextColor"
+                app:ccp_contentColor="?attr/themeTextColor"
                 app:ccp_showFlag="false"
                 app:ccp_showNameCode="false" />
 
@@ -132,10 +132,10 @@
                 android:id="@+id/edit_text_phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/myPrimary"
+                android:background="?attr/themePrimary"
                 android:hint="Your phone number"
                 android:inputType="phone"
-                android:textColor="?myTextColor" />
+                android:textColor="?attr/themeTextColor" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -146,7 +146,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Save"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -188,7 +188,7 @@
                 android:layout_marginTop="@dimen/_20sdp"
                 android:backgroundTint="@drawable/buttons_state_colors"
                 android:text="Verify"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:visibility="gone" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -205,7 +205,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="8dp"

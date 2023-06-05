@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/mySecondary"
+    android:background="?attr/themeSecondary"
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
@@ -21,14 +21,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/myPrimary">
+            android:backgroundTint="?attr/themePrimary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="1"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -37,14 +37,14 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_margin="@dimen/_10sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+            android:backgroundTint="?attr/themeSecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="2"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -52,14 +52,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+            android:backgroundTint="?attr/themeSecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="3"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -71,14 +71,14 @@
         android:layout_margin="@dimen/_10sdp"
         android:contentDescription="Enter your phone number"
         android:src="@drawable/ic_baseline_phone_android_24"
-        app:tint="?attr/myTextColor" />
+        app:tint="?attr/themeTextColor" />
 
     <com.google.android.material.textview.MaterialTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter your phone number"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -100,19 +100,19 @@
             app:ccpDialog_cornerRadius="@dimen/_3sdp"
             app:ccp_autoDetectCountry="true"
             app:ccp_autoFormatNumber="true"
-            app:ccp_contentColor="?attr/myTextColor"
+            app:ccp_contentColor="?attr/themeTextColor"
             app:ccp_showFlag="false"
-            app:ccpDialog_textColor="?attr/myTextColor"
+            app:ccpDialog_textColor="?attr/themeTextColor"
             app:ccp_showNameCode="false" />
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_text_phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/myPrimary"
+            android:background="?attr/themePrimary"
             android:hint="Your phone number"
             android:inputType="phone"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
     </LinearLayout>
 
     <LinearLayout
@@ -130,7 +130,7 @@
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Get otp"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator"
@@ -140,7 +140,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="8dp"

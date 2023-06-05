@@ -15,6 +15,6 @@
     </style>
 
     <style name="DialogStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
-        <item name="android:textColor">?attr/myTextColor</item>
+        <item name="android:textColor">?attr/themeTextColor</item>
     </style>
 </resources>

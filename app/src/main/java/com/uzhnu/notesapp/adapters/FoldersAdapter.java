@@ -115,7 +115,6 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
             FolderModel folder = folderModels.get(position);
             holder.bind(folder);
 
-            // TODO
             String currentFolderName = StoreUtil.getCurrentFolder().getName();
             if (folder.getName().equals(currentFolderName)) {
                 setCurrentFolderHolder(holder);
@@ -126,7 +125,7 @@ public class FoldersAdapter extends RecyclerView.Adapter<FoldersAdapter.FoldersV
                 EventBus.getDefault().post(event);
             });
 
-            if (type == SPECIAL) {
+            if (type == SPECIAL || !folder.getCreatedBy().equals(AuthUtil.getCurrentUserId())) {
                 return;
             }
 

@@ -6,14 +6,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     android:orientation="vertical"
     tools:context=".activities.ManageFolderAccessActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foregroundTint="?attr/myTextColor">
+        android:foregroundTint="?attr/themeTextColor">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -23,14 +23,14 @@
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             app:title="Manage access"
             app:titleMargin="0dp"
-            app:titleTextColor="?attr/myTextColor" />
+            app:titleTextColor="?attr/themeTextColor" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/mySecondary"
+        android:background="?attr/themeSecondary"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
@@ -53,9 +53,9 @@
         android:layout_gravity="center"
         android:indeterminate="true"
         android:progress="0"
-        app:indicatorColor="?attr/mySecondary"
+        app:indicatorColor="?attr/themeSecondary"
         app:indicatorSize="@dimen/_30sdp"
-        app:trackColor="?myPrimary"
+        app:trackColor="?attr/themePrimary"
         app:trackCornerRadius="8dp"
         app:trackThickness="@dimen/_4sdp" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

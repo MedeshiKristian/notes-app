@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_20sdp"
         android:layout_marginTop="@dimen/_5sdp"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_12ssp"
         android:textStyle="bold" />
 
@@ -35,5 +35,5 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_20sdp"
         android:layout_marginBottom="@dimen/_10sdp"
-        android:textColor="?attr/myTextColor" />
+        android:textColor="?attr/themeTextColor" />
 </LinearLayout>

@@ -12,12 +12,12 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:text="@string/folders_title"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_16ssp"
         android:gravity="center"
         android:layout_marginStart="@dimen/_20sdp"
         android:drawablePadding="@dimen/_20sdp"
         app:drawableLeftCompat="@drawable/ic_outline_folder_24"
-        android:drawableTint="?attr/myTextColor"/>
+        android:drawableTint="?attr/themeTextColor"/>
 
 </LinearLayout>

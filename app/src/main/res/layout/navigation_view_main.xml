@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/mySecondary"
+        android:background="?attr/themeSecondary"
         android:orientation="vertical">
 
         <include
@@ -24,7 +24,7 @@
             android:layout_marginTop="@dimen/_10sdp"
             android:layout_marginBottom="@dimen/_10sdp"
             android:text="Folders"
-            android:textColor="?attr/myTextColor"
+            android:textColor="?attr/themeTextColor"
             android:textSize="@dimen/_14ssp" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -59,10 +59,10 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:gravity="center"
                 android:text="@string/settings"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_16ssp"
                 app:drawableLeftCompat="@drawable/outline_settings_24"
-                app:drawableTint="?attr/myTextColor" />
+                app:drawableTint="?attr/themeTextColor" />
 
         </LinearLayout>
 
@@ -85,10 +85,10 @@
                 android:drawablePadding="@dimen/_20sdp"
                 android:gravity="center"
                 android:text="@string/log_out"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_16ssp"
                 app:drawableLeftCompat="@drawable/outline_logout_24"
-                app:drawableTint="?attr/myTextColor" />
+                app:drawableTint="?attr/themeTextColor" />
 
         </LinearLayout>
 
@@ -100,7 +100,7 @@
             android:layout_marginTop="@dimen/_30sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="10dp"

@@ -7,13 +7,13 @@
     android:fitsSystemWindows="true"
     android:gravity="center"
     android:orientation="vertical"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     tools:context=".activities.SplashActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:foregroundTint="?attr/myTextColor">
+        android:foregroundTint="?attr/themeTextColor">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -23,7 +23,7 @@
             android:backgroundTint="?attr/colorPrimary"
             app:title="@string/app_name"
             app:titleMargin="0dp"
-            app:titleTextColor="?attr/myTextColor"/>
+            app:titleTextColor="?attr/themeTextColor"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 

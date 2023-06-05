@@ -16,7 +16,7 @@
         android:inputType="text"
         android:hint="New name"
         android:padding="@dimen/_8sdp"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_12ssp" />
 
 </LinearLayout>

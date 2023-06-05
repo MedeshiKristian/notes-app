@@ -1,7 +1,9 @@
 package com.uzhnu.notesapp.adapters;
 
 import android.telephony.PhoneNumberUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -11,12 +13,14 @@ import com.uzhnu.notesapp.databinding.ItemUserBinding;
 import com.uzhnu.notesapp.models.FolderModel;
 import com.uzhnu.notesapp.models.UserModel;
 import com.uzhnu.notesapp.utilities.AndroidUtil;
+import com.uzhnu.notesapp.utilities.Constants;
 import com.uzhnu.notesapp.utilities.firebase.AuthUtil;
 import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 import com.uzhnu.notesapp.utilities.ImageUtil;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
     private List<UserModel> userModels;
@@ -38,6 +42,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                             Locale.getDefault().getCountry()
                     )
             );
+        }
+
+        private void setIcon(boolean isEditor) {
+            if (isEditor) {
+                binding.imageViewAdd.setVisibility(View.GONE);
+                binding.imageViewRemove.setVisibility(View.VISIBLE);
+            } else {
+                binding.imageViewRemove.setVisibility(View.GONE);
+                binding.imageViewAdd.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -63,21 +77,45 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         UserModel userModel = userModels.get(position);
         holder.bind(userModel);
 
-        holder.itemView.setOnClickListener(view -> {
-            if (currentFolder.getCreatedBy().equals(AuthUtil.getCurrentUserId())) {
+        StoreUtil.getUser(currentFolder.getCreatedBy())
+                .collection(currentFolder.getCollectionName())
+                .document(Constants.KEY_EDITORS).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    Object editor = documentSnapshot.get(userModel.getId());
+                    setListeners(holder, currentFolder, userModel, editor != null);
+                });
+    }
+
+    private void setListeners(@NonNull UserViewHolder holder,
+                              FolderModel currentFolder,
+                              @NonNull UserModel userModel,
+                              boolean isEditor) {
+        if (isEditor) {
+            holder.itemView.setOnClickListener(view -> {
+                StoreUtil.deleteFolderEditor(currentFolder, userModel)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                AndroidUtil.showToast(view.getContext(), "Successfully took access from user");
+                                setListeners(holder, currentFolder, userModel, !isEditor);
+                            } else {
+                                AndroidUtil.showToast(view.getContext(), "Failed to take access from user");
+                            }
+                        });
+            });
+        } else {
+            holder.itemView.setOnClickListener(view -> {
                 StoreUtil.updateFolderEditors(currentFolder, userModel)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 AndroidUtil.showToast(view.getContext(), "Successfully gave access to folder");
+                                setListeners(holder, currentFolder, userModel, !isEditor);
                             } else {
                                 AndroidUtil.showToast(view.getContext(), "Failed to access folder");
                             }
                         });
-            } else {
-                AndroidUtil.showToast(view.getContext(),
-                        "You do not have the right to manage this folder access");
-            }
-        });
+            });
+        }
+        holder.setIcon(isEditor);
     }
 
     @Override

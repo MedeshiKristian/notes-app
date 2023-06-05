@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="myPrimary" format="color" />
-    <attr name="mySecondary" format="color" />
-    <attr name="myTextColor" format="color" />
-    <attr name="mySelectionColor" format="color" />
+    <attr name="themePrimary" format="color" />
+    <attr name="themeSecondary" format="color" />
+    <attr name="themeTextColor" format="color" />
+    <attr name="themeSelectionColor" format="color" />
 </resources>

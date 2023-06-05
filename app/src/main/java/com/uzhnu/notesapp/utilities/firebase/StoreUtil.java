@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -236,6 +237,13 @@ public class StoreUtil {
     }
 
     @NonNull
+    public static Task<Void> addFolder(@NonNull FolderModel folderModel) {
+        UserModel userModel = new UserModel();
+        userModel.setUserId(AuthUtil.getCurrentUserId());
+        return addFolder(folderModel, userModel);
+    }
+
+    @NonNull
     public static Task<Void> updateFolderEditors(@NonNull FolderModel folderModel,
                                                  @NonNull UserModel userModel) {
         return getUser(userModel.getId())
@@ -245,20 +253,28 @@ public class StoreUtil {
                 .addOnSuccessListener(unused -> updateEditors(folderModel, userModel));
     }
 
-    @NonNull
-    public static Task<Void> addFolder(@NonNull FolderModel folderModel) {
-        UserModel userModel = new UserModel();
-        userModel.setUserId(AuthUtil.getCurrentUserId());
-        return addFolder(folderModel, userModel);
-    }
-
     private static void updateEditors(@NonNull FolderModel folderModel,
                                       @NonNull UserModel userModel) {
-        Map<String, Object> data = new HashMap<>();
-        data.put(userModel.getId(), 1);
         getFolder(folderModel)
                 .document(Constants.KEY_EDITORS)
-                .update(data);
+                .update(userModel.getId(), 1);
+    }
+
+    @NonNull
+    public static Task<Void> deleteFolderEditor(@NonNull FolderModel folderModel,
+                                                 @NonNull UserModel userModel) {
+        return getUser(userModel.getId())
+                .collection(Constants.KEY_COLLECTION_FOLDERS)
+                .document(getFolderDocumentId(folderModel))
+                .delete()
+                .addOnSuccessListener(unused -> deleteEditor(folderModel, userModel));
+    }
+
+    private static void deleteEditor(@NonNull FolderModel folderModel,
+                                      @NonNull UserModel userModel) {
+        getFolder(folderModel)
+                .document(Constants.KEY_EDITORS)
+                .update(userModel.getId(), FieldValue.delete());
     }
 
     @NonNull

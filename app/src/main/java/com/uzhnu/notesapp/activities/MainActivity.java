@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 if (currentFolder.getCollectionName().equals(Constants.KEY_COLLECTION_FOLDER_DEFAULT)) {
                     AndroidUtil.showToast(getApplicationContext(), "You can't share you default folder");
                 } else if (!currentFolder.getCreatedBy().equals(AuthUtil.getCurrentUserId())) {
-                    AndroidUtil.showToast(getApplicationContext(), "You are not owner of this folder");
+                    AndroidUtil.showToast(getApplicationContext(), "You are not the creator of this folder");
                 } else {
                     Intent intent = new Intent(MainActivity.this,
                             ManageFolderAccessActivity.class);
@@ -320,7 +320,8 @@ public class MainActivity extends AppCompatActivity {
         notificationModel.setId((int) new Date().getTime() / 1000);
         if (event.isNewNote()) {
             NoteModel noteModel = new NoteModel(event.getNewNoteText());
-            StoreUtil.addNoteToFolder(noteModel).addOnSuccessListener(documentReference -> {
+            StoreUtil.addNoteToFolder(noteModel)
+                    .addOnSuccessListener(documentReference -> {
                 loadNotes();
                 notificationModel.setText(userModel.getUsername() +
                         " created a note");

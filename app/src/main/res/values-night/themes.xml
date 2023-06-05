@@ -1,27 +1,27 @@
 <resources>
     <style name="Theme.NotesApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!--        <item name="myPrimary">#2B2C37</item>-->
-        <!--        <item name="mySecondary">#20212C</item>-->
+        <!--        <item name="themePrimary">#2B2C37</item>-->
+        <!--        <item name="themeSecondary">#20212C</item>-->
 
-        <item name="myPrimary">#20212C</item>
-        <item name="mySecondary">#2B2C37</item>
+        <item name="themePrimary">#20212C</item>
+        <item name="themeSecondary">#2B2C37</item>
 
-        <item name="myTextColor">#FFFFFF</item>
-        <item name="mySelectionColor">@color/md_grey_900</item>
+        <item name="themeTextColor">#FFFFFF</item>
+        <item name="themeSelectionColor">@color/md_grey_900</item>
 
         <!-- Primary brand color. -->
-        <item name="colorPrimary">?myPrimary</item>
+        <item name="colorPrimary">?attr/themePrimary</item>
         <item name="colorPrimaryVariant">?attr/colorPrimary</item>
         <item name="colorPrimaryContainer">?attr/colorPrimary</item>
         <item name="colorSurface">?attr/colorPrimary</item>
 
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">?attr/mySecondary</item>
+        <item name="colorSecondary">?attr/themeSecondary</item>
         <item name="colorSecondaryVariant">?attr/colorSecondary</item>
         <item name="colorOnSecondaryContainer">?attr/colorSecondary</item>
 
         <!-- Top bar icons color-->
-        <item name="colorControlNormal">?attr/myTextColor</item>
+        <item name="colorControlNormal">?attr/themeTextColor</item>
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>

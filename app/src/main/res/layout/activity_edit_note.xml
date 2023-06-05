@@ -5,7 +5,7 @@
     android:id="@+id/coordinatorContent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/myPrimary"
+    android:background="?attr/themePrimary"
     android:orientation="vertical"
     tools:context=".activities.EditNoteActivity">
 
@@ -22,7 +22,7 @@
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             app:title="Edit note"
             app:titleMargin="0dp"
-            app:titleTextColor="?attr/myTextColor" />
+            app:titleTextColor="?attr/themeTextColor" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -50,7 +50,7 @@
         android:layout_gravity="center"
         android:indeterminate="true"
         android:progress="0"
-        app:indicatorColor="?attr/mySecondary"
+        app:indicatorColor="?attr/themeSecondary"
         app:indicatorSize="@dimen/_30sdp"
         app:trackColor="?attr/colorPrimary"
         app:trackCornerRadius="8dp"

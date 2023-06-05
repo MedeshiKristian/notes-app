@@ -6,6 +6,6 @@
         android:icon="@drawable/ic_baseline_done_24"
         android:title="@string/save_note"
         android:fitsSystemWindows="true"
-        app:iconTint="?attr/myTextColor"
+        app:iconTint="?attr/themeTextColor"
         app:showAsAction="always" />
 </menu>

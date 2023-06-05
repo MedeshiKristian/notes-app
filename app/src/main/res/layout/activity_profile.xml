@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/mySecondary"
+    android:background="?attr/themeSecondary"
     android:gravity="center"
     android:orientation="vertical"
     android:weightSum="100"
@@ -15,12 +15,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start|top"
-        android:backgroundTint="?attr/myPrimary"
+        android:backgroundTint="?attr/themePrimary"
         android:drawableLeft="@drawable/outline_logout_24"
         android:gravity="center"
         android:layout_marginStart="@dimen/_10sdp"
         android:text="@string/log_out"
-        android:textColor="?attr/myTextColor" />
+        android:textColor="?attr/themeTextColor" />
 
 <!--    <LinearLayout-->
 <!--        android:layout_width="match_parent"-->
@@ -33,14 +33,14 @@
 <!--            android:layout_width="@dimen/_32sdp"-->
 <!--            android:layout_height="@dimen/_32sdp"-->
 <!--            android:background="@drawable/text_view_circular_background"-->
-<!--            android:backgroundTint="?attr/mySecondary">-->
+<!--            android:backgroundTint="?attr/themeSecondary">-->
 
 <!--            <com.google.android.material.textview.MaterialTextView-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:layout_centerInParent="true"-->
 <!--                android:text="1"-->
-<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textColor="?attr/themeTextColor"-->
 <!--                android:textSize="@dimen/_18sdp" />-->
 <!--        </RelativeLayout>-->
 
@@ -49,14 +49,14 @@
 <!--            android:layout_height="@dimen/_32sdp"-->
 <!--            android:layout_margin="@dimen/_10sdp"-->
 <!--            android:background="@drawable/text_view_circular_background"-->
-<!--            android:backgroundTint="?attr/mySecondary">-->
+<!--            android:backgroundTint="?attr/themeSecondary">-->
 
 <!--            <com.google.android.material.textview.MaterialTextView-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:layout_centerInParent="true"-->
 <!--                android:text="2"-->
-<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textColor="?attr/themeTextColor"-->
 <!--                android:textSize="@dimen/_18sdp" />-->
 <!--        </RelativeLayout>-->
 
@@ -64,14 +64,14 @@
 <!--            android:layout_width="@dimen/_32sdp"-->
 <!--            android:layout_height="@dimen/_32sdp"-->
 <!--            android:background="@drawable/text_view_circular_background"-->
-<!--            android:backgroundTint="?attr/myPrimary">-->
+<!--            android:backgroundTint="?attr/themePrimary">-->
 
 <!--            <com.google.android.material.textview.MaterialTextView-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="wrap_content"-->
 <!--                android:layout_centerInParent="true"-->
 <!--                android:text="3"-->
-<!--                android:textColor="?attr/myTextColor"-->
+<!--                android:textColor="?attr/themeTextColor"-->
 <!--                android:textSize="@dimen/_18sdp" />-->
 <!--        </RelativeLayout>-->
 
@@ -83,11 +83,11 @@
         android:layout_height="@dimen/_150sdp"
         android:layout_marginTop="@dimen/_10sdp"
         android:background="@drawable/text_view_circular_background"
-        android:backgroundTint="?attr/mySecondary"
+        android:backgroundTint="?attr/themeSecondary"
         android:contentDescription="User image"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_baseline_username_48"
-        android:tint="?attr/myTextColor"
+        android:tint="?attr/themeTextColor"
         app:riv_oval="true" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -95,7 +95,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter your username"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -116,7 +116,7 @@
             android:hint="Username"
             android:inputType="text"
             android:padding="@dimen/_10sdp"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
     </LinearLayout>
 
     <LinearLayout
@@ -134,7 +134,7 @@
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Sign in"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator"
@@ -144,7 +144,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="8dp"

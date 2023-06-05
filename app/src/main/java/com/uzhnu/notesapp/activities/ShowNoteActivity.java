@@ -2,11 +2,14 @@ package com.uzhnu.notesapp.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.Window;
 
 import com.uzhnu.notesapp.R;
 import com.uzhnu.notesapp.databinding.ActivityEditNoteBinding;
@@ -17,7 +20,7 @@ import com.uzhnu.notesapp.utilities.firebase.StoreUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
-public class ShowNoteActivity extends SlidrActivity {
+public class ShowNoteActivity extends AppCompatActivity {
     private ActivityEditNoteBinding binding;
 
     @Override
@@ -25,7 +28,6 @@ public class ShowNoteActivity extends SlidrActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityEditNoteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.toolbar.setTitle("Note");
         setSupportActionBar(binding.toolbar);
 
         init();
@@ -33,13 +35,20 @@ public class ShowNoteActivity extends SlidrActivity {
     }
 
     private void init() {
-        if (!MainActivity.isRunning) {
-            EventBus.getDefault().post(new LockSlidrEvent());
-        }
+        Window window = getWindow();
+        window.setStatusBarColor(Color.TRANSPARENT);
+
+        binding.toolbar.setTitle("Note");
+
+        binding.editor.setEnabled(false);
+        binding.editor.setEditorHeight(200);
+        binding.editor.setEditorFontSize(22);
+
+        binding.richEditToolbar.scrollViewActions.setVisibility(View.GONE);
 
         setProgress(true);
         String notePath = getIntent().getStringExtra(Constants.KEY_NOTE_PATH);
-        Log.i(Constants.TAG, "Received the path: " + notePath);
+        Log.d(Constants.TAG, "Received the path: " + notePath);
 
         StoreUtil.getDatebase().document(notePath).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -47,12 +56,6 @@ public class ShowNoteActivity extends SlidrActivity {
                     binding.editor.setHtml(noteModel.getText());
                     setProgress(false);
                 });
-
-        binding.editor.setEnabled(false);
-        binding.editor.setEditorHeight(200);
-        binding.editor.setEditorFontSize(22);
-
-        binding.richEditToolbar.scrollViewActions.setVisibility(View.GONE);
     }
 
     private void setListeners() {
@@ -68,15 +71,6 @@ public class ShowNoteActivity extends SlidrActivity {
         binding.toolbar.setOnClickListener(view -> {
             binding.editor.clearFocus();
         });
-
-        binding.editor.setOnFocusChangeListener((view, b) -> {
-            if (b) {
-                slidrInterface.lock();
-            } else {
-                slidrInterface.unlock();
-            }
-        });
-
     }
 
     private void setProgress(boolean show) {
@@ -89,5 +83,13 @@ public class ShowNoteActivity extends SlidrActivity {
             binding.circularProgressIndicator.hide();
             binding.editor.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(ShowNoteActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

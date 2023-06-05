@@ -24,7 +24,7 @@
             android:layout_margin="@dimen/_2sdp"
             android:maxLines="1"
             android:text="Note Title"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/text_view_meta_data"

@@ -20,14 +20,14 @@
             android:layout_width="@dimen/_32sdp"
             android:layout_height="@dimen/_32sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+            android:backgroundTint="?attr/themeSecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="1"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -36,14 +36,14 @@
             android:layout_height="@dimen/_32sdp"
             android:layout_margin="@dimen/_10sdp"
             android:background="@drawable/text_view_circular_background"
-            android:backgroundTint="?attr/mySecondary">
+            android:backgroundTint="?attr/themeSecondary">
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="2"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:text="3"
-                android:textColor="?attr/myTextColor"
+                android:textColor="?attr/themeTextColor"
                 android:textSize="@dimen/_18sdp" />
         </RelativeLayout>
 
@@ -70,11 +70,11 @@
         android:layout_height="@dimen/_150sdp"
         android:layout_marginTop="@dimen/_10sdp"
         android:background="@drawable/text_view_circular_background"
-        android:backgroundTint="?attr/mySecondary"
+        android:backgroundTint="?attr/themeSecondary"
         android:contentDescription="User image"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_baseline_username_48"
-        android:tint="?attr/myTextColor"
+        android:tint="?attr/themeTextColor"
         app:riv_oval="true" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_10sdp"
         android:text="Enter your username"
-        android:textColor="?attr/myTextColor"
+        android:textColor="?attr/themeTextColor"
         android:textSize="@dimen/_20sdp" />
 
     <LinearLayout
@@ -122,7 +122,7 @@
             android:layout_height="@dimen/_45sdp"
             android:backgroundTint="@drawable/buttons_state_colors"
             android:text="Sign in"
-            android:textColor="?attr/myTextColor" />
+            android:textColor="?attr/themeTextColor" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/circular_progress_indicator"
@@ -132,7 +132,7 @@
             android:layout_marginTop="@dimen/_20sdp"
             android:indeterminate="true"
             android:progress="0"
-            app:indicatorColor="?attr/mySecondary"
+            app:indicatorColor="?attr/themeSecondary"
             app:indicatorSize="@dimen/_25sdp"
             app:trackColor="?attr/colorPrimary"
             app:trackCornerRadius="8dp"

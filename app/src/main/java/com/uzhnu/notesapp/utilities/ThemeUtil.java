@@ -19,21 +19,21 @@ public class ThemeUtil {
     }
     @ColorInt
     public static int getPrimary(@NonNull Context context) {
-        return getColor(context, R.attr.myPrimary);
+        return getColor(context, R.attr.themePrimary);
     }
 
     @ColorInt
     public static int getSecondary(@NonNull Context context) {
-        return getColor(context, R.attr.mySecondary);
+        return getColor(context, R.attr.themeSecondary);
     }
 
     @ColorInt
     public static int getTextColor(@NonNull Context context) {
-        return getColor(context, R.attr.myTextColor);
+        return getColor(context, R.attr.themeTextColor);
     }
 
     @ColorInt
     public static int getSelectionColor(@NonNull Context context) {
-        return getColor(context, R.attr.mySelectionColor);
+        return getColor(context, R.attr.themeSelectionColor);
     }
 }
